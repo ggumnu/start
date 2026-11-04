@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_032
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 32
+  displayName: "\uC790\uC218\uAC00 \uB193\uC778 \uC190\uC218\uAC74"
+  description: "\uC18C\uBC15\uD55C \uC790\uC218\uAC00 \uB2E8\uC544\uD55C \uC544\uB984\uB2E4\uC6C0\uC744
+    \uD48D\uAE30\uB294 \uC190\uC218\uAC74."
+  icon: {fileID: 21300000, guid: 64fb9c67e7a75b44c9a3957521280621, type: 3}
+  weight: 100
+  rarity: 0
+  category: 2
+  confirmBeforeReplace: 0
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: 6346787369122267199
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 1
+    variantId: 
+  - category: 2
+    variantId: 
+  - category: 3
+    variantId: 
+  - category: 7
+    variantId: 
+  statModifiers: []
+  specialEffects: []
+  specialEffectDescription: "\uD604\uC7AC \uCCB4\uB825 +2\n\n\uC801\uC744 \uCC98\uCE58\uD558\uBA74
+    25% \uD655\uB960\uB85C \uCCB4\uB825\uC744 1 \uD68C\uBCF5\uD55C\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6346787369122267199
+      type: {class: KillChanceHealTrinketEffect, ns: , asm: Assembly-CSharp}
+      data:
+        firstEquipHealAmount: 2
+        healChancePerKill: 0.25
+        healAmountPerKill: 1

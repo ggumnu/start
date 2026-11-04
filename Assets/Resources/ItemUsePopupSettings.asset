@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e69ecc1944fb7c647b77cdabcdca1be9, type: 3}
+  m_Name: ItemUsePopupSettings
+  m_EditorClassIdentifier: Assembly-CSharp::ItemUsePopupSettings
+  popup:
+    icon: {fileID: 0}
+    iconSize: 80
+    headroom: 0.15
+    maxScreenHeightAboveFeet: 140
+    riseDistance: 30
+    sinkDistance: 25
+    appearDuration: 0.25
+    holdDuration: 0.35
+    vanishDuration: 0.35
+    canvasSortingOrder: 8
+    enableGlow: 1
+    glowSprite: {fileID: 0}
+    glowColor: {r: 1, g: 0.85, b: 0.25, a: 0.85}
+    glowSizeMultiplier: 2.2
+    glowPulseAmount: 0.08
+    glowPulseSpeed: 8
+    enableSparkles: 1
+    sparkleSprite: {fileID: 0}
+    sparkleColor: {r: 1, g: 0.92, b: 0.45, a: 1}
+    sparkleCount: 8
+    sparkleSizeRange: {x: 6, y: 14}
+    sparkleSpeedRange: {x: 40, y: 90}
+    sparkleLifetimeRange: {x: 0.35, y: 0.6}
+    sparkleSpawnWindow: 0.25
+    sparkleRiseAcceleration: 80
+  glowAlpha: 0.85
+  sparkleAlpha: 1

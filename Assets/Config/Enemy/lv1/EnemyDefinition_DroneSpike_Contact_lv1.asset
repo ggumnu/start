@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb76f5f07d320ed4691775ae1912d7b4, type: 3}
+  m_Name: EnemyDefinition_DroneSpike_Contact_lv1
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDefinition
+  variantId: 
+  weight: 10
+  prefab: {fileID: 7776610045248769580, guid: 0707613acd158ea4980ed1711034cd5c, type: 3}
+  maxHealth: 60
+  moveSpeed: 1
+  moveAcceleration: 999
+  detectRange: 8
+  attackPower: 1
+  attackConfig:
+    rid: 6346787202596339775
+  references:
+    version: 2
+    RefIds:
+    - rid: 6346787202596339775
+      type: {class: ContactOnlyAttackConfig, ns: , asm: Assembly-CSharp}
+      data:
+        attackRange: 3
+        spinDuration: 0.4
+        spinRotations: 1
+        postAttackCooldown: 0.4

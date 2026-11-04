@@ -1,0 +1,88 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_103
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 103
+  displayName: "\uD654\uB824\uD55C \uAF43\uBB34\uB2AC \uC591\uC0B0"
+  description: "\uC640\uCE74\uBAA8\uAC00 \uC4F0\uACE0 \uB2E4\uB2C8\uB294 \uD654\uB824\uD55C
+    \uC591\uC0B0.\r\n\uC120\uC0DD\uB2D8\uC744 \uD5A5\uD55C \uC560\uC815\uC744 \uC601\uC6D0\uD788
+    \uAE30\uC5B5\uD558\uACE0 \uC2F6\uC740, \n\uC640\uCE74\uBAA8\uC758 \uCCAD\uC21C\uD55C
+    \uB9C8\uC74C\uC774 \uB2F4\uACBC\uB2E4."
+  icon: {fileID: 21300000, guid: 96adacff4e767184e90dc71055678602, type: 3}
+  weight: 80
+  rarity: 1
+  category: 2
+  confirmBeforeReplace: 0
+  incompatibleItemIds: []
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: 4841274519186047044
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 2
+    variantId: 
+  - category: 8
+    variantId: Schale
+  statModifiers: []
+  specialEffects: []
+  specialEffectDescription: "\uACF5\uACA9\uB825\uC774 30% \uC99D\uAC00\uD558\uC9C0\uB9CC\r\n\uD53C\uD574\uB97C
+    \uC785\uC744 \uACBD\uC6B0 \uACF5\uACA9\uB825\uC774 30% \uAC10\uC18C\uD55C\uB2E4\r\n\uB9E4
+    \uBC29\uB9C8\uB2E4 \uD6A8\uACFC\uAC00 \uCD08\uAE30\uD654\uB41C\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 4841274519186047044
+      type: {class: GlassCannonTrinketEffect, ns: , asm: Assembly-CSharp}
+      data:
+        attackBonusMultiplier: 1.3
+        attackPenaltyMultiplier: 0.7
+        penaltyPopup:
+          icon: {fileID: 21300000, guid: 96adacff4e767184e90dc71055678602, type: 3}
+          iconSize: 100
+          headroom: 0.15
+          maxScreenHeightAboveFeet: 140
+          riseDistance: 30
+          sinkDistance: 25
+          appearDuration: 0.25
+          holdDuration: 0.35
+          vanishDuration: 0.35
+          canvasSortingOrder: 8
+          enableGlow: 1
+          glowSprite: {fileID: 0}
+          glowColor: {r: 1, g: 0.12, b: 0.12, a: 0.9}
+          glowSizeMultiplier: 2.2
+          glowPulseAmount: 0.08
+          glowPulseSpeed: 8
+          enableSparkles: 1
+          sparkleSprite: {fileID: 0}
+          sparkleColor: {r: 1, g: 0.3, b: 0.25, a: 1}
+          sparkleCount: 8
+          sparkleSizeRange: {x: 6, y: 14}
+          sparkleSpeedRange: {x: 40, y: 90}
+          sparkleLifetimeRange: {x: 0.35, y: 0.6}
+          sparkleSpawnWindow: 0.25
+          sparkleRiseAcceleration: 80
+        penaltyVfxPrefab: {fileID: 4306488877223958017, guid: ecb38e0319a6ad44cbca52d7b5add7a6, type: 3}
+        vfxDelay: 0.25
+        vfxOffsetAboveHead: {x: 0, y: 0.6, z: 0}
+        vfxScale: 0.3
+        vfxFollowPlayer: 1
+        vfxLifetime: 2

@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4fe2620f9481c442825d01d7ffd179d, type: 3}
+  m_Name: Level3Config
+  m_EditorClassIdentifier: Assembly-CSharp::RoomGenerationConfig
+  levelNumber: 3
+  minBranches: 3
+  maxBranches: 5
+  maxBranchDepth: 4
+  boundingBoxLimit: {x: 6, y: 6}
+  roomCountRules:
+  - category: 0
+    minCount: 1
+    maxCount: 1
+    countWeights: []
+  - category: 1
+    minCount: 1
+    maxCount: 1
+    countWeights: []
+  - category: 2
+    minCount: 4
+    maxCount: 5
+    countWeights:
+    - 10
+    - 8
+  - category: 3
+    minCount: 1
+    maxCount: 1
+    countWeights: []
+  - category: 4
+    minCount: 1
+    maxCount: 1
+    countWeights: []
+  - category: 7
+    minCount: 5
+    maxCount: 7
+    countWeights:
+    - 5
+    - 10
+    - 5
+  storeVariants:
+  - variantId: convenience_store
+    category: 3
+    weight: 1
+    footprint: []
+  - variantId: cafe
+    category: 3
+    weight: 0
+    footprint: []
+  specialLayouts:
+  - layout: {fileID: 11400000, guid: 6a8b906ed817d61479cabe24decec38a, type: 2}
+    weight: 1
+  specialRoomParentCategories: 0000000007000000
+  startVariants: []
+  bossVariants: []
+  clubVariants: []
+  overrideNormalEnemyCount: 0
+  normalEnemyMinCount: 3
+  normalEnemyMaxCount: 4
+  normalEnemyCountWeights: []
+  normalEnemyPool: []
+  backgroundMaterial: {fileID: 2100000, guid: 9c40a12467e444edadee354a6a5e7af8, type: 2}
+  allowMultiCellRooms: 0
+  maxGenerationAttempts: 100

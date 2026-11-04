@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a57c81faaae4d84f85ca1d3f4b6a99d, type: 3}
+  m_Name: SDFaceSet_Reisa01
+  m_EditorClassIdentifier: Assembly-CSharp::SDFaceExpressionSet
+  expressions:
+  - expression: 0
+    eyeCell: 1
+    mouthCell: 1
+    priority: 0
+    allowBlink: 1
+  - expression: 3
+    eyeCell: 3
+    mouthCell: 1
+    priority: 10
+    allowBlink: 0
+  - expression: 2
+    eyeCell: 4
+    mouthCell: 4
+    priority: 20
+    allowBlink: 0
+  - expression: 1
+    eyeCell: 5
+    mouthCell: 5
+    priority: 30
+    allowBlink: 0
+  - expression: 4
+    eyeCell: 5
+    mouthCell: 5
+    priority: 100
+    allowBlink: 0
+  blinkEyeCell: 2
+  blinkIntervalMin: 2
+  blinkIntervalMax: 5
+  blinkDuration: 0.1

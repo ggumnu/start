@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_029
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 29
+  displayName: "\uC2DD\uCDA9 \uC2DD\uBB3C \uD654\uBD84"
+  description: "\uC18C\uC218\uC758 \uD2B9\uC774\uD55C \uCDE8\uD5A5\uC744 \uAC00\uC9C4
+    \uC0AC\uB78C\uB4E4\uC774 \uCC3E\uB294 \uC2DD\uCDA9\uC2DD\uBB3C \uD654\uBD84.
+    \n\uACE4\uCDA9\uC744 \uC7A1\uC544\uBA39\uB294 \uBAA8\uC2B5\uC774 \uC758\uC678\uB85C
+    \uADC0\uC5FD\uB2E4\uBA70 \uC778\uAE30\uAC00 \uB9CE\uB2E4."
+  icon: {fileID: 21300000, guid: 7baf81130e3c5ad4789f6268e23d3799, type: 3}
+  weight: 100
+  rarity: 0
+  category: 1
+  confirmBeforeReplace: 0
+  incompatibleItemIds: []
+  tags: []
+  activeCost: 3
+  activeEffect:
+    rid: 6346787383039754304
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 1
+    variantId: 
+  - category: 2
+    variantId: 
+  - category: 3
+    variantId: 
+  - category: 7
+    variantId: 
+  statModifiers: []
+  specialEffects: []
+  specialEffectDescription: "[\uD544\uC694 \uCF54\uC2A4\uD2B8 3]\n\n\uD604\uC7AC
+    \uBC29\uC758 \uBAA8\uB4E0 \uC801\uC5D0\uAC8C \n\uACF5\uACA9\uB825 200%\uC758
+    \uD53C\uD574\uB97C \uC785\uD78C\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6346787383039754304
+      type: {class: RoomWideAttackDamageEffect, ns: , asm: Assembly-CSharp}
+      data:
+        damageRatio: 2
+        damageVfxPrefab: {fileID: 467751860875805754, guid: 7c6d9bb9c8994364dbe5ba2e32dd4d13, type: 3}
+        damageVfxPositionOffset: {x: 0, y: 0.5, z: 0}
+        damageVfxScaleMultiplier: 0.5

@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_019
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 19
+  displayName: "\uCF54\uC2A4\uD504\uB808\uC6A9 \uBC45\uBC45\uC774 \uC548\uACBD"
+  description: "\uC774\uAC83\uB9CC \uC4F0\uBA74 \uB2F9\uC2E0\uB3C4 \uC9C0\uB2C8\uC5B4\uC2A4!
+    \uC4F0\uAE30\uB9CC \uD574\uB3C4 \n(\uAC89\uBAA8\uC2B5\uC740) \uCC9C\uC7AC\uAC00
+    \uB420 \uC218 \uC788\uB294 \uC548\uACBD. \n\uC8FC\uC758: \uCC29\uC6A9\uD55C\uB2E4\uACE0
+    IQ\uAC00 \uC62C\uB77C\uAC00\uC9C4 \uC54A\uC2B5\uB2C8\uB2E4."
+  icon: {fileID: 21300000, guid: 28b7451429600b14f8908b59748f58cf, type: 3}
+  weight: 80
+  rarity: 1
+  category: 0
+  confirmBeforeReplace: 0
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 1
+    variantId: 
+  - category: 2
+    variantId: 
+  - category: 3
+    variantId: 
+  - category: 7
+    variantId: 
+  statModifiers:
+  - statType: 6
+    modifierType: 0
+    value: 15
+  specialEffects:
+  - rid: 6346787519567233089
+  specialEffectDescription: "\n\uCD1D\uC54C\uC774 60\uB3C4\uB85C \uBC8C\uC5B4\uC9C4
+    \uC591\uAC08\uB798\uB85C \uBC1C\uC0AC\uB41C\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6346787519567233089
+      type: {class: Item19effect, ns: , asm: Assembly-CSharp}
+      data: 

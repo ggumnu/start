@@ -1,0 +1,117 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_106
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 106
+  displayName: "\uC2B9\uBD80 \uB3D9\uC804"
+  description: "\uCF54\uC720\uD0A4\uAC00 \uC190\uC218 \uAD6C\uBA4D\uC744 \uB6AB\uC740
+    \uB3D9\uC804.\r\n\uC624\uB77D\uAE30\uB97C \uACF5\uC9DC\uB85C \uC4F0\uAE30 \uC704\uD55C
+    \uC6A9\uB3C4\uC600\uC9C0\uB9CC, \n\uBCF4\uC548 \uAE30\uC220\uC758 \uBC1C\uC804\uC73C\uB85C
+    \uC778\uD574 \uD604\uC7AC\uB294 \uBB34\uC6A9\uC9C0\uBB3C\uC774 \uB418\uC5C8\uB2E4."
+  icon: {fileID: 21300000, guid: d584d4b71bee7d34db6a66947225e9fa, type: 3}
+  weight: 100
+  rarity: 0
+  category: 1
+  confirmBeforeReplace: 0
+  incompatibleItemIds: []
+  tags: []
+  activeCost: 5
+  activeEffect:
+    rid: 4841274536587165765
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 2
+    variantId: 
+  - category: 8
+    variantId: Schale
+  statModifiers: []
+  specialEffects: []
+  specialEffectDescription: "[\uD544\uC694 \uCF54\uC2A4\uD2B8 5]\n\n\uB3D9\uC804\uC744
+    \uB358\uC838 \uC6B4\uC744 \uD655\uC778\uD55C\uB2E4\r\n\uBCF4\uBB3C \uC0C1\uC790\uAC00
+    \uC788\uB294 \uACF3\uC5D0\uC11C \uC0AC\uC6A9\uD560 \uC218 \uC788\uC73C\uBA70
+    \n\uC55E\uBA74\uC774 \uB098\uC628 \uACBD\uC6B0 \uBCF4\uBB3C \uC0C1\uC790\uAC00
+    3\uBC30\uB85C \uB298\uC5B4\uB098\uC9C0\uB9CC \n\uB4B7\uBA74\uC774 \uB098\uC628
+    \uACBD\uC6B0 \uBCF4\uBB3C \uC0C1\uC790\uAC00 \uC804\uBD80 \uC0AC\uB77C\uC9C4\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 4841274536587165765
+      type: {class: ChestGambleActiveEffect, ns: , asm: Assembly-CSharp}
+      data:
+        successChance: 0.25
+        duplicateMultiplier: 3
+        successPopup:
+          icon: {fileID: 21300000, guid: d584d4b71bee7d34db6a66947225e9fa, type: 3}
+          iconSize: 100
+          headroom: 0.15
+          maxScreenHeightAboveFeet: 140
+          riseDistance: 30
+          sinkDistance: 25
+          appearDuration: 0.25
+          holdDuration: 0.35
+          vanishDuration: 0.35
+          canvasSortingOrder: 8
+          enableGlow: 1
+          glowSprite: {fileID: 0}
+          glowColor: {r: 0.45, g: 0.85, b: 1, a: 0.9}
+          glowSizeMultiplier: 2.2
+          glowPulseAmount: 0.08
+          glowPulseSpeed: 8
+          enableSparkles: 1
+          sparkleSprite: {fileID: 0}
+          sparkleColor: {r: 0.6, g: 0.92, b: 1, a: 1}
+          sparkleCount: 8
+          sparkleSizeRange: {x: 6, y: 14}
+          sparkleSpeedRange: {x: 40, y: 90}
+          sparkleLifetimeRange: {x: 0.35, y: 0.6}
+          sparkleSpawnWindow: 0.25
+          sparkleRiseAcceleration: 80
+        failurePopup:
+          icon: {fileID: 21300000, guid: d584d4b71bee7d34db6a66947225e9fa, type: 3}
+          iconSize: 100
+          headroom: 0.15
+          maxScreenHeightAboveFeet: 140
+          riseDistance: 30
+          sinkDistance: 25
+          appearDuration: 0.25
+          holdDuration: 0.35
+          vanishDuration: 0.35
+          canvasSortingOrder: 8
+          enableGlow: 1
+          glowSprite: {fileID: 0}
+          glowColor: {r: 1, g: 0.12, b: 0.12, a: 0.9}
+          glowSizeMultiplier: 2.2
+          glowPulseAmount: 0.08
+          glowPulseSpeed: 8
+          enableSparkles: 1
+          sparkleSprite: {fileID: 0}
+          sparkleColor: {r: 1, g: 0.3, b: 0.25, a: 1}
+          sparkleCount: 8
+          sparkleSizeRange: {x: 6, y: 14}
+          sparkleSpeedRange: {x: 40, y: 90}
+          sparkleLifetimeRange: {x: 0.35, y: 0.6}
+          sparkleSpawnWindow: 0.25
+          sparkleRiseAcceleration: 80
+        failureVfxPrefab: {fileID: 4306488877223958017, guid: ecb38e0319a6ad44cbca52d7b5add7a6, type: 3}
+        failureVfxDelay: 0.25
+        failureVfxOffsetAboveHead: {x: 0, y: 0.6, z: 0}
+        failureVfxScale: 0.3
+        failureVfxFollowPlayer: 1
+        failureVfxLifetime: 2

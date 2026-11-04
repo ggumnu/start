@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95c0c81881890ea46b130a82e5267757, type: 3}
+  m_Name: ShopConfig_Store
+  m_EditorClassIdentifier: Assembly-CSharp::ShopConfig
+  basicItems:
+  - type: 1
+    displayName: 
+    icon: {fileID: 21300000, guid: 39212976117353c449a4fce911682d9a, type: 3}
+    currency: 0
+    price: 3
+    amountPerPurchase: 1
+  - type: 2
+    displayName: 
+    icon: {fileID: 21300000, guid: dc6718ff43fdc1549abdd5983ccc91c8, type: 3}
+    currency: 0
+    price: 3
+    amountPerPurchase: 1
+  - type: 0
+    displayName: 
+    icon: {fileID: 21300000, guid: 087222fd11188714882472c522db3f87, type: 3}
+    currency: 0
+    price: 3
+    amountPerPurchase: 1
+  - type: 4
+    displayName: 
+    icon: {fileID: 21300000, guid: 932f159a53096cb41b370598eb2324de, type: 3}
+    currency: 0
+    price: 10
+    amountPerPurchase: 1
+  itemDatabase: {fileID: 11400000, guid: 17bcbb9a50e5f6648b8c7d5602b505e3, type: 2}
+  playerItemContexts:
+  - category: 3
+    variantId: 
+  minPlayerItemCount: 1
+  maxPlayerItemCount: 3
+  rarityPrices:
+  - rarity: 0
+    currency: 0
+    minPrice: 5
+    maxPrice: 15
+  - rarity: 1
+    currency: 0
+    minPrice: 10
+    maxPrice: 20
+  - rarity: 2
+    currency: 0
+    minPrice: 15
+    maxPrice: 25
+  - rarity: 3
+    currency: 0
+    minPrice: 20
+    maxPrice: 30
+  refreshCurrency: 0
+  refreshPrice: 1
+  maxRefreshCount: 2

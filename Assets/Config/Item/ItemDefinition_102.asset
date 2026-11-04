@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_102
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 102
+  displayName: "\uD734\uB300\uC6A9 \uAC8C\uC784\uAE30"
+  description: "\uBBF8\uB3C4\uB9AC\uAC00 \uC5B8\uB2C8\uC640 \uCC98\uC74C\uC73C\uB85C
+    \uAD6C\uC785\uD55C \uD734\uB300\uC6A9 \uAC8C\uC784\uAE30.\r\n\uC2F8\uC6E0\uB358
+    \uAE30\uC5B5, \uD654\uD574\uD588\uB358 \uAE30\uC5B5, \uC544\uC774\uC2A4\uD06C\uB9BC
+    \uC2B9\uBD80\uB97C \uD588\uB358 \uAE30\uC5B5 \uB4F1, \n\uBAA8\uB4E0 \uAC83\uC774
+    \uB2F4\uAE34 \uCD94\uC5B5\uC758 \uAC8C\uC784\uAE30\uB2E4."
+  icon: {fileID: 21300000, guid: 8c7ea055c28985948b1ed142b84a4b6f, type: 3}
+  weight: 60
+  rarity: 2
+  category: 0
+  confirmBeforeReplace: 0
+  incompatibleItemIds: []
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 2
+    variantId: 
+  - category: 8
+    variantId: Schale
+  statModifiers:
+  - statType: 11
+    modifierType: 0
+    value: 1
+  - statType: 6
+    modifierType: 0
+    value: -15
+  specialEffects:
+  - rid: 4841274519186047045
+  specialEffectDescription: "\n[\uCF00\uC774\uC2A4\uC5D0 \uB2F4\uAE34 \uB0A1\uC740
+    \uAC8C\uC784\uAE30]\uB97C \uBCF4\uC720\uD558\uACE0 \uC788\uC73C\uBA74\n\uCD1D\uC54C
+    \uC801\uC911 \uC2DC 3\uCD08 \uB3D9\uC548 \uB9E4\uCD08 \uACF5\uACA9\uB825\uC758
+    20%\uC758 \n\uC911\uB3C5 \uD53C\uD574\uB97C \uC785\uD78C\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 4841274519186047045
+      type: {class: Item102effect, ns: , asm: Assembly-CSharp}
+      data:
+        partnerItemId: 109
+        poisonDuration: 3
+        tickInterval: 1
+        damageRatioPerTick: 0.5
+        poisonColor: {r: 0.5045029, g: 0.8, b: 0.4768, a: 1}
+        poisonBulletColor: {r: 0.35, g: 0.9, b: 0.3, a: 1}
+        poisonBulletColorPriority: 0
+        poisonTickVfxPrefab: {fileID: 2957842864923083962, guid: ace9fc22d4885204fad19db7b31cf379, type: 3}
+        poisonTickVfxScale: 0.5
+        poisonTickVfxOffset: {x: 0, y: 0, z: 0}
+        poisonTickVfxLifetime: 2

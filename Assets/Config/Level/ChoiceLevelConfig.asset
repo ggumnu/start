@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0b4bc56def58834db466a8f4dff497a, type: 3}
+  m_Name: ChoiceLevelConfig
+  m_EditorClassIdentifier: Assembly-CSharp::ChoiceLevelConfig
+  westVariants:
+  - variantId: Gematria
+    category: 8
+    weight: 1
+    footprint: []
+  eastVariants:
+  - variantId: Schale
+    category: 8
+    weight: 0
+    footprint: []
+  backgroundMaterial: {fileID: 2100000, guid: 066807d796f543d9b24ca63f6d3296f1, type: 2}

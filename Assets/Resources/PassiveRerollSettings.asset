@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d34f420354ac8d4a9ecae160285da93, type: 3}
+  m_Name: PassiveRerollSettings
+  m_EditorClassIdentifier: Assembly-CSharp::PassiveRerollSettings
+  title: "\uAD50\uCCB4\uD560 \uD328\uC2DC\uBE0C \uC544\uC774\uD15C\uC744 \uC120\uD0DD\uD558\uC138\uC694"
+  confirmLabel: "\uAD50\uCCB4\uD558\uAE30"
+  cancelLabel: "\uCDE8\uC18C\uD558\uAE30"
+  confirmQuestion: "\uAD50\uCCB4\uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?"
+  noItemMessage: "\uAD50\uCCB4\uD560 \uC218 \uC788\uB294 \uC544\uC774\uD15C\uC774
+    \uC5C6\uC2B5\uB2C8\uB2E4"
+  okLabel: "\uD655\uC778"
+  canvasSortingOrder: 85
+  dimColor: {r: 0, g: 0, b: 0, a: 0.55}
+  windowSize: {x: 760, y: 720}
+  windowColor: {r: 1, g: 1, b: 1, a: 0.9}
+  windowOutlineColor: {r: 0.08, g: 0.08, b: 0.1, a: 1}
+  windowOutlineThickness: 0
+  windowCornerRadius: 24
+  titleFontSize: 34
+  titleColor: {r: 0.1, g: 0.1, b: 0.1, a: 1}
+  titleTopMargin: 60
+  gridScale: 1.5
+  visibleRows: 4
+  gridOffsetY: 30
+  scrollSpeed: 60
+  selectedAlpha: 0.45
+  selectedScale: 0.75
+  unavailableTint: {r: 0.3, g: 0.3, b: 0.3, a: 1}
+  mainButtonSize: {x: 220, y: 90}
+  mainButtonSpacing: 60
+  mainButtonBottomMargin: 45
+  mainButtonCornerRadius: 18
+  mainButtonOutlineColor: {r: 0.08, g: 0.08, b: 0.1, a: 1}
+  mainButtonOutlineThickness: 0
+  mainButtonFontSize: 34
+  confirmSize: {x: 560, y: 240}
+  messageSize: {x: 480, y: 220}
+  darkMessageFontSize: 26
+  darkMessageColor: {r: 1, g: 1, b: 1, a: 1}
+  darkButtonSize: {x: 140, y: 46}
+  darkButtonSpacing: 30
+  darkButtonBottomMargin: 24
+  darkButtonFontSize: 22

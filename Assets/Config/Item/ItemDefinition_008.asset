@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_008
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 8
+  displayName: "\uBC00\uB9AC\uD130\uB9AC 3\uC885 \uC704\uC7A5\uC6A9 \uD30C\uC6B4\uB370\uC774\uC158"
+  description: "\uACE0\uAE09 \uD654\uC7A5\uD488 \uBA54\uC774\uCEE4 '\uC0AC\uBB34\uC5D8\uB77C'\uC5D0\uC11C
+    \uBC1C\uB9E4\uD55C \uD788\uD2B8\uC0C1\uD488. \n\uD53C\uBD80\uC5D0 \uC2A4\uBA70\uB4DC\uB294
+    \uD3B8\uC548\uD568! \uD544\uC694\uD560 \uB54C \uC5B4\uB514\uC11C\uB4E0 \uC704\uC7A5
+    \uAC00\uB2A5! \n\uC5B4\uB514\uC11C\uB4E0 \uB098\uB9CC\uC758 \uC704\uC7A5\uC744
+    \uACBD\uD5D8\uD574\uBCF4\uC138\uC694!"
+  icon: {fileID: 21300000, guid: c738cfa5a42c5424cb80af9700bffb91, type: 3}
+  weight: 60
+  rarity: 2
+  category: 0
+  confirmBeforeReplace: 0
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 1
+    variantId: 
+  - category: 2
+    variantId: 
+  - category: 3
+    variantId: 
+  - category: 7
+    variantId: 
+  statModifiers:
+  - statType: 3
+    modifierType: 0
+    value: -0.1
+  - statType: 10
+    modifierType: 0
+    value: 0.3
+  specialEffects:
+  - rid: 5535533560695095296
+  specialEffectDescription: "\n\uBCBD \uB4A4\uC5D0 \uC228\uC73C\uBA74 \uC801\uC774
+    \uB354 \uC774\uC0C1 \uCD94\uC801\uD558\uC9C0 \uBABB\uD55C\uB2E4 "
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 5535533560695095296
+      type: {class: HideBehindWallEffect, ns: , asm: Assembly-CSharp}
+      data:
+        wallLayerMask:
+          serializedVersion: 2
+          m_Bits: 64
+        eyeHeight: 0.3
+        lossGraceTime: 0.3

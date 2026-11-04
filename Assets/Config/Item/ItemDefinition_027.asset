@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_027
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 27
+  displayName: "\uB300\uD615 \uD640 \uCF00\uC774\uD06C"
+  description: "\uBCF4\uAE30\uB9CC \uD574\uB3C4 \uB9CC\uC871\uAC10\uC774 \uCC28\uC624\uB974\uB294
+    \uB300\uD615 \uD640 \uCF00\uC774\uD06C.\n\uCE7C\uB85C\uB9AC \uD45C\uAE30\uB294
+    \uB4B7\uBA74\uC5D0 \uC788\uC2B5\uB2C8\uB2E4. "
+  icon: {fileID: 21300000, guid: 10152ec9e9e44ba4ea6a983a4b67745b, type: 3}
+  weight: 80
+  rarity: 1
+  category: 4
+  confirmBeforeReplace: 0
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: 5535533505301708864
+  appearanceContexts:
+  - category: 1
+    variantId: 
+  - category: 2
+    variantId: 
+  - category: 3
+    variantId: 
+  - category: 7
+    variantId: 
+  statModifiers: []
+  specialEffects: []
+  specialEffectDescription: "\uB2E4\uC74C\uC5D0 \uAC1C\uBD09\uD558\uB294 \uB3D9\uC544\uB9AC\uBC29,
+    \uBCF4\uC2A4\uBC29 \uBCF4\uBB3C\uC0C1\uC790\uC5D0\uC11C \n\uBC18\uB4DC\uC2DC
+    3\uB4F1\uAE09 \uC544\uC774\uD15C\uC774 \uB4F1\uC7A5\uD55C\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 5535533505301708864
+      type: {class: GuaranteedLegendaryFoodEffect, ns: , asm: Assembly-CSharp}
+      data: 

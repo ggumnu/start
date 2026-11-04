@@ -1,0 +1,118 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_039
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 39
+  displayName: "\uACE0\uD48D\uC2A4\uB7EC\uC6B4 \uB2EC\uAC40 \uACF5\uC608\uD488"
+  description: "\uB2EC\uAC40 \uBAA8\uC591\uC758 \uBAB8\uCCB4 \uC704\uB85C \uC544\uB984\uB2E4\uC6B4
+    \uBCF4\uC11D\uACFC \n\uAE30\uD558\uD559\uC801\uC778 \uBB34\uB2AC\uAC00 \uC138\uACF5\uB418\uC5B4
+    \uC788\uB294 \uACF5\uC608\uD488.\n\uBB3C\uB860 \uB530\uB4EF\uD558\uAC8C \uD488\uC5B4\uC900\uB2E4\uACE0
+    \uBCD1\uC544\uB9AC\uAC00 \uD0DC\uC5B4\uB098\uC9C4 \uC54A\uB294\uB2E4."
+  icon: {fileID: 21300000, guid: 7a3c0ed5abd0d204ebd3d1655ffaf053, type: 3}
+  weight: 80
+  rarity: 1
+  category: 2
+  confirmBeforeReplace: 0
+  incompatibleItemIds: []
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: 5535533489836785731
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 1
+    variantId: 
+  - category: 2
+    variantId: 
+  - category: 3
+    variantId: 
+  - category: 7
+    variantId: 
+  statModifiers: []
+  specialEffects: []
+  specialEffectDescription: "\uD06C\uB808\uB527 +5\n\n\uD53C\uACA9 \uBC1B\uC9C0 \uC54A\uACE0
+    \uC804\uD22C\uAC00 \uC788\uB294 \uBC29\uC744 \n\uD074\uB9AC\uC5B4 \uD558\uBA74
+    3 \uD06C\uB808\uB527\uC744 \uC5BB\uB294\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 5535533489836785731
+      type: {class: CreditBonusTrinketEffect, ns: , asm: Assembly-CSharp}
+      data:
+        creditOnFirstEquip: 5
+        creditOnNoDamageClear: 3
+        successPopup:
+          icon: {fileID: 21300000, guid: 7a3c0ed5abd0d204ebd3d1655ffaf053, type: 3}
+          iconSize: 100
+          headroom: 0.15
+          maxScreenHeightAboveFeet: 140
+          riseDistance: 30
+          sinkDistance: 25
+          appearDuration: 0.25
+          holdDuration: 0.35
+          vanishDuration: 0.35
+          canvasSortingOrder: 8
+          enableGlow: 1
+          glowSprite: {fileID: 0}
+          glowColor: {r: 0.45, g: 0.85, b: 1, a: 0.9}
+          glowSizeMultiplier: 2.2
+          glowPulseAmount: 0.08
+          glowPulseSpeed: 8
+          enableSparkles: 1
+          sparkleSprite: {fileID: 0}
+          sparkleColor: {r: 0.6, g: 0.92, b: 1, a: 1}
+          sparkleCount: 8
+          sparkleSizeRange: {x: 6, y: 14}
+          sparkleSpeedRange: {x: 40, y: 90}
+          sparkleLifetimeRange: {x: 0.35, y: 0.6}
+          sparkleSpawnWindow: 0.25
+          sparkleRiseAcceleration: 80
+        failurePopup:
+          icon: {fileID: 21300000, guid: 7a3c0ed5abd0d204ebd3d1655ffaf053, type: 3}
+          iconSize: 100
+          headroom: 0.15
+          maxScreenHeightAboveFeet: 140
+          riseDistance: 30
+          sinkDistance: 25
+          appearDuration: 0.25
+          holdDuration: 0.35
+          vanishDuration: 0.35
+          canvasSortingOrder: 8
+          enableGlow: 1
+          glowSprite: {fileID: 0}
+          glowColor: {r: 1, g: 0.12, b: 0.12, a: 0.9}
+          glowSizeMultiplier: 2.2
+          glowPulseAmount: 0.08
+          glowPulseSpeed: 8
+          enableSparkles: 1
+          sparkleSprite: {fileID: 0}
+          sparkleColor: {r: 1, g: 0.3, b: 0.25, a: 1}
+          sparkleCount: 8
+          sparkleSizeRange: {x: 6, y: 14}
+          sparkleSpeedRange: {x: 40, y: 90}
+          sparkleLifetimeRange: {x: 0.35, y: 0.6}
+          sparkleSpawnWindow: 0.25
+          sparkleRiseAcceleration: 80
+        failureVfxPrefab: {fileID: 4306488877223958017, guid: ecb38e0319a6ad44cbca52d7b5add7a6, type: 3}
+        failureVfxDelay: 0.25
+        failureVfxOffsetAboveHead: {x: 0, y: 0.6, z: 0}
+        failureVfxScale: 0.3
+        failureVfxFollowPlayer: 1
+        failureVfxLifetime: 2

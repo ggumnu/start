@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_026
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 26
+  displayName: "\uB450\uB1CC \uAC1C\uBC1C\uC6A9 \uD37C\uC990 \uD050\uBE0C"
+  description: "<\uC774\uAC83\uC744 \uD480 \uC218 \uC788\uB294 \uB2F9\uC2E0\uC774\uC57C\uB9D0\uB85C
+    \uBC00\uB808\uB2C8\uC5C4!>\n\uBC00\uB808\uB2C8\uC5C4 \uC0AC\uC774\uC5B8\uC2A4
+    \uC2A4\uCFE8 \uACF5\uC778 \uC0C1\uAE09\uC790\uC6A9 \uD37C\uC990 \uD050\uBE0C."
+  icon: {fileID: 21300000, guid: f623570aee9a42f43a0748dfe6c57949, type: 3}
+  weight: 80
+  rarity: 1
+  category: 0
+  confirmBeforeReplace: 0
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 1
+    variantId: 
+  - category: 2
+    variantId: 
+  - category: 3
+    variantId: 
+  - category: 7
+    variantId: 
+  statModifiers: []
+  specialEffects:
+  - rid: 4841274260879573059
+  specialEffectDescription: "\uD574\uD0B9\uD234 +2\n\n\uD2B9\uC218\uBC29\uC744 \uD574\uD0B9\uD234
+    \uC18C\uBAA8 \uC5C6\uC774 \uC9C4\uC785\uD560 \uC218 \uC788\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 4841274260879573059
+      type: {class: HackingToolRoomPassEffect, ns: , asm: Assembly-CSharp}
+      data:
+        hackingToolAmount: 2
+        unlockDelay: 0.3

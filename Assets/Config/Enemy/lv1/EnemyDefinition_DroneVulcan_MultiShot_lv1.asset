@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb76f5f07d320ed4691775ae1912d7b4, type: 3}
+  m_Name: EnemyDefinition_DroneVulcan_MultiShot_lv1
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDefinition
+  variantId: 
+  weight: 7
+  prefab: {fileID: 852035135700197158, guid: 8207818efe4f74b4799b842e52975ede, type: 3}
+  maxHealth: 80
+  moveSpeed: 0.5
+  moveAcceleration: 999
+  detectRange: 8
+  attackPower: 1
+  attackConfig:
+    rid: 5535533142013902914
+  references:
+    version: 2
+    RefIds:
+    - rid: 5535533142013902914
+      type: {class: ShootAttackConfig, ns: , asm: Assembly-CSharp}
+      data:
+        rangedDamage: 0.5
+        rangedProjectileSize: 0.1
+        rangedProjectileSpeed: 2
+        rangedAttackRange: 4
+        engageRange: 3
+        chaseRange: 2
+        retreatRange: 2
+        retreatDuration: 2
+        rangedAttackSpeed: 0.5
+        burstCount: 3
+        burstInterval: 0.2
+        pelletCount: 1
+        totalSpreadAngle: 0

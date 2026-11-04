@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_002
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 2
+  displayName: "\uD398\uB85C\uB85C \uD720 \uC2AC\uB77C\uC774\uB4DC"
+  description: "\uD654\uC81C\uC758 \uBAA8\uBAA8\uD504\uB80C\uC988 \uCF5C\uB77C\uBCF4
+    \uC0C1\uD488 \uC81C9\uD0C4! \n\uC62C\uD574\uC758 \uC6B4\uB3D9\uAE30\uAD6C \uC778\uAE30\uB7AD\uD0B9
+    1\uC704\uC5D0 \uB7AD\uD06C\uB418\uC5B4\uC788\uB294 \n\uD398\uB85C\uB85C \uBAA8\uC591\uC758
+    \uC6B4\uB3D9\uAE30\uAD6C."
+  icon: {fileID: 21300000, guid: 059df4d1a3d259c45a1a1a6a9e9e318a, type: 3}
+  weight: 100
+  rarity: 0
+  category: 0
+  confirmBeforeReplace: 0
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 1
+    variantId: 
+  - category: 2
+    variantId: 
+  - category: 3
+    variantId: 
+  - category: 7
+    variantId: 
+  statModifiers:
+  - statType: 1
+    modifierType: 0
+    value: 0.2
+  specialEffects:
+  - rid: 5535533559899488319
+  specialEffectDescription: "\n\uD50C\uB808\uC774\uC5B4\uAC00 \uC9C0\uB098\uAC04
+    \uACF3\uC5D0 \uBC1C\uC790\uAD6D\uC774 \uB0A8\uB294\uB2E4\n\uBC1C\uC790\uAD6D
+    \uC704\uC758 \uC801\uC740 \uC774\uB3D9 \uC18D\uB3C4\uAC00 50% \uAC10\uC18C\uD55C\uB2E4\n\uBC1C\uC790\uAD6D\uC740
+    5\uCD08 \uB4A4 \uC0AC\uB77C\uC9C4\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 5535533559899488319
+      type: {class: FootprintTrailEffect, ns: , asm: Assembly-CSharp}
+      data:
+        leftFootSprite: {fileID: 21300000, guid: 4a33576966a7604449545c2d43a300a9, type: 3}
+        rightFootSprite: {fileID: 21300000, guid: 59d0c60089523474daafe3785ac9f0ab, type: 3}
+        footprintColor: {r: 1, g: 1, b: 1, a: 0.85}
+        footprintSize: 0.3
+        stepDistance: 0.4
+        lateralOffset: 0.12
+        groundOffset: 0.03
+        maxFootprints: 400
+        lifetime: 4
+        fadeDuration: 1
+        slowMultiplier: 0.5
+        slowRadius: 0.45

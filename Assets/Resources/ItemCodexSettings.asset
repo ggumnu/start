@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c396df1b7515b740a1556be58344583, type: 3}
+  m_Name: ItemCodexSettings
+  m_EditorClassIdentifier: Assembly-CSharp::ItemCodexSettings
+  itemDatabase: {fileID: 11400000, guid: 17bcbb9a50e5f6648b8c7d5602b505e3, type: 2}
+  hudPrefab: {fileID: 4028203156877693131, guid: 5a1b819dee9d43249b7d7f5ca8ed5d05, type: 3}
+  closeKey: 27
+  title: "\uC544\uC774\uD15C \uB3C4\uAC10"
+  backLabel: "\uB3CC\uC544\uAC00\uAE30"
+  overlayColor: {r: 1, g: 1, b: 1, a: 1}
+  canvasSortingOrder: 50
+  patternShader: {fileID: 4800000, guid: 88cad8217cc0a01408a8312200975fa3, type: 3}
+  showPattern: 1
+  patternTriangleSide: 145
+  patternSpread: 820
+  patternMaxAlpha: 0.75
+  patternTint: {r: 0.78431374, g: 0.89411765, b: 0.972549, a: 1}
+  patternGlowColor: {r: 0.5882353, g: 0.8039216, b: 0.98039216, a: 1}
+  patternGlowAmount: 0.35
+  patternGlowSpeed: 0.15
+  patternGlowSharpness: 6
+  patternSeed: 0
+  titleFontSize: 56
+  titleColor: {r: 0.20392157, g: 0.2, b: 0.39607844, a: 1}
+  titleOffsetY: 420
+  panelColor: {r: 0.9245283, g: 0.9245283, b: 0.9245283, a: 1}
+  panelCornerRadius: 28
+  panelOffsetY: 5
+  panelPadding: 32
+  columns: 15
+  iconSize: 90
+  iconSpacingX: 16
+  iconSpacingY: 16
+  visibleRows: 6
+  scrollSpeed: 60
+  unacquiredAlpha: 0.35
+  missingIconColor: {r: 0.6, g: 0.6, b: 0.6, a: 1}
+  buttonSize: {x: 220, y: 80}
+  buttonOffsetY: -420
+  buttonCornerRadius: 18
+  buttonFontSize: 32
+  tooltipCursorOffset: {x: 0, y: 24}
+  tooltipScreenEdgeMargin: 16
+  overlayFadeInDuration: 0.3
+  contentDelay: 0.2
+  contentFadeInDuration: 0.3
+  buttonDelay: 0.4
+  buttonFadeInDuration: 0.25
+  closeDuration: 0.35
+  riseDistance: 30

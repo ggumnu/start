@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_115
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 115
+  displayName: "\uD074\uB808\uC774\uBAA8\uC5B4 \uC545\uB825\uAE30"
+  description: "\uBAA8\uC5D0\uAC00 \uC560\uC6A9\uD558\uB294 \uB300\uC778 \uC9C0\uB8B0\u2026\u2026
+    \n\uC758 \uACA9\uBC1C\uAE30\uB97C \uAC1C\uC870\uD574\uC11C \uB9CC\uB4E0 \uC545\uB825\uAE30.
+    \n\uB1CC\uAD00\uC744 \uC81C\uAC70\uD574\uC11C \uD3ED\uBC1C\uD558\uC9C4 \uC54A\uC9C0\uB9CC,
+    \n\uB450\uAEBC\uC6B4 \uC6A9\uC218\uCCA0\uC774 \uC190\uC5D0 \uAC00\uD558\uB294
+    \uC555\uB825\uB9CC\uD07C\uC740 \n\uD3ED\uD0C4\uB9CC\uD07C\uC774\uB098 \uD30C\uBA78\uC801\uC774\uB77C\uACE0."
+  icon: {fileID: 21300000, guid: c9d6f0846d555324a81de82f410495b4, type: 3}
+  weight: 100
+  rarity: 0
+  category: 0
+  confirmBeforeReplace: 0
+  incompatibleItemIds: []
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 2
+    variantId: 
+  - category: 8
+    variantId: Schale
+  statModifiers:
+  - statType: 15
+    modifierType: 0
+    value: 30
+  specialEffects:
+  - rid: 4841274536587165770
+  specialEffectDescription: "\n\uC218\uB958\uD0C4\uC774 \uD074\uB808\uC774\uBAA8\uC5B4\uB85C
+    \uAD50\uCCB4\uB418\uC5B4\n\uC989\uC2DC \uD130\uC9C0\uC9C0 \uC54A\uACE0 \uADF8
+    \uC790\uB9AC\uC5D0 \uC124\uCE58\uB41C\uB2E4\r\n\uC218\uB958\uD0C4 \uBAA8\uB4DC\uC5D0\uC11C
+    R\uC744 \uB20C\uB7EC \n\uD55C\uAEBC\uBC88\uC5D0 \uD3ED\uD30C\uD560 \uC218 \uC788\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 4841274536587165770
+      type: {class: ClaymoreEffect, ns: , asm: Assembly-CSharp}
+      data:
+        settings:
+          glowColor: {r: 1, g: 0.05, b: 0.05, a: 0.9}
+          glowSize: 1.2
+          glowMinBrightness: 0.15
+          pulsePeriod: 1.6
+          glowMinScale: 0.85
+          enableGlowLight: 1
+          glowLightColor: {r: 1, g: 0.1, b: 0.05, a: 1}
+          glowLightIntensity: 4
+          glowLightRange: 3
+          glowOffset: {x: 0, y: 0.1, z: 0}

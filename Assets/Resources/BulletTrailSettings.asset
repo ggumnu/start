@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65447e5b58fc9d74e93865feed9c806b, type: 3}
+  m_Name: BulletTrailSettings
+  m_EditorClassIdentifier: Assembly-CSharp::BulletTrailSettings
+  bulletTrailTemplate: {fileID: 3323373162206697781, guid: 6f31050852499d045b93b388be0ed097, type: 3}
+  bulletUseProjectileColor: 1
+  grenadeTrailTemplate: {fileID: 3323373162206697781, guid: ce64fa84ed7ff9645bd78fab3ce5dd70, type: 3}
+  grenadeUseProjectileColor: 0
+  bulletReleaseFadeTime: 0.2
+  grenadeReleaseFadeTime: 0.15

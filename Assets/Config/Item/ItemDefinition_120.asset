@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_120
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 120
+  displayName: "\uBA54\uC774\uB4DC\uC758 \uD504\uB9B4 \uC55E\uCE58\uB9C8"
+  description: "\uCE74\uB9B0\uC774 \uD56D\uC0C1 \uCC29\uC6A9\uD558\uB294 \uC55E\uCE58\uB9C8.\r\n\uBA54\uC774\uB4DC\uC758
+    \uC0C1\uC9D5\uC774\uB77C \uD560 \uC218 \uC788\uAE30\uC5D0, \n\uD56D\uC0C1 \uC815\uC131
+    \uB4E4\uC5EC \uAD00\uB9AC\uD558\uACE0 \uC788\uB2E4."
+  icon: {fileID: 21300000, guid: be471cc8dfdf3a145a32aa6fec487086, type: 3}
+  weight: 40
+  rarity: 3
+  category: 0
+  confirmBeforeReplace: 0
+  incompatibleItemIds:
+  - 35
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 2
+    variantId: 
+  - category: 8
+    variantId: Schale
+  statModifiers:
+  - statType: 9
+    modifierType: 0
+    value: 0.03
+  specialEffects:
+  - rid: 4841274579931627588
+  specialEffectDescription: "\n\uCD1D\uC54C\uC774 \uBCBD\uC744 \uAD00\uD1B5\uD560
+    \uC218 \uC788\uAC8C \uB41C\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 4841274579931627588
+      type: {class: Item120effect, ns: , asm: Assembly-CSharp}
+      data: 

@@ -1,0 +1,1154 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4028203156877693131
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 637255433842034673}
+  - component: {fileID: 6508955265461468378}
+  - component: {fileID: 5710119854866892248}
+  - component: {fileID: 6859012609958131568}
+  - component: {fileID: 8261480909416003412}
+  - component: {fileID: 8348429486781463646}
+  - component: {fileID: 3425244829326310260}
+  - component: {fileID: 7488094772057042346}
+  - component: {fileID: 7844003826562715231}
+  - component: {fileID: 8985789144020700063}
+  - component: {fileID: 1475294116836378952}
+  - component: {fileID: 3381429684325208208}
+  - component: {fileID: 102579380779662795}
+  - component: {fileID: 327658820336581927}
+  - component: {fileID: 7735561429346389095}
+  - component: {fileID: 8831611637386716110}
+  - component: {fileID: 3613494200596890435}
+  - component: {fileID: 7752702058159195549}
+  - component: {fileID: 6741980025479879414}
+  - component: {fileID: 4109992749893833259}
+  m_Layer: 0
+  m_Name: PlayerHUD
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &637255433842034673
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &6508955265461468378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3ca9da3b3ceb46458e9a54a9d9b8968, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHUDManager
+  referenceResolution: {x: 1920, y: 1080}
+  defaultPortraitSprite: {fileID: -672993019, guid: 2a06ce243569b0e49be8a53138913298, type: 3}
+  portraitSize: 120
+  portraitBorderColor: {r: 0.83921576, g: 0.89019614, b: 0.91372555, a: 1}
+  portraitBorderThickness: 5
+  topLeftMarginX: 35
+  topLeftMarginY: 35
+  portraitToHeartSpacing: 15
+  heartVerticalOffset: 40
+  collapseAllKey: 9
+--- !u!114 &5710119854866892248
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 528c225323ff21e4db5bbdb8b30ea288, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHeartDisplay
+  fullHeartSprite: {fileID: 21300000, guid: 90db3aa0b1d9a0944bfe2a98e420d1fc, type: 3}
+  halfHeartSprite: {fileID: 21300000, guid: fcda947d3104c5847abe7757c30ab1c7, type: 3}
+  emptyHeartSprite: {fileID: 21300000, guid: 98b159a253512e548bb1a661b3ce6403, type: 3}
+  fallbackFullColor: {r: 0.85, g: 0.15, b: 0.15, a: 1}
+  fallbackHalfColor: {r: 0.85, g: 0.15, b: 0.15, a: 0.5}
+  fallbackEmptyColor: {r: 0.3, g: 0.1, b: 0.1, a: 0.4}
+  hudManager: {fileID: 6508955265461468378}
+  playerHealth: {fileID: 0}
+  heartWidth: 85
+  heartHeight: 50
+  heartSpacing: 0
+  fullSizeSlotCount: 5
+  heartBorderThickness: 3.4
+  shieldSprite: {fileID: 21300000, guid: 97f8842175344ce887d781f8d94c0245, type: 3}
+  shieldFallbackColor: {r: 0.4, g: 0.8, b: 1, a: 1}
+  shieldBarHeight: 16
+  shieldGap: -17
+  shieldBorderThickness: 3.4
+  shieldBorderColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!114 &6859012609958131568
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8877127553300b743998f137335999ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerItemInfoDisplay
+  hudManager: {fileID: 6508955265461468378}
+  panelMarginX: 35
+  panelGapBelowHeader: 120
+  panelWidth: 520
+  panelMinHeight: 200
+  backgroundSprite: {fileID: 0}
+  panelColor: {r: 0, g: 0, b: 0, a: 0.9490196}
+  panelCornerRadius: 16
+  paddingLeft: 16
+  paddingRight: 16
+  paddingTop: 14
+  paddingBottom: 14
+  sectionSpacing: 25
+  iconSize: 100
+  iconToNameSpacing: 6
+  nameFontSize: 30
+  useTierNameColor: 1
+  nameTextColor: {r: 1, g: 1, b: 1, a: 1}
+  tier0NameColor: {r: 1, g: 1, b: 1, a: 1}
+  tier1NameColor: {r: 0, g: 1, b: 1, a: 1}
+  tier2NameColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  tier3NameColor: {r: 1, g: 0, b: 1, a: 1}
+  categoryFontSize: 20
+  categoryTextColor: {r: 0.85, g: 0.85, b: 0.85, a: 1}
+  categoryToTierSpacing: 20
+  tier0Sprite: {fileID: 21300000, guid: cc8c6f8052f262a43abf198de19a319b, type: 3}
+  tier1Sprite: {fileID: 21300000, guid: 950fe004cb35a924faf91340c90b0c77, type: 3}
+  tier2Sprite: {fileID: 21300000, guid: ba03fd883a2b09848b4b4d8d3b48c5ec, type: 3}
+  tier3Sprite: {fileID: 21300000, guid: d2c1fb58b6abe264391f80e1e6939edf, type: 3}
+  tierIconSize: {x: 40, y: 40}
+  tierGapBelowName: 25
+  tierPlaceholderColor: {r: 1, g: 1, b: 1, a: 0.15}
+  statFontSize: 25
+  specialEffectFontSize: 25
+  descriptionFontSize: 18
+  descriptionTextColor: {r: 0.6627451, g: 0.6627451, b: 0.6627451, a: 1}
+  iconOffset: {x: 0, y: 0}
+  nameOffset: {x: 20, y: -15}
+  categoryOffset: {x: 20, y: 0}
+  tierOffset: {x: 10, y: 0}
+  statOffset: {x: 0, y: 0}
+  specialEffectOffset: {x: 0, y: 0}
+  descriptionOffset: {x: 0, y: 0}
+--- !u!114 &8261480909416003412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d9f479ab7678ae478c872d4caa8c33b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStatDisplay
+  hudManager: {fileID: 6508955265461468378}
+  playerStats: {fileID: 0}
+  statEntries:
+  - statType: 6
+    enabled: 1
+    icon: {fileID: 21300000, guid: 94a2e01ba27ad994786fd41d0b6450b5, type: 3}
+    showDecimal: 1
+    tooltipName: "\uACF5\uACA9\uB825"
+    tooltipDescription: "\uD50C\uB808\uC774\uC5B4\uAC00 \uC801\uC5D0\uAC8C \uC785\uD788\uB294
+      \uD53C\uD574\uB7C9\uACFC\n\uAD00\uB828\uB41C \uC218\uCE58\uB97C \uACC4\uC0B0\uD569\uB2C8\uB2E4"
+    isSkillStat: 0
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 0
+    enabled: 1
+    icon: {fileID: 21300000, guid: e50c9b839ef606c469dc56c340220f8c, type: 3}
+    showDecimal: 1
+    tooltipName: "\uCD5C\uB300 \uCCB4\uB825"
+    tooltipDescription: "\uD50C\uB808\uC774\uC5B4\uC758 \uCCB4\uB825\uC744 \uB098\uD0C0\uB0C5\uB2C8\uB2E4"
+    isSkillStat: 0
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 1
+    enabled: 1
+    icon: {fileID: 21300000, guid: 70ad761b40db1734fbc2c3a7463bef49, type: 3}
+    showDecimal: 1
+    tooltipName: "\uC774\uB3D9 \uC18D\uB3C4"
+    tooltipDescription: "\uD50C\uB808\uC774\uC5B4\uAC00 \uC5BC\uB9C8\uB098 \uBE60\uB974\uAC8C
+      \n\uC6C0\uC9C1\uC774\uB294\uC9C0 \uB098\uD0C0\uB0C5\uB2C8\uB2E4"
+    isSkillStat: 0
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 2
+    enabled: 1
+    icon: {fileID: 21300000, guid: 1a530eb698b7e6d49ae16931d0ed6fa7, type: 3}
+    showDecimal: 1
+    tooltipName: "\uACF5\uACA9 \uC18D\uB3C4"
+    tooltipDescription: "\uD50C\uB808\uC774\uC5B4\uAC00 \uC5BC\uB9C8\uB098 \uBE60\uB974\uAC8C
+      \uCD1D\uC744 \n\uBC1C\uC0AC\uD560 \uC218 \uC788\uB294\uC9C0 \uB098\uD0C0\uB0C5\uB2C8\uB2E4"
+    isSkillStat: 0
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 7
+    enabled: 1
+    icon: {fileID: 21300000, guid: cda995e932dd42543b3288f4147ebe17, type: 3}
+    showDecimal: 1
+    tooltipName: "\uC0AC\uAC70\uB9AC"
+    tooltipDescription: "\uCD1D\uC54C\uC774 \uC2E4\uC81C\uB85C \uB0A0\uC544\uAC00\uB294
+      \n\uAC70\uB9AC\uB97C \uB098\uD0C0\uB0C5\uB2C8\uB2E4"
+    isSkillStat: 0
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 3
+    enabled: 1
+    icon: {fileID: 21300000, guid: fdd95f817fa8f4842850ca95e9e59f5d, type: 3}
+    showDecimal: 1
+    tooltipName: "\uC7A5\uC804 \uC2DC\uAC04"
+    tooltipDescription: "\uC7A5\uC804 \uC2DC \uAC78\uB9AC\uB294 \uC2DC\uAC04\uC744
+      \uB098\uD0C0\uB0C5\uB2C8\uB2E4"
+    isSkillStat: 0
+    lowerIsBetter: 1
+    lowerIsBetterInitialized: 1
+  - statType: 8
+    enabled: 1
+    icon: {fileID: 21300000, guid: 4d7b7eecc6115094c94ed1ec3df223a3, type: 3}
+    showDecimal: 0
+    tooltipName: "\uD0C4\uCC3D \uD06C\uAE30"
+    tooltipDescription: "\uC7A5\uC804 \uD55C \uBC88\uC5D0 \uCDA9\uC804\uD560 \uC218
+      \uC788\uB294 \n\uD0C4\uD658\uC758 \uC591\uC785\uB2C8\uB2E4"
+    isSkillStat: 0
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 11
+    enabled: 1
+    icon: {fileID: 21300000, guid: d7b4f3a085e8526418774c48be281e0b, type: 3}
+    showDecimal: 0
+    tooltipName: "\uC5F0\uC0AC"
+    tooltipDescription: "\uD55C \uBC88\uC758 \uC0AC\uACA9\uC73C\uB85C \uC5BC\uB9C8\uB098
+      \uB9CE\uC740 \uCD1D\uC54C\uC744 \uC0AC\uACA9\uD560\uC9C0 \uB098\uD0C0\uB0C5\uB2C8\uB2E4"
+    isSkillStat: 0
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 9
+    enabled: 1
+    icon: {fileID: 21300000, guid: c3552eefaf5ea9344ba2ff982fa4cf69, type: 3}
+    showDecimal: 1
+    tooltipName: "\uCD1D\uC54C \uD06C\uAE30"
+    tooltipDescription: "\uCD1D\uC54C\uC758 \uD06C\uAE30\uB97C \uB098\uD0C0\uB0C5\uB2C8\uB2E4"
+    isSkillStat: 0
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 10
+    enabled: 1
+    icon: {fileID: 21300000, guid: 5f1b2d447ac065b4cb44dbf8c790b27b, type: 3}
+    showDecimal: 1
+    tooltipName: "\uCD1D\uC54C \uC18D\uB3C4"
+    tooltipDescription: "\uCD1D\uC54C\uC774 \uC5BC\uB9C8\uB098 \uBE60\uB974\uAC8C
+      \n\uB0A0\uC544\uAC00\uB294\uC9C0 \uB098\uD0C0\uB0C5\uB2C8\uB2E4"
+    isSkillStat: 0
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 5
+    enabled: 1
+    icon: {fileID: 21300000, guid: 79f771c17dfbcf94b8f4c3e18bc0023b, type: 3}
+    showDecimal: 1
+    tooltipName: "\uCF54\uC2A4\uD2B8 \uD68C\uBCF5\uB825"
+    tooltipDescription: "\uC804\uD22C\uB97C \uB05D\uB9C8\uCCE4\uC744 \uB54C \uC5BB\uB294
+      \n\uCF54\uC2A4\uD2B8\uC758 \uC591\uC744 \uB098\uD0C0\uB0C5\uB2C8\uB2E4"
+    isSkillStat: 0
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 4
+    enabled: 1
+    icon: {fileID: 21300000, guid: 3c9789b344d3cb64ba11a178d49fe6ef, type: 3}
+    showDecimal: 1
+    tooltipName: "\uD589\uC6B4"
+    tooltipDescription: "\uC5EC\uB7EC \uD655\uB960\uACFC \uAD00\uB828\uB41C \uC218\uCE58\uB97C
+      \uACC4\uC0B0\uD569\uB2C8\uB2E4"
+    isSkillStat: 0
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 14
+    enabled: 1
+    icon: {fileID: 21300000, guid: 0c8582315ffd7694982055de275495fa, type: 3}
+    showDecimal: 1
+    tooltipName: "\uC0EC\uB808 \uD655\uB960"
+    tooltipDescription: "\uC120\uD0DD \uB808\uBCA8\uC5D0\uC11C \uC0EC\uB808\uAC00
+      \n\uB4F1\uC7A5\uD560 \uD655\uB960\uC744 \uB098\uD0C0\uB0C5\uB2C8\uB2E4"
+    isSkillStat: 0
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 13
+    enabled: 1
+    icon: {fileID: 21300000, guid: 3f50326add8df6e48a14b40efa32d7cf, type: 3}
+    showDecimal: 1
+    tooltipName: "\uAC8C\uB9C8\uD2B8\uB9AC\uC544 \uD655\uB960"
+    tooltipDescription: "\uC120\uD0DD \uB808\uBCA8\uC5D0\uC11C \uAC8C\uB9C8\uD2B8\uB9AC\uC544\uAC00
+      \n\uB4F1\uC7A5\uD560 \uD655\uB960\uC744 \uB098\uD0C0\uB0C5\uB2C8\uB2E4"
+    isSkillStat: 0
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 15
+    enabled: 1
+    icon: {fileID: 21300000, guid: 07e8779b700baad43aaf5dac13d829a2, type: 3}
+    showDecimal: 1
+    tooltipName: "\uC218\uB958\uD0C4 \uACF5\uACA9\uB825"
+    tooltipDescription: "\uC218\uB958\uD0C4\uC774 \uC801\uC5D0\uAC8C \uC785\uD788\uB294
+      \uD53C\uD574\uB7C9\uACFC\n\uAD00\uB828\uB41C \uC218\uCE58\uB97C \uACC4\uC0B0\uD569\uB2C8\uB2E4"
+    isSkillStat: 1
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 17
+    enabled: 1
+    icon: {fileID: 21300000, guid: 279c52f9b0d44f64188100b058a3c421, type: 3}
+    showDecimal: 1
+    tooltipName: "\uC218\uB958\uD0C4 \uBC94\uC704"
+    tooltipDescription: "\uC218\uB958\uD0C4\uC758 \uD3ED\uBC1C \uBC94\uC704\uB97C
+      \uB098\uD0C0\uB0C5\uB2C8\uB2E4"
+    isSkillStat: 1
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 18
+    enabled: 1
+    icon: {fileID: 21300000, guid: c22aebf197e06d84fa2630deb770c1c4, type: 3}
+    showDecimal: 1
+    tooltipName: "\uC218\uB958\uD0C4 \uC0AC\uAC70\uB9AC"
+    tooltipDescription: "\uC218\uB958\uD0C4\uC744 \uB358\uC9C8 \uC218 \uC788\uB294\n\uC0AC\uAC70\uB9AC\uB97C
+      \uB098\uD0C0\uB0C5\uB2C8\uB2E4"
+    isSkillStat: 1
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 19
+    enabled: 1
+    icon: {fileID: 21300000, guid: 7672a8dfecdd2764bb98bd5c9d479e9a, type: 3}
+    showDecimal: 1
+    tooltipName: "\uD574\uD0B9\uD234 \uACF5\uACA9\uB825"
+    tooltipDescription: "\uD574\uD0B9\uD234\uC774 \uC801\uC5D0\uAC8C \uC785\uD788\uB294
+      \uD53C\uD574\uB7C9\uACFC\n\uAD00\uB828\uB41C \uC218\uCE58\uB97C \uACC4\uC0B0\uD569\uB2C8\uB2E4"
+    isSkillStat: 1
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 20
+    enabled: 1
+    icon: {fileID: 21300000, guid: c8c4b675c3c76fb40be2d05534e9843f, type: 3}
+    showDecimal: 1
+    tooltipName: "\uD574\uD0B9\uD234 \uBC94\uC704"
+    tooltipDescription: "\uD574\uD0B9\uD234\uC758 \uD6A8\uACFC \uBC94\uC704\uB97C
+      \uB098\uD0C0\uB0C5\uB2C8\uB2E4"
+    isSkillStat: 1
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  - statType: 21
+    enabled: 1
+    icon: {fileID: 21300000, guid: 191cd6025b15d9c449421d8017241848, type: 3}
+    showDecimal: 1
+    tooltipName: "\uD574\uD0B9\uD234 \uC9C0\uC18D \uC2DC\uAC04"
+    tooltipDescription: "\uD574\uD0B9\uD234\uC758 \uD6A8\uACFC \uC9C0\uC18D \uC2DC\uAC04\uC744
+      \uB098\uD0C0\uB0C5\uB2C8\uB2E4"
+    isSkillStat: 1
+    lowerIsBetter: 0
+    lowerIsBetterInitialized: 1
+  panelMarginX: 35
+  panelMarginY: 35
+  iconSize: 55
+  fontSize: 25
+  valueTextWidth: 100
+  autoShrinkValueText: 1
+  minValueFontSize: 14
+  hideDecimalAtOrAbove: 100
+  fallbackIconColor: {r: 0.25, g: 0.85, b: 0.35, a: 1}
+  valueTextColor: {r: 1, g: 1, b: 1, a: 1}
+  flashOnChange: 1
+  increaseFlashColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  decreaseFlashColor: {r: 1, g: 0.3, b: 0.25, a: 1}
+  flashPeakScale: 1.5
+  flashPopDuration: 0.1
+  flashReturnDuration: 2
+  flashStartupGrace: 0.5
+  iconToValueSpacing: 3
+  rowSpacing: 0
+  rowsPerColumn: 7
+  columnSpacing: -50
+  tooltipCursorOffset: {x: 0, y: 24}
+  tooltipScreenEdgeMargin: 16
+  tooltipBackgroundColor: {r: 0, g: 0, b: 0, a: 0.98039216}
+  tooltipCornerRadius: 12
+  tooltipPadding: 20
+  tooltipMaxWidth: 360
+  tooltipNameDescSpacing: 15
+  tooltipNameFontSize: 26
+  tooltipNameColor: {r: 1, g: 0.92, b: 0.45, a: 1}
+  tooltipDescriptionFontSize: 20
+  tooltipDescriptionColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
+  tooltipCanvasSortingOrder: 20
+  collapse:
+    startCollapsed: 0
+    duration: 0.3
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    buttonLength: 96
+    buttonDepth: 30
+    buttonGap: 4
+    buttonOffset: {x: 0, y: 10}
+    trapezoidInset: 0.2
+    cornerRadius: 8
+    buttonColor: {r: 0, g: 0, b: 0, a: 0.6}
+    buttonHoverColor: {r: 0, g: 0, b: 0, a: 0.8}
+    arrowSize: 20
+    arrowColor: {r: 1, g: 1, b: 1, a: 1}
+    buttonSprite: {fileID: 0}
+    arrowSprite: {fileID: 0}
+--- !u!114 &8348429486781463646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 784cab714016e33479cf42b1acef9afa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MinimapDisplay
+  hudManager: {fileID: 6508955265461468378}
+  levelBuilder: {fileID: 0}
+  currentBackgroundIcon: {fileID: 21300000, guid: ced8fec87c608a647a59077a0e03d533, type: 3}
+  visitedBackgroundIcon: {fileID: 21300000, guid: 956beb1f9aaac34459c7e0e69992a170, type: 3}
+  unvisitedBackgroundIcon: {fileID: 21300000, guid: 58ddc8377dd309b4abbb8c673b3b9703, type: 3}
+  currentFallbackColor: {r: 0.3, g: 0.95, b: 0.4, a: 1}
+  visitedFallbackColor: {r: 0.85, g: 0.85, b: 0.85, a: 1}
+  unvisitedFallbackColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  categoryOverlayIcons:
+  - category: 0
+    icon: {fileID: 0}
+  - category: 1
+    icon: {fileID: 21300000, guid: 3f50326add8df6e48a14b40efa32d7cf, type: 3}
+  - category: 2
+    icon: {fileID: 21300000, guid: 740779ad0b4289a4b9ddb5a614399d70, type: 3}
+  - category: 3
+    icon: {fileID: 21300000, guid: 4ed5ab629e6e01447892e870722ae89d, type: 3}
+  - category: 7
+    icon: {fileID: 0}
+  - category: 8
+    icon: {fileID: 0}
+  - category: 4
+    icon: {fileID: 21300000, guid: 76b3bb21173223645b0b19b1ed42c3bd, type: 3}
+  keepIconAfterVisitCategories: 0300000004000000
+  variantIcons: []
+  playerMarkerIcon: {fileID: 21300000, guid: 087222fd11188714882472c522db3f87, type: 3}
+  playerMarkerFallbackColor: {r: 1, g: 1, b: 1, a: 1}
+  markerIcons:
+  - markerKey: Item
+    icon: {fileID: 21300000, guid: d2c1fb58b6abe264391f80e1e6939edf, type: 3}
+    fallbackColor: {r: 1, g: 1, b: 1, a: 1}
+  - markerKey: Chest
+    icon: {fileID: 21300000, guid: d9259986b2e5b2245950ea28a79c63b5, type: 3}
+    fallbackColor: {r: 0.65, g: 0.42, b: 0.2, a: 1}
+  - markerKey: Pyroxenes
+    icon: {fileID: 21300000, guid: 932f159a53096cb41b370598eb2324de, type: 3}
+    fallbackColor: {r: 0.6, g: 0.6, b: 1, a: 1}
+  - markerKey: Credit
+    icon: {fileID: 21300000, guid: 4ed5ab629e6e01447892e870722ae89d, type: 3}
+    fallbackColor: {r: 1, g: 0.9, b: 0.3, a: 1}
+  - markerKey: Grenade
+    icon: {fileID: 21300000, guid: 39212976117353c449a4fce911682d9a, type: 3}
+    fallbackColor: {r: 1, g: 0.6, b: 0.1, a: 1}
+  - markerKey: HackingTool
+    icon: {fileID: 21300000, guid: dc6718ff43fdc1549abdd5983ccc91c8, type: 3}
+    fallbackColor: {r: 0.3, g: 0.9, b: 1, a: 1}
+  - markerKey: Cost
+    icon: {fileID: 21300000, guid: 73f54ce31a3fa3749a80284dba4002b8, type: 3}
+    fallbackColor: {r: 0.4, g: 1, b: 0.5, a: 1}
+  - markerKey: Health
+    icon: {fileID: 21300000, guid: 087222fd11188714882472c522db3f87, type: 3}
+    fallbackColor: {r: 1, g: 0.3, b: 0.3, a: 1}
+  portalIcon: {fileID: 21300000, guid: 950fe004cb35a924faf91340c90b0c77, type: 3}
+  portalFallbackColor: {r: 0.3, g: 0.8, b: 1, a: 1}
+  portalIconSize: 40
+  panelMarginX: 35
+  panelMarginY: 35
+  zoneWidth: 380
+  zoneHeight: 340
+  zoneColor: {r: 0, g: 0, b: 0, a: 0.5}
+  zoneCornerRadius: 16
+  initialZoom: 1
+  minZoom: 0.4
+  maxZoom: 2
+  zoomStepPerNotch: 0.15
+  zoomSmoothSpeed: 14
+  followCurrentRoom: 1
+  followSmoothSpeed: 8
+  resetZoomOnRoomChange: 1
+  showRecenterButton: 1
+  recenterButtonText: "\uD604\uC7AC \uC704\uCE58"
+  recenterButtonSize: {x: 96, y: 34}
+  recenterButtonMargin: {x: 10, y: 10}
+  recenterButtonCornerRadius: 40
+  recenterButtonColor: {r: 1, g: 1, b: 1, a: 1}
+  recenterButtonHoverColor: {r: 0.82, g: 0.82, b: 0.82, a: 1}
+  recenterButtonTextColor: {r: 0.20392159, g: 0.20000002, b: 0.39607847, a: 1}
+  recenterButtonFontSize: 20
+  gridRotationDegrees: -45
+  cellPixelSize: 70
+  mapOriginOffset: {x: 0, y: 0}
+  iconSize: 95
+  centerOverlaySize: 40
+  quadrantIconSize: 25
+  quadrantOffset: 20
+  showConnections: 1
+  lineThickness: 30
+  lineColor: {r: 1, g: 1, b: 1, a: 0.5}
+--- !u!114 &3425244829326310260
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67e6e1502e66dcd4a9bef45c2c643246, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AmmoBoxDisplay
+  hudManager: {fileID: 6508955265461468378}
+  playerShooting: {fileID: 0}
+  playerStats: {fileID: 0}
+  panelMarginX: 35
+  panelMarginY: 35
+  panelWidth: 260
+  panelHeight: 140
+  backgroundSprite: {fileID: 21300000, guid: 7b8b3742ead6ac34f838370dc99032b5, type: 3}
+  backgroundFallbackColor: {r: 1, g: 1, b: 1, a: 0.85}
+  reloadNormalIcon: {fileID: 21300000, guid: dd58a8a5133397d4cbb30316ee4d3ecf, type: 3}
+  reloadActiveIcon: {fileID: 21300000, guid: 6fc62232e8efc40488ad275cd6a21efc, type: 3}
+  reloadNormalFallbackColor: {r: 0.35686275, g: 0.8980393, b: 0.8980393, a: 1}
+  reloadActiveFallbackColor: {r: 0.19999999, g: 0.47129938, b: 0.9019608, a: 1}
+  reloadIconPosition: {x: 80, y: -40}
+  reloadIconSize: 44
+  multishotTextPosition: {x: 195, y: -24}
+  multishotTextSize: {x: 110, y: 34}
+  multishotFontSize: 30
+  multishotTextColor: {r: 1, g: 1, b: 1, a: 1}
+  currentAmmoTextPosition: {x: 60, y: -80}
+  currentAmmoTextSize: {x: 70, y: 40}
+  currentAmmoFontSize: 60
+  currentAmmoTextColor: {r: 0.46666667, g: 0.87058824, b: 1, a: 1}
+  separatorPosition: {x: 130, y: -80}
+  separatorSize: {x: 20, y: 40}
+  separatorFontSize: 60
+  separatorTextColor: {r: 0.20392159, g: 0.20000002, b: 0.39607847, a: 1}
+  maxAmmoTextPosition: {x: 150, y: -80}
+  maxAmmoTextSize: {x: 70, y: 40}
+  maxAmmoFontSize: 60
+  maxAmmoTextColor: {r: 0.20392157, g: 0.2, b: 0.39607844, a: 1}
+  weaponMode: {fileID: 0}
+  playerResources: {fileID: 0}
+  resourceDisplay: {fileID: 7844003826562715231}
+  subBoxSprite: {fileID: 21300000, guid: 83b93b44944588c44b79420e26a23b36, type: 3}
+  subBoxColor: {r: 1, g: 1, b: 1, a: 1}
+  subBoxSize: {x: 180, y: 60}
+  subBoxGrenadeHiddenPosition: {x: -60, y: 30}
+  subBoxGrenadeShownPosition: {x: -190, y: 60}
+  subBoxHackHiddenPosition: {x: -60, y: 30}
+  subBoxHackShownPosition: {x: -190, y: 15}
+  subBoxHackPositionInitialized: 1
+  subBoxDebugDrawOnTop: 0
+  subBoxSlideDuration: 0.25
+  subBoxSlideCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 2.5
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  subBoxGrenadeIcon: {fileID: 0}
+  subBoxHackingToolIcon: {fileID: 0}
+  subBoxIconPosition: {x: 50, y: -30}
+  subBoxIconSize: 45
+  subBoxCountTextPosition: {x: 70, y: -12}
+  subBoxCountTextSize: {x: 50, y: 40}
+  subBoxCountFontSize: 40
+  subBoxCountTextColor: {r: 0.20392159, g: 0.20000002, b: 0.39607847, a: 1}
+--- !u!114 &7488094772057042346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feaa0499dc88891458355d9899873a14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TreasureChestInfoDisplay
+  hudManager: {fileID: 6508955265461468378}
+  healthIcon: {fileID: 21300000, guid: 087222fd11188714882472c522db3f87, type: 3}
+  grenadeIcon: {fileID: 21300000, guid: 39212976117353c449a4fce911682d9a, type: 3}
+  hackingToolIcon: {fileID: 21300000, guid: dc6718ff43fdc1549abdd5983ccc91c8, type: 3}
+  creditIcon: {fileID: 21300000, guid: 4ed5ab629e6e01447892e870722ae89d, type: 3}
+  pyroxenesIcon: {fileID: 21300000, guid: 932f159a53096cb41b370598eb2324de, type: 3}
+  costIcon: {fileID: 21300000, guid: 73f54ce31a3fa3749a80284dba4002b8, type: 3}
+  panelMarginX: 35
+  panelGapBelowHeader: 120
+  panelWidth: 400
+  panelMinHeight: 100
+  backgroundSprite: {fileID: 21300000, guid: 0e9c1a52a3bcce54381be8cd0f3ff9a5, type: 3}
+  panelColor: {r: 0, g: 0, b: 0, a: 0.82}
+  paddingLeft: 16
+  paddingRight: 16
+  paddingTop: 14
+  paddingBottom: 14
+  rowSpacing: 6
+  maxRows: 8
+  rowIconSize: 60
+  iconToTextSpacing: 10
+  rowFontSize: 30
+  rowTextColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!114 &7844003826562715231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70b0fac6242cf9e4f8ba2d6c938b6fbc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerResourceDisplay
+  hudManager: {fileID: 6508955265461468378}
+  playerResources: {fileID: 0}
+  grenadeIcon: {fileID: 21300000, guid: 39212976117353c449a4fce911682d9a, type: 3}
+  hackingToolIcon: {fileID: 21300000, guid: dc6718ff43fdc1549abdd5983ccc91c8, type: 3}
+  creditIcon: {fileID: 21300000, guid: 4ed5ab629e6e01447892e870722ae89d, type: 3}
+  pyroxenesIcon: {fileID: 21300000, guid: 932f159a53096cb41b370598eb2324de, type: 3}
+  marginX: 165
+  gapBelowHeartRow: -45
+  iconSize: 50
+  fontSize: 30
+  fontColor: {r: 1, g: 1, b: 1, a: 1}
+  numberTextWidth: 19
+  placeholderColor: {r: 1, g: 1, b: 1, a: 0.15}
+  iconToNumberSpacing: 1
+  groupSpacing: 35
+--- !u!114 &8985789144020700063
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf901b1c759a7184db3ffcd9b9a2bf79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInventoryDisplay
+  hudManager: {fileID: 6508955265461468378}
+  playerInventory: {fileID: 0}
+  marginX: 35
+  verticalOffset: -200
+  panelWidth: 380
+  panelHeight: 300
+  backgroundSprite: {fileID: 21300000, guid: 3caba37c0cbe668438f3e40b1ef678ce, type: 3}
+  panelColor: {r: 0, g: 0, b: 0, a: 0.6}
+  paddingLeft: 12
+  paddingRight: 12
+  paddingTop: 12
+  paddingBottom: 12
+  columns: 5
+  iconSize: 64
+  iconSpacingX: 8
+  iconSpacingY: 8
+  placeholderColor: {r: 1, g: 1, b: 1, a: 0.15}
+  collapse:
+    startCollapsed: 0
+    duration: 0.3
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    buttonLength: 96
+    buttonDepth: 30
+    buttonGap: 4
+    buttonOffset: {x: -10, y: 0}
+    trapezoidInset: 0.2
+    cornerRadius: 8
+    buttonColor: {r: 0, g: 0, b: 0, a: 0.6}
+    buttonHoverColor: {r: 0, g: 0, b: 0, a: 0.8}
+    arrowSize: 20
+    arrowColor: {r: 1, g: 1, b: 1, a: 1}
+    buttonSprite: {fileID: 0}
+    arrowSprite: {fileID: 0}
+--- !u!114 &1475294116836378952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40765a1ee8ac2774f8dfad5ad39d84db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCostDisplay
+  hudManager: {fileID: 6508955265461468378}
+  playerResources: {fileID: 0}
+  playerActiveItem: {fileID: 0}
+  activeFrameSprite: {fileID: 21300000, guid: e1cfa67e0dea95c419f38ee35ceb7f35, type: 3}
+  costBadgeSprite: {fileID: 21300000, guid: a888e6cb14855434caa3caed9a7e51e7, type: 3}
+  currentCostBoxSprite: {fileID: 21300000, guid: e538d1df930466e4cb63988f78840ffc, type: 3}
+  costFilledSprite: {fileID: 21300000, guid: 29ac5914a7017a947b37ca1ee7f5737a, type: 3}
+  costEmptySprite: {fileID: 21300000, guid: 5e8a2332c2d164d4fba648729b991b09, type: 3}
+  activeFramePlaceholderColor: {r: 0.2, g: 0.55, b: 1, a: 1}
+  costBadgePlaceholderColor: {r: 0.9, g: 0.1, b: 0.15, a: 1}
+  currentCostBoxPlaceholderColor: {r: 0.6, g: 0.25, b: 0.7, a: 1}
+  costFilledPlaceholderColor: {r: 1, g: 0.6, b: 0.75, a: 1}
+  costEmptyPlaceholderColor: {r: 0.9, g: 0.1, b: 0.15, a: 1}
+  missingItemIconColor: {r: 1, g: 1, b: 1, a: 0.15}
+  pendingAlpha: 0.5
+  cooldownOverlayColor: {r: 0, g: 0, b: 0, a: 0.6}
+  auxIconSize: 60
+  auxIconOffset: {x: 15, y: 15}
+  marginX: 35
+  gapBelowPortrait: 15
+  starSize: 90
+  itemIconSize: 110
+  itemIconOffset: {x: 0, y: 0}
+  badgeSize: 50
+  badgeOffset: {x: -15, y: 15}
+  badgeFontSize: 30
+  badgeFontColor: {r: 1, g: 1, b: 1, a: 1}
+  boxOffset: {x: 100, y: -15}
+  boxSize: 80
+  boxFontSize: 35
+  boxFontColor: {r: 1, g: 1, b: 1, a: 1}
+  boxTextOffset: {x: 0, y: -3}
+  barOffset: {x: 175, y: -60}
+  slotWidth: 40
+  slotHeight: 40
+  slotSpacing: -3
+  spaceHintSprite: {fileID: 21300000, guid: 62a6a6f296a28b24980f85d33a55b608, type: 3}
+  spaceHintSize: {x: 90, y: 30}
+  spaceHintOffset: {x: 10, y: -4}
+--- !u!114 &3381429684325208208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79232e84b7360ba48a97478515bbfdce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSlotItemDisplay
+  hudManager: {fileID: 6508955265461468378}
+  playerTrinket: {fileID: 0}
+  playerDisposableItem: {fileID: 0}
+  playerFoodItem: {fileID: 0}
+  marginX: 35
+  verticalOffset: 45
+  panelWidth: 380
+  panelHeight: 165
+  backgroundSprite: {fileID: 21300000, guid: 5bafb15703dc62c4cb6758a0c3a9e44e, type: 3}
+  panelColor: {r: 0, g: 0, b: 0, a: 0.6}
+  paddingLeft: 20
+  slotRowTop: 90
+  slotSize: 50
+  slotSpacing: 6
+  groupSpacing: 8
+  itemIconInset: -2
+  slotFrameSprite: {fileID: 21300000, guid: e1cfa67e0dea95c419f38ee35ceb7f35, type: 3}
+  slotFramePlaceholderColor: {r: 1, g: 1, b: 1, a: 0.15}
+  missingItemIconColor: {r: 1, g: 1, b: 1, a: 0.4}
+  pendingAlpha: 0.3
+  lockedSlotScale: 0.75
+  lockedSlotAlpha: 0.45
+  lockTransitionDuration: 0.25
+  collapse:
+    startCollapsed: 0
+    duration: 0.3
+    curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    buttonLength: 96
+    buttonDepth: 30
+    buttonGap: 4
+    buttonOffset: {x: -10, y: 0}
+    trapezoidInset: 0.2
+    cornerRadius: 8
+    buttonColor: {r: 0, g: 0, b: 0, a: 0.6}
+    buttonHoverColor: {r: 0, g: 0, b: 0, a: 0.8}
+    arrowSize: 20
+    arrowColor: {r: 1, g: 1, b: 1, a: 1}
+    buttonSprite: {fileID: 0}
+    arrowSprite: {fileID: 0}
+--- !u!114 &102579380779662795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea26f25862c932743bf3daebe133cea1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossHealthBarDisplay
+  hudManager: {fileID: 6508955265461468378}
+  offsetX: 0
+  topMargin: 10
+  defaultPortraitSprite: {fileID: 0}
+  portraitSize: {x: 150, y: 150}
+  portraitToBarSpacing: -40
+  portraitOffset: {x: 0, y: 0}
+  portraitPlaceholderColor: {r: 0.3, g: 0.55, b: 1, a: 0.9}
+  barSize: {x: 800, y: 30}
+  barOffset: {x: 0, y: 0}
+  barFillSprite: {fileID: 21300000, guid: 65d986e29d881784684aed77e618e169, type: 3}
+  barFillPlaceholderColor: {r: 0.85, g: 0.15, b: 0.15, a: 1}
+  barBackgroundSprite: {fileID: 21300000, guid: 6eec39a8f3cc0ca499903df46061b210, type: 3}
+  barBackgroundPlaceholderColor: {r: 0.1, g: 0.1, b: 0.1, a: 0.85}
+  frameSprite: {fileID: 0}
+  framePadding: 0
+  placeholderBorderThickness: 5
+  placeholderBorderColor: {r: 1, g: 1, b: 1, a: 1}
+  shieldBarHeight: 12
+  shieldBarGap: -10
+  shieldFillSprite: {fileID: 0}
+  shieldFillColor: {r: 1, g: 0.55, b: 0.1, a: 1}
+  shieldBackgroundColor: {r: 0, g: 0, b: 0, a: 0.9}
+  shieldBorderMatchesBar: 1
+  shieldBorderThickness: 2
+  shieldBorderColor: {r: 1, g: 1, b: 1, a: 1}
+  nameOffset: {x: 0, y: 7}
+  nameFontSize: 40
+  nameOutlineThickness: 2
+--- !u!114 &327658820336581927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 715ed37ebb284c947823fb8172890408, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InteractPromptDisplay
+  interactPromptSprite: {fileID: 21300000, guid: 250c0ed52766a3d4798c5c1ebb0757a0, type: 3}
+  interactPromptIconSize: {x: 50, y: 50}
+  promptHeight: 1
+  interactPromptIconOffset: {x: 45, y: -20}
+  interactPromptTextOffset: {x: 105, y: -20}
+  interactPromptFontSize: 30
+  interactPromptTextColor: {r: 1, g: 1, b: 1, a: 1}
+  interactPromptOutlineThickness: 1.5
+  interactPromptOutlineColor: {r: 0, g: 0, b: 0, a: 0.8}
+  openLabel: "\uC5F4\uAE30"
+  pickupLabel: "\uD68D\uB4DD\uD558\uAE30"
+  portalLabel: "\uB2E4\uC74C \uB808\uBCA8"
+  shopLabel: "\uAC70\uB798\uD558\uAE30"
+  referenceResolution: {x: 1920, y: 1080}
+  canvasSortingOrder: 10
+--- !u!114 &7735561429346389095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c3aad1de366305439f31c6d28ef8f33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerReloadIndicator
+  playerShooting: {fileID: 0}
+  playerStats: {fileID: 0}
+  reloadNormalIcon: {fileID: 21300000, guid: dd58a8a5133397d4cbb30316ee4d3ecf, type: 3}
+  reloadActiveIcon: {fileID: 21300000, guid: 6fc62232e8efc40488ad275cd6a21efc, type: 3}
+  reloadNormalFallbackColor: {r: 0.95, g: 0.85, b: 0.15, a: 1}
+  reloadActiveFallbackColor: {r: 0.9, g: 0.2, b: 0.2, a: 1}
+  indicatorHeight: 0
+  indicatorOffset: {x: 55, y: 0}
+  indicatorSize: 40
+  referenceResolution: {x: 1920, y: 1080}
+  canvasSortingOrder: 5
+--- !u!114 &8831611637386716110
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37421876890f6e347a01467e1d7b21b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemTooltipDisplay
+  hudManager: {fileID: 0}
+  playerItemInfoDisplay: {fileID: 0}
+  treasureChestInfoDisplay: {fileID: 0}
+  playerInventoryDisplay: {fileID: 0}
+  playerSlotItemDisplay: {fileID: 0}
+  playerCostDisplay: {fileID: 0}
+  cursorOffset: {x: 0, y: 24}
+  screenEdgeMargin: 16
+  activeItemOverlapGap: 20
+  canvasSortingOrder: 20
+--- !u!114 &3613494200596890435
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 061b33d639373cf4b81efac1d660251e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DamagePopupDisplay
+  textColor: {r: 1, g: 0, b: 0, a: 1}
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  shieldTextColor: {r: 1, g: 0.55, b: 0.1, a: 1}
+  shieldOutlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineThickness: 2
+  fontSize: 30
+  lifetime: 0.5
+  popDuration: 0.12
+  popStartScale: 0.3
+  popOvershoot: 1.3
+  fadeStartRatio: 0.4
+  fallDistance: 35
+  screenOffset: {x: 20, y: 5}
+  headroom: 0.15
+  stackPushDistance: 30
+  stackPushSpeed: 900
+  maxPopups: 60
+  canvasSortingOrder: 8
+  referenceResolution: {x: 1920, y: 1080}
+--- !u!114 &7752702058159195549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69936274fdcf05c4c9f74c85d7d42201, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthBarDisplay
+  barSize: {x: 45, y: 5}
+  borderThickness: 2
+  fillColor: {r: 0.9, g: 0.1, b: 0.1, a: 1}
+  allyFillColor: {r: 0.2, g: 0.85, b: 0.3, a: 1}
+  backColor: {r: 0, g: 0, b: 0, a: 1}
+  borderColor: {r: 1, g: 1, b: 1, a: 1}
+  headroom: 0.1
+  screenOffset: {x: 0, y: 12}
+  dyingStyle: 1
+  popDuration: 0.15
+  popScale: 1.4
+  fallbackDuration: 0.5
+  fallbackWhitenPortion: 0.35
+  canvasSortingOrder: 7
+  referenceResolution: {x: 1920, y: 1080}
+--- !u!114 &6741980025479879414
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01d24d88239b4194290a4e0642d93cd4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatVfxSpawner
+  playerMuzzleFlash:
+    prefab: {fileID: 500345726442012828, guid: 50a810bfd70577b41a2d43ae0241ea2d, type: 3}
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffsetEuler: {x: 0, y: 0, z: 0}
+    scaleMultiplier: 0.2
+    alignToDirection: 1
+  enemyMuzzleFlash:
+    prefab: {fileID: 500345726442012828, guid: 50a810bfd70577b41a2d43ae0241ea2d, type: 3}
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffsetEuler: {x: 0, y: 0, z: 0}
+    scaleMultiplier: 0.2
+    alignToDirection: 1
+  playerHitByMelee:
+    prefab: {fileID: 2054803858064431036, guid: 500c1d6ddd48f2c4092af85e4e941eb2, type: 3}
+    positionOffset: {x: 0, y: 0.3, z: 0}
+    rotationOffsetEuler: {x: 0, y: 0, z: 0}
+    scaleMultiplier: 0.5
+    alignToDirection: 1
+  playerHitByRanged:
+    prefab: {fileID: 467751860875805754, guid: 7c6d9bb9c8994364dbe5ba2e32dd4d13, type: 3}
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffsetEuler: {x: 0, y: 0, z: 0}
+    scaleMultiplier: 0.3
+    alignToDirection: 1
+  enemyHitByPlayerBullet:
+    prefab: {fileID: 3042519775331041172, guid: 841004c4c6a39e244abe2257394de913, type: 3}
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffsetEuler: {x: 0, y: 0, z: 0}
+    scaleMultiplier: 0.3
+    alignToDirection: 1
+  playerBulletHitWall:
+    prefab: {fileID: 500345726442012828, guid: 50a810bfd70577b41a2d43ae0241ea2d, type: 3}
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffsetEuler: {x: 0, y: 0, z: 0}
+    scaleMultiplier: 0.15
+    alignToDirection: 1
+  enemyBulletHitWall:
+    prefab: {fileID: 500345726442012828, guid: 50a810bfd70577b41a2d43ae0241ea2d, type: 3}
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffsetEuler: {x: 0, y: 0, z: 0}
+    scaleMultiplier: 0.15
+    alignToDirection: 1
+  enemyDeathExplosion:
+    prefab: {fileID: 2054803858064431036, guid: 500c1d6ddd48f2c4092af85e4e941eb2, type: 3}
+    burstCount: 8
+    horizontalScatterRadius: 0.2
+    verticalScatterRange: {x: 0, y: 0.5}
+    burstDelayRange: {x: 0.05, y: 0.15}
+    randomizeRotation: 1
+    scaleMultiplier: 0.4
+  maxEffectLifetime: 5
+--- !u!114 &4109992749893833259
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4028203156877693131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a288c012063dd14cb5b064a85b939f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponModeResourceIndicator
+  weaponMode: {fileID: 0}
+  playerResources: {fileID: 0}
+  resourceDisplay: {fileID: 0}
+  grenadeIcon: {fileID: 0}
+  hackingToolIcon: {fileID: 0}
+  iconAlphaWhenZero: 0.4
+  anchorHeight: 0.5
+  iconOffset: {x: 45, y: -45}
+  iconSize: 44
+  numberOffset: {x: 4, y: 4}
+  numberFontSize: 28
+  numberColor: {r: 0, g: 0, b: 0, a: 1}
+  numberOutlineColor: {r: 1, g: 1, b: 1, a: 1}
+  numberOutlinePixels: 2.5
+  referenceResolution: {x: 1920, y: 1080}
+  canvasSortingOrder: 5

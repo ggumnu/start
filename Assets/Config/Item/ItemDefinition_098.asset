@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_098
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 98
+  displayName: "\uC0AC\uC624\uB9AC\uC758 \uB9C8\uC2A4\uD06C"
+  description: "\uC0AC\uC624\uB9AC\uAC00 \uD56D\uC0C1 \uCC29\uC6A9\uD558\uB294 \uB9C8\uC2A4\uD06C.\r\n\uC5F0\uC2DD\uC774
+    \uB290\uAEF4\uC9C0\uBA70, \uC218\uB9CE\uC740 \uC2F8\uC6C0\uC744 \uD568\uAED8\uD55C
+    \n\uC8FC\uC778\uC758 \uC560\uCC29\uC744 \uC5FF\uBCFC \uC218 \uC788\uB2E4."
+  icon: {fileID: 21300000, guid: aaea2747bde1028418bacc464d4e922c, type: 3}
+  weight: 60
+  rarity: 2
+  category: 0
+  confirmBeforeReplace: 0
+  incompatibleItemIds: []
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 2
+    variantId: 
+  - category: 8
+    variantId: Schale
+  statModifiers:
+  - statType: 13
+    modifierType: 0
+    value: 0.05
+  specialEffects:
+  - rid: 4841274495229493318
+  specialEffectDescription: "\n\uCCB4\uB825\uC774 25% \uC774\uD558\uC778 \uC801\uC5D0\uAC8C
+    \uD53C\uD574\uB97C \uC785\uD788\uBA74 \n\uC989\uC2DC \uC12C\uBA78\uD55C\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 4841274495229493318
+      type: {class: ExecuteLowHealthEffect, ns: , asm: Assembly-CSharp}
+      data:
+        settings:
+          healthThreshold: 0.25
+          popupText: "\uC12C\uBA78"
+          popupTextColor: {r: 0, g: 0, b: 0, a: 1}
+          popupOutlineColor: {r: 0.9, g: 0.05, b: 0.05, a: 1}
+          popupOutlinePixels: 2.5
+          popupFontSize: 44
+          popupFadeOutTime: 0.15
+          dissolveColor: {r: 1, g: 0.08, b: 0.08, a: 1}
+          executeVfxPrefab: {fileID: 5669246471909640947, guid: bfd016bff164dfc4aac33a0563922772, type: 3}
+          executeVfxOffset: {x: 0, y: 0.5, z: 0}
+          executeVfxScale: 0.5
+          bossVfxScaleMultiplier: 1
+          executeVfxLifetime: 2

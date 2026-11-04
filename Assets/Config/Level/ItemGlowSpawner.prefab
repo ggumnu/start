@@ -1,0 +1,77 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &576232331470636669
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3046168380108540522}
+  - component: {fileID: 6982502292052992601}
+  m_Layer: 0
+  m_Name: ItemGlowSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3046168380108540522
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 576232331470636669}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -8.9501, y: -5.23051, z: -8.39996}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6982502292052992601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 576232331470636669}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 23bab07c88e73634f9a3d1d37d7133f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemGlowSpawner
+  enableGlow: 1
+  glowPrefab: {fileID: 1943286446490004412, guid: e953460ff16e0a6459684f9b77202b5c, type: 3}
+  glowScale: 0.5
+  particleSizeMultiplier: 1
+  worldOffset: {x: 0, y: 0, z: 0}
+  pushBehindDistance: 0.05
+  worldEulerAngles: {x: 0, y: 0, z: 0}
+  sortingOrderBelowIcon: 1
+  useTierColors: 1
+  tier0Color: {r: 1, g: 1, b: 1, a: 1}
+  tier1Color: {r: 0, g: 1, b: 1, a: 1}
+  tier2Color: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  tier3Color: {r: 1, g: 0, b: 1, a: 1}
+  keepOriginalAlpha: 1
+  extraLayers:
+  - enabled: 1
+    prefab: {fileID: 3473529909581181512, guid: bc142210df3ec4545a4e3e1f21e00da7, type: 3}
+    scale: 1
+    worldOffset: {x: 0, y: 0.1, z: 0}
+    pushBehindDistance: 0
+    worldEulerAngles: {x: 0, y: 0, z: 0}
+    useTierColors: 1
+    keepOriginalAlpha: 1
+    lifetimeMultiplier: 5
+    speedMultiplier: 1
+    emissionRateMultiplier: 2
+    particleSizeMultiplier: 0.3
+    gravityOverride: 0
+    disabledChildNames:
+    - Particle System
+    initialized: 1

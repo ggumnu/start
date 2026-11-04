@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e58522ea2ab43ce9cbafb87d332f677, type: 3}
+  m_Name: HeliExtractionSettings
+  m_EditorClassIdentifier: Assembly-CSharp::HeliExtractionSettings
+  shadowFrames:
+  - {fileID: 2800000, guid: b8dd1ac4acc14dd8b9b789eded48311f, type: 3}
+  - {fileID: 2800000, guid: d4162e2ecd6d40088009e037b3ed0a88, type: 3}
+  - {fileID: 2800000, guid: 330d24e5223a444eb7b1dfec2882623a, type: 3}
+  shadowMaterial: {fileID: 2100000, guid: ccf5e2f52d544465832ffcb16c9cdaf1, type: 2}
+  ladderTexture: {fileID: 2800000, guid: fc642838267f4fdfbe1137159f00a65a, type: 3}
+  ladderMaterial: {fileID: 2100000, guid: 3a5a36bc688148e083633f1d058081f0, type: 2}
+  dustMaterial: {fileID: 2100000, guid: 8b6dd68e1fd34da5a2d3f2cd3f48f7d2, type: 2}
+  shadowSize: 5
+  shadowOpacity: 0.5
+  shadowFps: 24
+  flyInFrom: {x: -1, y: 0}
+  flyInDistance: 18
+  flyInDuration: 2.2
+  hoverDrift: 0.15
+  hoverPeriod: 2.6
+  groundOffset: 0.03
+  dustColor: {r: 1, g: 0.89056003, b: 0.772, a: 0.19215687}
+  dustStartBeforeArrive: 0.6
+  dustInterval: 0.8
+  dustDuration: 1
+  dustRadius: 2
+  dustRingWidth: 0.2
+  dustRippleCount: 0
+  dustRippleSpacing: 0.5
+  dustRippleFalloff: 0.5
+  dustFadeStart: 0.35
+  ladderOffset: {x: 0, y: 0}
+  ladderTopHeight: 9
+  ladderBottomClearance: 0.25
+  ladderWidth: 0.55
+  ladderTileLength: 0.3
+  ladderSegments: 24
+  ladderDropDelay: 0.6
+  ladderGravity: 16
+  ladderStretch: 0.25
+  ladderDamping: 0.985
+  ladderThrowKick: 1.6
+  ladderSwayStrength: 1.4
+  ladderSwaySpeed: 0.9
+  ladderSettleTime: 1.2
+  approachDistance: 0.45
+  approachTimeout: 4
+  approachTurnSpeed: 12
+  jumpDuration: 0.45
+  jumpArcHeight: 0.35
+  grabHeight: 0.9
+  hangOffset: 0.6
+  faceCameraWhileHanging: 1
+  grabJolt: 2
+  hangStateName: ItemPickup
+  hangBool: IsPickingUp
+  hangBlendIn: 0.2
+  liftDelay: 0.5
+  liftAcceleration: 7
+  liftMaxSpeed: 9
+  departAcceleration: 2.5
+  departAfterLift: 0.1
+  fadeStartAfterLift: 2.5
+  fadeDuration: 0.8
+  skipKeys: 200000001b0000000d0000000f010000
+  skipFadeDuration: 0.15
+  overlaySortingOrder: 998
+  gunObjectName: Reisa_gun_Fixed
+  gunBackOffset: {x: 0, y: 0, z: -0.12}
+  gunBackEuler: {x: 49.6, y: -89.8, z: 179.5}
+  arrivalStartLift: 7
+  descendDuration: 2.2
+  arrivalLadderInertia: 0.35
+  letGoDelay: 0.25
+  dropGravity: 14
+  landBlend: 0.3
+  controlReturnDelay: 0.2
+  leaveDelay: 1
+  leaveDuration: 2.5
+  arrivalHudFadeIn: 0.4

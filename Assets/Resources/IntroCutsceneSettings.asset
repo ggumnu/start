@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b8be7a4be0059f4eb4fa84fae320320, type: 3}
+  m_Name: IntroCutsceneSettings
+  m_EditorClassIdentifier: Assembly-CSharp::IntroCutsceneSettings
+  editorAlwaysPlay: 1
+  faceCameraOnStart: 1
+  introFadeIn: 1.2
+  revealAfterWalkStart: 0.5
+  hudFadeIn: 0.5
+  walkStartOffset: {x: -2.5, y: 0}
+  turnSpeed: 12
+  arriveSlowDistance: 0.6
+  arriveMinSpeed: 0.25
+  walkTimeout: 8
+  arriveHold: 0.15
+  stopBlendDuration: 0.35
+  reloadBlendIn: 0.35
+  pickupBlendIn: 0.35
+  reloadDuration: 1.5
+  pickupHold: 2
+  faceTurnDuration: 0.6
+  returnTurnDuration: 1.2
+  returnBlendDuration: 0.6
+  shotStartDistance: 2.6
+  shotDistance: 1.1
+  shotHeight: 0.35
+  shotSideAngle: 30
+  shotEndSideAngle: 20
+  frontTurnStartProgress: 0.1
+  frontTurnDuration: 1
+  lookHeight: 0.3
+  shotFollowSpeed: 6
+  cameraRiseDelay: 1
+  spiralDuration: 3
+  spiralTurns: 1
+  spiralClockwise: 1
+  reloadBool: IsReloading
+  reloadSpeedFloat: ReloadSpeed
+  pickupTrigger: ItemPickup
+  pickupBool: IsPickingUp
+  reloadStateName: Reloading
+  pickupStateName: ItemPickup
+  idleStateName: NonAimIdle
+  upperBodyLayerName: UpperBody
+  skipKeys: 200000001b0000000d0000000f010000
+  skipFadeIn: 0.12
+  skipHold: 0.1
+  skipFadeOut: 0.3
+  overlayColor: {r: 0, g: 0, b: 0, a: 1}
+  canvasSortingOrder: 998

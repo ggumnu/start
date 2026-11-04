@@ -1,0 +1,89 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7869684968483474926
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5561187403991849201}
+  - component: {fileID: 1749556972606868759}
+  - component: {fileID: 3311144780905779709}
+  m_Layer: 0
+  m_Name: YesOrNoUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5561187403991849201
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7869684968483474926}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: -0, z: -0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1749556972606868759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7869684968483474926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7537d0b76c09dc4d9d6c3468eac2920, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameOverUI
+  showDelay: 2
+  titleText: DEFEAT
+  messageText: "\uB2E4\uC2DC \uC2DC\uC791\uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?"
+  yesLabel: "\uB2E4\uC2DC \uD558\uAE30"
+  noLabel: "\uC544\uB2C8\uC624"
+  canvasSortingOrder: 100
+--- !u!114 &3311144780905779709
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7869684968483474926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22efa0ff24e16aa4f8e720d6ccec66cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SlotReplaceConfirmUI
+  message: "\uC544\uC774\uD15C \uC2AC\uB86F\uC744 \uAD50\uCCB4\uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?"
+  equippedLabel: "\uC7A5\uCC29 \uC911 "
+  incomingLabel: "\uC0C8 \uC544\uC774\uD15C "
+  yesLabel: "\uC608"
+  noLabel: "\uC544\uB2C8\uC624"
+  confirmKey: 102
+  cancelKey: 27
+  pauseGame: 1
+  panelSize: {x: 480, y: 230}
+  panelColor: {r: 0, g: 0, b: 0, a: 0.98039216}
+  panelCornerRadius: 16
+  messageFontSize: 26
+  messageColor: {r: 1, g: 1, b: 1, a: 1}
+  detailFontSize: 19
+  detailColor: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  buttonSize: {x: 140, y: 46}
+  buttonSpacing: 30
+  buttonBottomMargin: 24
+  buttonCornerRadius: 10
+  buttonColor: {r: 0.5372549, g: 0.8862746, b: 1, a: 1}
+  buttonHoverColor: {r: 0.33879998, g: 0.5808, b: 0.638, a: 1}
+  buttonTextColor: {r: 0.20392159, g: 0.20000002, b: 0.39607847, a: 1}
+  buttonFontSize: 25
+  canvasSortingOrder: 90

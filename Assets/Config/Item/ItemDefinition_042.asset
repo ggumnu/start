@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_042
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 42
+  displayName: "\uC138\uB828\uB41C \uBA38\uB9AC\uBE57"
+  description: "\uACE0\uAE09\uC2A4\uB7EC\uC6B4 \uB290\uB08C\uC774 \uB4DC\uB294 \uC138\uB828\uB41C
+    \uB514\uC790\uC778\uC758 \uD734\uB300\uC6A9 \uBA38\uB9AC\uBE57. \n\uC120\uBB3C\uC6A9\uC73C\uB85C
+    \uC778\uAE30\uAC00 \uB9CE\uB2E4."
+  icon: {fileID: 21300000, guid: 6ab86ae58db841a4fbebf65694afa9f1, type: 3}
+  weight: 60
+  rarity: 2
+  category: 2
+  confirmBeforeReplace: 0
+  tags: []
+  activeCost: 5
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: 6346787504725426242
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 1
+    variantId: 
+  - category: 2
+    variantId: 
+  - category: 3
+    variantId: 
+  - category: 7
+    variantId: 
+  statModifiers: []
+  specialEffects: []
+  specialEffectDescription: "\uD53C\uACA9 \uBB34\uC801 \uC2DC\uAC04\uC774 0.5\uCD08
+    \uC99D\uAC00\uD55C\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6346787504725426242
+      type: {class: InvincibilityDurationTrinketEffect, ns: , asm: Assembly-CSharp}
+      data:
+        invincibilityDurationBonus: 0.5

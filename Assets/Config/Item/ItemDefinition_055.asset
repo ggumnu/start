@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_055
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 55
+  displayName: "\uCE20\uB8E8\uAE30\uC758 \uD2B9\uBCC4\uD55C \uC0C1\uC790"
+  description: "\uCE20\uB8E8\uAE30\uC758 \uBC29 \uAE4A\uC219\uD55C \uACF3\uC5D0 \uC228\uC5B4
+    \uC788\uB294 \uAD7F\uC988 \uBC15\uC2A4.\r\n\uBE0C\uB85C\uB9C8\uC774\uB4DC\uB098
+    \uCC45, \uC601\uD654\uD45C \uB4F1 \uC7A5\uB974\uB97C \uAC00\uB9AC\uC9C0 \uC54A\uACE0\n\uB2E4\uC591\uD55C
+    \uC885\uB958\uC758 \uAD7F\uC988\uAC00 \uC313\uC5EC \uC788\uB2E4. \n\uBA3C\uC9C0
+    \uD558\uB098 \uC5C6\uC774 \uAE54\uB054\uD558\uAC8C \uC815\uB9AC\uB41C \uAD7F\uC988\uC758
+    \uC0C1\uD0DC\uB9CC\uC73C\uB85C\uB3C4\n\uCE20\uB8E8\uAE30\uC758 \uC138\uC2EC\uD568\uC744
+    \uC5FF\uBCFC \uC218 \uC788\uB2E4."
+  icon: {fileID: 21300000, guid: 8d131f714c245164e97e330cab7efe1a, type: 3}
+  weight: 60
+  rarity: 2
+  category: 0
+  confirmBeforeReplace: 0
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 2
+    variantId: 
+  - category: 8
+    variantId: Schale
+  statModifiers: []
+  specialEffects:
+  - rid: 4841274286726447171
+  specialEffectDescription: "\uC218\uB958\uD0C4 +1\n\uD574\uD0B9\uD234 +1\n\uCCAD\uD718\uC11D
+    +1\n\n\uC7A5\uC2E0\uAD6C\uB97C \uB450 \uAC1C \uC7A5\uCC29\uD560 \uC218 \uC788\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 4841274286726447171
+      type: {class: TrinketSlotExpansionEffect, ns: , asm: Assembly-CSharp}
+      data:
+        extraTrinketSlots: 1
+        grenadeAmount: 1
+        hackingToolAmount: 1
+        pyroxenesAmount: 1

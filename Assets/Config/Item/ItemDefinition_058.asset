@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_058
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 58
+  displayName: "\uC720\uC6B0\uCE74\uC758 \uD568\uC218 \uACC4\uC0B0\uAE30"
+  description: "\uC720\uC6B0\uCE74\uAC00 \uB298 \uBAB8\uC5D0\uC11C \uB5BC\uB193\uC9C0
+    \uC54A\uB294 \uD568\uC218 \uACC4\uC0B0\uAE30.\r\n\uB6F0\uC5B4\uB09C \uC554\uC0B0
+    \uC2E4\uB825\uC744 \uBCF4\uC720\uD558\uACE0 \uC788\uC74C\uC5D0\uB3C4 \uBD88\uAD6C\uD558\uACE0,
+    \n\uC720\uC6B0\uCE74\uB294 \uC5B8\uC81C\uB098 \uC644\uBCBD\uC744 \uCD94\uAD6C\uD558\uAE30
+    \uC704\uD574 \uAC80\uC0B0\uC6A9\uC73C\uB85C \n\uACC4\uC0B0\uAE30\uB97C \uC0AC\uC6A9\uD558\uACE0
+    \uC788\uB2E4."
+  icon: {fileID: 21300000, guid: 2c09e4f465ac48144845e15ed910183f, type: 3}
+  weight: 60
+  rarity: 2
+  category: 0
+  confirmBeforeReplace: 0
+  incompatibleItemIds: []
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 2
+    variantId: 
+  - category: 8
+    variantId: Schale
+  statModifiers:
+  - statType: 19
+    modifierType: 0
+    value: 30
+  specialEffects:
+  - rid: 4841274600602468418
+  specialEffectDescription: "\uD574\uD0B9\uD234 +2\n\n\uD574\uD0B9\uD234 \uC0AC\uC6A9
+    \uC2DC \uBCF4\uD638\uB9C9\uC744 \uD558\uB098 \uC5BB\uB294\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 4841274600602468418
+      type: {class: HackShieldEffect, ns: , asm: Assembly-CSharp}
+      data:
+        hackingToolAmount: 2
+        shieldPerUse: 1

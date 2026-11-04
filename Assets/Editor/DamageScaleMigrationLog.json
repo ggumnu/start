@@ -1,0 +1,225 @@
+{
+    "entries": [
+        {
+            "loc": {
+                "kind": "asset",
+                "path": "Assets/Config/Enemy/EnemyDefinition_DroneSpike_ChainDash.asset",
+                "objectPath": "",
+                "typeName": "EnemyDefinition",
+                "propertyPath": "maxHealth"
+            },
+            "oldValue": 10.0,
+            "newValue": 100.0,
+            "label": "EnemyDefinition_DroneSpike_ChainDash / maxHealth",
+            "time": "2026-09-24 21:37:40"
+        },
+        {
+            "loc": {
+                "kind": "asset",
+                "path": "Assets/Config/Enemy/EnemyDefinition_DroneSpike_Contact.asset",
+                "objectPath": "",
+                "typeName": "EnemyDefinition",
+                "propertyPath": "maxHealth"
+            },
+            "oldValue": 6.0,
+            "newValue": 60.0,
+            "label": "EnemyDefinition_DroneSpike_Contact / maxHealth",
+            "time": "2026-09-24 21:37:40"
+        },
+        {
+            "loc": {
+                "kind": "asset",
+                "path": "Assets/Config/Enemy/EnemyDefinition_DroneSpike_Dash.asset",
+                "objectPath": "",
+                "typeName": "EnemyDefinition",
+                "propertyPath": "maxHealth"
+            },
+            "oldValue": 8.0,
+            "newValue": 80.0,
+            "label": "EnemyDefinition_DroneSpike_Dash / maxHealth",
+            "time": "2026-09-24 21:37:40"
+        },
+        {
+            "loc": {
+                "kind": "asset",
+                "path": "Assets/Config/Enemy/EnemyDefinition_DroneVulcan_MultiShot.asset",
+                "objectPath": "",
+                "typeName": "EnemyDefinition",
+                "propertyPath": "maxHealth"
+            },
+            "oldValue": 8.0,
+            "newValue": 80.0,
+            "label": "EnemyDefinition_DroneVulcan_MultiShot / maxHealth",
+            "time": "2026-09-24 21:37:40"
+        },
+        {
+            "loc": {
+                "kind": "asset",
+                "path": "Assets/Config/Enemy/EnemyDefinition_DroneVulcan_Shot.asset",
+                "objectPath": "",
+                "typeName": "EnemyDefinition",
+                "propertyPath": "maxHealth"
+            },
+            "oldValue": 6.0,
+            "newValue": 60.0,
+            "label": "EnemyDefinition_DroneVulcan_Shot / maxHealth",
+            "time": "2026-09-24 21:37:40"
+        },
+        {
+            "loc": {
+                "kind": "asset",
+                "path": "Assets/Config/Enemy/EnemyDefinition_DroneVulcan_SpreadShot.asset",
+                "objectPath": "",
+                "typeName": "EnemyDefinition",
+                "propertyPath": "maxHealth"
+            },
+            "oldValue": 10.0,
+            "newValue": 100.0,
+            "label": "EnemyDefinition_DroneVulcan_SpreadShot / maxHealth",
+            "time": "2026-09-24 21:37:40"
+        },
+        {
+            "loc": {
+                "kind": "prefab",
+                "path": "Assets/Player/Character/Enemy/Drone_Elite_Boss_Prefab.prefab",
+                "objectPath": "Drone_Elite_Boss_Prefab",
+                "typeName": "EnemyStats",
+                "propertyPath": "maxHealth"
+            },
+            "oldValue": 50.0,
+            "newValue": 500.0,
+            "label": "Drone_Elite_Boss_Prefab / maxHealth",
+            "time": "2026-09-24 21:37:40"
+        },
+        {
+            "loc": {
+                "kind": "prefab",
+                "path": "Assets/Config/Enemy/EnemyBoss_DroneElite_Boss.prefab",
+                "objectPath": "EnemyBoss_DroneElite_Boss",
+                "typeName": "EnemyStats",
+                "propertyPath": "maxHealth"
+            },
+            "oldValue": 50.0,
+            "newValue": 500.0,
+            "label": "EnemyBoss_DroneElite_Boss / maxHealth",
+            "time": "2026-09-24 21:37:40"
+        },
+        {
+            "loc": {
+                "kind": "prefab",
+                "path": "Assets/Player/Character/Player/Reisa_Player.prefab",
+                "objectPath": "Reisa_Player",
+                "typeName": "PlayerStats",
+                "propertyPath": "damage"
+            },
+            "oldValue": 5.0,
+            "newValue": 50.0,
+            "label": "Reisa_Player / damage",
+            "time": "2026-09-24 21:37:40"
+        },
+        {
+            "loc": {
+                "kind": "prefab",
+                "path": "Assets/Player/Character/Player/Reisa_Player_Fixed.prefab",
+                "objectPath": "Reisa_Player_Fixed",
+                "typeName": "PlayerStats",
+                "propertyPath": "damage"
+            },
+            "oldValue": 3.0,
+            "newValue": 30.0,
+            "label": "Reisa_Player_Fixed / damage",
+            "time": "2026-09-24 21:37:40"
+        },
+        {
+            "loc": {
+                "kind": "asset",
+                "path": "Assets/Config/Item/ItemDefinition_001.asset",
+                "objectPath": "",
+                "typeName": "ItemDefinition",
+                "propertyPath": "statModifiers.Array.data[0].value"
+            },
+            "oldValue": 1.0,
+            "newValue": 10.0,
+            "label": "ItemDefinition_001 / statModifiers[0].value (공격력 +)",
+            "time": "2026-09-24 21:37:40"
+        },
+        {
+            "loc": {
+                "kind": "asset",
+                "path": "Assets/Config/Item/ItemDefinition_012.asset",
+                "objectPath": "",
+                "typeName": "ItemDefinition",
+                "propertyPath": "statModifiers.Array.data[1].value"
+            },
+            "oldValue": -1.0,
+            "newValue": -10.0,
+            "label": "ItemDefinition_012 / statModifiers[1].value (공격력 +)",
+            "time": "2026-09-24 21:37:40"
+        },
+        {
+            "loc": {
+                "kind": "asset",
+                "path": "Assets/Config/Item/ItemDefinition_045.asset",
+                "objectPath": "",
+                "typeName": "ItemDefinition",
+                "propertyPath": "statModifiers.Array.data[0].value"
+            },
+            "oldValue": 2.0,
+            "newValue": 20.0,
+            "label": "ItemDefinition_045 / statModifiers[0].value (공격력 +)",
+            "time": "2026-09-24 21:37:40"
+        },
+        {
+            "loc": {
+                "kind": "asset",
+                "path": "Assets/Config/Item/ItemDefinition_011.asset",
+                "objectPath": "",
+                "typeName": "ItemDefinition",
+                "propertyPath": "specialEffects.Array.data[0].damageLossPerShortfallStep"
+            },
+            "oldValue": 0.20000000298023225,
+            "newValue": 2.0,
+            "label": "ItemDefinition_011  /  DistanceDamageEffect / damageLossPerShortfallStep",
+            "time": "2026-09-24 21:37:40"
+        },
+        {
+            "loc": {
+                "kind": "asset",
+                "path": "Assets/Config/Item/ItemDefinition_011.asset",
+                "objectPath": "",
+                "typeName": "ItemDefinition",
+                "propertyPath": "specialEffects.Array.data[0].damagePerStep"
+            },
+            "oldValue": 0.10000000149011612,
+            "newValue": 1.0,
+            "label": "ItemDefinition_011  /  DistanceDamageEffect / damagePerStep",
+            "time": "2026-09-24 21:37:40"
+        },
+        {
+            "loc": {
+                "kind": "asset",
+                "path": "Assets/Config/Item/ItemDefinition_020.asset",
+                "objectPath": "",
+                "typeName": "ItemDefinition",
+                "propertyPath": "trinketEffect.attackPowerPerCredit"
+            },
+            "oldValue": 0.10000000149011612,
+            "newValue": 1.0,
+            "label": "ItemDefinition_020  /  CreditAbsorptionTrinketEffect / attackPowerPerCredit",
+            "time": "2026-09-24 21:37:40"
+        },
+        {
+            "loc": {
+                "kind": "asset",
+                "path": "Assets/Config/Item/ItemDefinition_034.asset",
+                "objectPath": "",
+                "typeName": "ItemDefinition",
+                "propertyPath": "foodEffect.attackPerMaxHealth"
+            },
+            "oldValue": 0.25,
+            "newValue": 2.5,
+            "label": "ItemDefinition_034  /  MaxHealthAttackFoodEffect / attackPerMaxHealth",
+            "time": "2026-09-24 21:37:40"
+        }
+    ]
+}

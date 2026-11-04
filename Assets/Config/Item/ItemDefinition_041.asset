@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_041
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 41
+  displayName: "\uC5D0\uC774~\uBD81 \uB808\uC5B4"
+  description: "\uD0A4\uBCF4\uD1A0\uC2A4 \uD559\uC0DD\uB4E4\uC774 \uAC00\uC7A5 \uAC16\uACE0
+    \uC2F6\uC5B4 \uD558\uB294 \n\uC804\uC790\uAE30\uAE30 TOP 3\uC5D0 \uB4E4\uC5B4\uAC00\uB294
+    \uC720\uBA85 \uB178\uD2B8\uBD81 \uC81C\uD488. \n\uC81C\uBC95 \uBE44\uC2F8\uB2E4.
+    \uD558\uC9C0\uB9CC \uAC16\uACE0 \uC2F6\uB2E4! \uADF8\uB798\uB3C4 \uC5ED\uC2DC
+    \uBE44\uC2F8\uB2E4!"
+  icon: {fileID: 21300000, guid: d1988fdce01876046994ac9610d88a18, type: 3}
+  weight: 80
+  rarity: 1
+  category: 0
+  confirmBeforeReplace: 0
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 1
+    variantId: 
+  - category: 2
+    variantId: 
+  - category: 3
+    variantId: 
+  - category: 7
+    variantId: 
+  statModifiers:
+  - statType: 21
+    modifierType: 0
+    value: 1
+  specialEffects:
+  - rid: 1931315341630373952
+  specialEffectDescription: "\uD574\uD0B9\uD234 +3\n\n\uD574\uD0B9 \uB2F9\uD55C \uC801\uC774
+    \uBC1B\uB294 \uD53C\uD574\uAC00 \n\uC9C0\uC18D \uC2DC\uAC04 \uB3D9\uC548 50%
+    \uC99D\uAC00\uD55C\uB2E4\n"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 1931315341630373952
+      type: {class: HackVulnerabilityEffect, ns: , asm: Assembly-CSharp}
+      data:
+        hackingToolGrant: 3
+        damageMultiplier: 1.5

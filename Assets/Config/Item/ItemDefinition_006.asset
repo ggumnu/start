@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_006
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 6
+  displayName: "\uCCB4\uB9AC\uB85C\uC988 \uB9BD\uAE00\uB85C\uC988"
+  description: "\uBD80\uB4DC\uB7FD\uC9C0\uB9CC \uC120\uBA85\uD55C \uCEEC\uB7EC\uAC00
+    \uC870\uD654\uB97C \uC774\uB8EC \uB9BD\uAE00\uB85C\uC988. \n\uAFB8\uBBF8\uAE30
+    \uC88B\uC544\uD558\uB294 \uC5EC\uC131\uB4E4 \uC0AC\uC774\uC5D0\uC11C \n\uC120\uD48D\uC801\uC778
+    \uC778\uAE30\uB97C \uB04C\uACE0 \uC788\uB294 \uD56B \uC787 \uD15C."
+  icon: {fileID: 21300000, guid: 578159594dd8a8d4db27904c540b4b8e, type: 3}
+  weight: 100
+  rarity: 0
+  category: 0
+  confirmBeforeReplace: 0
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 1
+    variantId: 
+  - category: 2
+    variantId: 
+  - category: 3
+    variantId: 
+  - category: 7
+    variantId: 
+  statModifiers:
+  - statType: 0
+    modifierType: 0
+    value: 1
+  - statType: 5
+    modifierType: 0
+    value: 1
+  specialEffects:
+  - rid: 6346787500958679104
+  specialEffectDescription: "\n\uC801\uC744 \uC81C\uC5B4\uD558\uB294 \uD6A8\uACFC\uC758
+    \uC9C0\uC18D \uC2DC\uAC04\uC774 1\uCD08 \uC99D\uAC00\uD55C\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6346787500958679104
+      type: {class: ControlDurationBonusEffect, ns: , asm: Assembly-CSharp}
+      data:
+        durationBonusSeconds: 1

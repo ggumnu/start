@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_004
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 4
+  displayName: "\uAE08\uB2E8\uC758 \uC5F0\uC560 ~\uD5C8\uB77D\uB418\uC9C0 \uC54A\uC544\uC11C,
+    \uB354\uC6B1 \uC544\uB984\uB2E4\uC6B4 \uC0AC\uB791~ "
+  description: "\uC778\uAE30\uAC00 \uB192\uC740 \uCD5C\uACE0\uC758 \uC778\uAE30 \uC5F0\uC560\uC18C\uC124
+    \uC791\uAC00 '\uC0AC\uB791\uC740 \uC789\uC5B4'\uB2D8\uC758 \uCD5C\uC2E0\uC791!
+    \n\uC774\uB8E8\uC5B4\uC9C8 \uC218 \uC5C6\uB294 \uC544\uCC14\uD55C \uAE08\uB2E8\uC758
+    \uC0AC\uB791\uC744 \uB2E4\uB8EC \uBB38\uC81C\uC791!"
+  icon: {fileID: 21300000, guid: 82963d807e8a42d44a356b0033033eff, type: 3}
+  weight: 40
+  rarity: 3
+  category: 0
+  confirmBeforeReplace: 0
+  tags:
+  - Book
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 1
+    variantId: 
+  - category: 2
+    variantId: 
+  - category: 3
+    variantId: 
+  - category: 7
+    variantId: 
+  statModifiers:
+  - statType: 9
+    modifierType: 0
+    value: 0.02
+  specialEffects:
+  - rid: 6346787134626332736
+  specialEffectDescription: "\n\uCD1D\uC54C\uC774 \uC801\uC774\uB098 \uBCBD\uC5D0\uAC8C
+    \uB2FF\uC73C\uBA74 \uD3ED\uBC1C\uD55C\uB2E4\n\uD3ED\uBC1C\uC740 \uCD1D\uC54C
+    \uB370\uBBF8\uC9C0\uC758 25%\uB9CC\uD07C \uD53C\uD574\uB97C \uC785\uD78C\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6346787134626332736
+      type: {class: ExplodeOnImpactEffect, ns: , asm: Assembly-CSharp}
+      data:
+        explosionRadius: 1
+        explosionDamageMultiplier: 0.25
+        explosionVfxPrefab: {fileID: 2054803858064431036, guid: 500c1d6ddd48f2c4092af85e4e941eb2, type: 3}
+        explosionVfxLifetime: 2

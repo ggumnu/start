@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_109
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 109
+  displayName: "\uCF00\uC774\uC2A4\uC5D0 \uB2F4\uAE34 \uB0A1\uC740 \uAC8C\uC784\uAE30"
+  description: "\uBAA8\uBAA8\uC774\uAC00 \uB3D9\uC0DD\uACFC \uAC19\uC774 \uCC98\uC74C\uC73C\uB85C
+    \uAD6C\uC785\uD55C \uD734\uB300\uC6A9 \uAC8C\uC784\uAE30.\r\n\uBAA8\uBAA8\uC774\uC758
+    '\uAC8C\uC784 \uBB3C\uB4E4\uC774\uAE30 \uC791\uC804'\uC740, \n\uADF8\uB807\uAC8C
+    \uC131\uACF5\uC801\uC73C\uB85C \uC644\uC218\uB41C \uAC83 \uAC19\uB2E4\u2026\u2026"
+  icon: {fileID: 21300000, guid: 65b8d3e14638a8a4fa10bf167688166d, type: 3}
+  weight: 60
+  rarity: 2
+  category: 0
+  confirmBeforeReplace: 0
+  incompatibleItemIds: []
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 2
+    variantId: 
+  - category: 8
+    variantId: Schale
+  statModifiers:
+  - statType: 11
+    modifierType: 0
+    value: 1
+  - statType: 6
+    modifierType: 0
+    value: -15
+  specialEffects:
+  - rid: 4841274519186047046
+  specialEffectDescription: "\n[\uD734\uB300\uC6A9 \uAC8C\uC784\uAE30]\uB97C \uBCF4\uC720\uD558\uACE0
+    \uC788\uC744 \uACBD\uC6B0\r\n\uACF5\uACA9\uB825\uC774 50 \uC99D\uAC00\uD55C\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 4841274519186047046
+      type: {class: Item109effect, ns: , asm: Assembly-CSharp}
+      data:
+        partnerItemId: 102
+        synergyDamageBonus: 50

@@ -1,0 +1,86 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_081
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 81
+  displayName: "\uB098\uBB34 \uC870\uAC01\uC0C1"
+  description: "\uC5B4\uB9B0 \uC2DC\uC808 \uC0AC\uC624\uB9AC\uAC00 \uCE7C\uB85C \uC870\uAC01\uD574\uC11C
+    \uB9CC\uB4E4\uC5B4\uC900 \uC870\uC7A1\uD55C \uC870\uAC01\uC0C1.\r\n\uC0AC\uC624\uB9AC
+    \uBCF8\uC778\uB3C4 \uAE4C\uB9E3\uAC8C \uC78A\uACE0 \uC788\uC744 \uC815\uB3C4\uB85C
+    \uC624\uB798\uB41C \uBB3C\uAC74\uC774\uB2E4."
+  icon: {fileID: 21300000, guid: c8a08fe50804c71448770809c54f19bd, type: 3}
+  weight: 80
+  rarity: 1
+  category: 0
+  confirmBeforeReplace: 0
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 2
+    variantId: 
+  - category: 8
+    variantId: Schale
+  statModifiers:
+  - statType: 17
+    modifierType: 0
+    value: 0.2
+  - statType: 18
+    modifierType: 0
+    value: 0.2
+  specialEffects:
+  - rid: 4841274490414956613
+  specialEffectDescription: "\n\uC218\uB958\uD0C4\uC774 \uC18C\uC774\uD0C4\uC73C\uB85C
+    \uBCC0\uACBD\uB418\uBA70 \n\uD574\uB2F9 \uAD6C\uC5ED\uC744 3\uCD08 \uB3D9\uC548
+    \uBD88\uD0DC\uC6B4\uB2E4\r\n\uC18C\uC774\uD0C4\uC740 \uAD6C\uC5ED \uC704\uC758
+    \uB300\uC0C1\uC5D0\uAC8C \uB9E4\uCD08\uB9C8\uB2E4 \n\uC218\uB958\uD0C4 \uD53C\uD574\uC758
+    50% \uB9CC\uD07C \uD53C\uD574\uB97C \uC900\uB2E4."
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 4841274490414956613
+      type: {class: IncendiaryGrenadeEffect, ns: , asm: Assembly-CSharp}
+      data:
+        settings:
+          explosionDamageRatio: 0.5
+          explosionSelfDamage: 0.5
+          burnDuration: 3
+          tickInterval: 0.5
+          tickDamageRatio: 0.25
+          playerTickDamage: 0.5
+          zoneFillColor: {r: 1, g: 0.15, b: 0.05, a: 0.3}
+          zoneOutlineColor: {r: 1, g: 0.2, b: 0.1, a: 0.9}
+          flamePrefab: {fileID: 8793510976239746625, guid: be6456a72df230743acfa0d19806c901, type: 3}
+          flameSpawnInterval: 0.15
+          flameEmitTime: 0.6
+          flameLingerTime: 1
+          flameScale: 0.1
+          flameOffset: {x: 0, y: 0, z: 0}
+          enableGlowSprite: 1
+          glowColor: {r: 1, g: 0.2, b: 0.05, a: 0.85}
+          glowSize: 0.6
+          glowPulseAmount: 0.15
+          glowPulseSpeed: 10
+          enableGlowLight: 1
+          glowLightColor: {r: 1, g: 0.25, b: 0.1, a: 1}
+          glowLightIntensity: 2
+          glowLightRange: 1.5

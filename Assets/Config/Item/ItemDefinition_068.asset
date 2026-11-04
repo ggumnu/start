@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_068
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 68
+  displayName: "\uCD08\uB0C9\uAC01 \uC120\uD48D\uAE30"
+  description: "\uB365\uAC70\uB098 \uB728\uAC70\uC6B4 \uC9C0\uC5ED\uC5D0\uC11C \uD65C\uB3D9\uD558\uAE30
+    \uC704\uD574 \uB9C8\uB828\uD55C \uC5D0\uC774\uBBF8\uC758 \uBE44\uBC00\uBCD1\uAE30.\r\n\uADC0\uC5EC\uC6B4
+    \uC0DD\uAE40\uC0C8\uC640 \uB2EC\uB9AC \uC704\uD5D8\uD560 \uC218\uC900\uC758 \uAC15\uD48D\uC744
+    \uB9CC\uB4E4\uC5B4 \uB0BC \uC218 \uC788\uB2E4. \n\uAC15\uD55C \uCD9C\uB825\uACFC
+    \uB2EC\uB9AC \uBC14\uB78C\uC744 \uB0B4\uBFDC\uB294 \uBC94\uC704\uB294 \uC81C\uD55C\uC801\uC774\uAE30\uC5D0,
+    \n\uC5EC\uB7EC \uC0AC\uB78C\uC774 \uC42C\uAE30 \uC704\uD574\uC120 \uBAB8\uC744
+    \uBC00\uCC29\uC2DC\uCF1C\uC57C \uD55C\uB2E4.\n\uC774\uC988\uBBF8\uB294 \uC774
+    \uBAA8\uD615\uC744 \uAC00\uC9C0\uACE0 \uB2E4\uB2C8\uBA74, \uB0C4\uC0C8\uB3C4
+    \uC88B\uACE0, \n\uBB34\uC5B8\uAC00 \uB9DB\uC788\uB294 \uAC83\uC744 \uBA39\uC744
+    \uC218 \uC788\uAC8C \uB418\uB294 \uD589\uC6B4\uC774 \uC790\uC8FC \uBC1C\uC0DD\uD558\uC5EC
+    \n\uC18C\uC9C0 \uC911\uC774\uB77C\uACE0 \uC8FC\uC7A5\uD55C\uB2E4."
+  icon: {fileID: 21300000, guid: de88334f686928442800a04bd077723a, type: 3}
+  weight: 40
+  rarity: 3
+  category: 0
+  confirmBeforeReplace: 0
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 2
+    variantId: 
+  - category: 8
+    variantId: Schale
+  statModifiers:
+  - statType: 10
+    modifierType: 0
+    value: 0.3
+  specialEffects:
+  - rid: 1931315703794892867
+  specialEffectDescription: "\n\uCD1D\uC54C\uC774 \uC801\uC744 \uBC00\uCCD0\uB0B8\uB2E4\r\n\uBC00\uCCD0\uB0B8
+    \uC801\uC774 \uB2E4\uB978 \uC801\uACFC \uBD80\uB52A\uD790 \uACBD\uC6B0\r\n\uACF5\uACA9\uB825\uC758
+    50%\uC5D0 \uB2EC\uD558\uB294 \uD53C\uD574\uB97C \uC785\uB294\uB2E4\r\n\uCD1D\uC54C
+    \uC18D\uB3C4\uC5D0 \uBE44\uB840\uD574 \uBC00\uB824\uB098\uB294 \uAC70\uB9AC\uAC00
+    \uC99D\uAC00\uD55C\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 1931315703794892867
+      type: {class: BulletKnockbackEffect, ns: , asm: Assembly-CSharp}
+      data:
+        distancePerBulletSpeed: 0.05
+        minPushDistance: 0.05
+        maxPushDistance: 3
+        pushDuration: 0.15
+        impactDamageRatio: 0.5
+        impactVfxPrefab: {fileID: 467751860875805754, guid: 7c6d9bb9c8994364dbe5ba2e32dd4d13, type: 3}
+        impactVfxOffset: {x: 0, y: 0, z: 0}
+        impactVfxScale: 0.5
+        impactVfxLifetime: 2

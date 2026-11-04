@@ -1,0 +1,121 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_111
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 111
+  displayName: "\uBE5B \uBC14\uB79C CD"
+  description: "\uC720\uC988\uC758 \uC774\uB984\uC774 \uC801\uD600\uC788\uB294 \uB0A1\uC740
+    CD \uD55C \uC7A5.\r\n\uD14C\uC77C\uC988 \uC0AC\uAC00 \uD06C\uB85C\uB2C8\uD074
+    \uD504\uB85C\uD1A0\uD0C0\uC785\uC758 \n\uCD5C\uC885\uBCF8\uC774 \uB2F4\uAE34
+    \uB9C8\uC2A4\uD130 \uB514\uC2A4\uD06C\uB85C, \n\uC720\uC988\uB294 \uD55C\uB54C
+    \uC774 CD\uB97C \uC9C0\uCF1C\uBCF4\uB294 \uAC83\uC870\uCC28\uB3C4 \uD798\uB4E4\uC5B4\uD588\uC5C8\uB2E4."
+  icon: {fileID: 21300000, guid: 130a18331c6bc9c42aaed13e66ef517c, type: 3}
+  weight: 60
+  rarity: 2
+  category: 0
+  confirmBeforeReplace: 0
+  incompatibleItemIds: []
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 2
+    variantId: 
+  - category: 8
+    variantId: Schale
+  statModifiers:
+  - statType: 1
+    modifierType: 0
+    value: 0.3
+  specialEffects:
+  - rid: 4841274536587165771
+  specialEffectDescription: "\n\uD53C\uD574\uB97C \uC785\uC9C0 \uC54A\uACE0 \uC804\uD22C\uAC00
+    \uC788\uB294 \uBC29\uC744 \uD074\uB9AC\uC5B4\uD560 \uACBD\uC6B0 \n\uACF5\uACA9\uB825\uC774
+    5 \uC99D\uAC00\uD55C\uB2E4\r\n\uD53C\uD574\uB97C \uC785\uC744 \uACBD\uC6B0 \uACF5\uACA9\uB825\uC774
+    1 \uAC10\uC18C\uD55C\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 4841274536587165771
+      type: {class: NoDamageClearDamageEffect, ns: , asm: Assembly-CSharp}
+      data:
+        damageOnNoDamageClear: 5
+        damageLossPerHit: 1
+        successPopup:
+          icon: {fileID: 21300000, guid: 130a18331c6bc9c42aaed13e66ef517c, type: 3}
+          iconSize: 100
+          headroom: 0.15
+          maxScreenHeightAboveFeet: 140
+          riseDistance: 30
+          sinkDistance: 25
+          appearDuration: 0.25
+          holdDuration: 0.35
+          vanishDuration: 0.35
+          canvasSortingOrder: 8
+          enableGlow: 1
+          glowSprite: {fileID: 0}
+          glowColor: {r: 0.45, g: 0.85, b: 1, a: 0.9}
+          glowSizeMultiplier: 2.2
+          glowPulseAmount: 0.08
+          glowPulseSpeed: 8
+          enableSparkles: 1
+          sparkleSprite: {fileID: 0}
+          sparkleColor: {r: 0.6, g: 0.92, b: 1, a: 1}
+          sparkleCount: 8
+          sparkleSizeRange: {x: 6, y: 14}
+          sparkleSpeedRange: {x: 40, y: 90}
+          sparkleLifetimeRange: {x: 0.35, y: 0.6}
+          sparkleSpawnWindow: 0.25
+          sparkleRiseAcceleration: 80
+        forceStatFlashOnSuccess: 1
+        failurePopup:
+          icon: {fileID: 21300000, guid: 130a18331c6bc9c42aaed13e66ef517c, type: 3}
+          iconSize: 100
+          headroom: 0.15
+          maxScreenHeightAboveFeet: 140
+          riseDistance: 30
+          sinkDistance: 25
+          appearDuration: 0.25
+          holdDuration: 0.35
+          vanishDuration: 0.35
+          canvasSortingOrder: 8
+          enableGlow: 1
+          glowSprite: {fileID: 0}
+          glowColor: {r: 1, g: 0.12, b: 0.12, a: 0.9}
+          glowSizeMultiplier: 2.2
+          glowPulseAmount: 0.08
+          glowPulseSpeed: 8
+          enableSparkles: 1
+          sparkleSprite: {fileID: 0}
+          sparkleColor: {r: 1, g: 0.3, b: 0.25, a: 1}
+          sparkleCount: 8
+          sparkleSizeRange: {x: 6, y: 14}
+          sparkleSpeedRange: {x: 40, y: 90}
+          sparkleLifetimeRange: {x: 0.35, y: 0.6}
+          sparkleSpawnWindow: 0.25
+          sparkleRiseAcceleration: 80
+        failureVfxPrefab: {fileID: 4306488877223958017, guid: ecb38e0319a6ad44cbca52d7b5add7a6, type: 3}
+        failureVfxDelay: 0.25
+        failureVfxOffsetAboveHead: {x: 0, y: 0.6, z: 0}
+        failureVfxScale: 0.3
+        failureVfxFollowPlayer: 1
+        failureVfxLifetime: 2
