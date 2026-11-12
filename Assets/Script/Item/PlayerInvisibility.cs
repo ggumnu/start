@@ -13,6 +13,7 @@ using UnityEngine;
 // - 체력 소모 특수방 출입 피해를 받지 않습니다(SpecialRoomHealthDamageOverride.Block).
 // - 캐릭터가 점 무늬(디더)로 반투명하게 보입니다. Toon_Character_SD / Toon_Face_SD 셰이더의 _DitherFade 값을 MaterialPropertyBlock으로
 //   넣습니다. 이 값이 없는 셰이더를 쓰는 렌더러(다른 셰이더의 무기 모델/이펙트/조준선 등)는 건드리지 않습니다.
+//   PlayerEffectExclude가 붙은 오브젝트 아래(헤일로 등)도 건드리지 않습니다.
 // - 시간이 끝나면(또는 플레이어가 죽으면) 모두 원래대로 돌아가고, 적은 평소 규칙(탐지 범위 + 시야)으로 다시 플레이어를 찾습니다.
 // - 시간은 게임 시간 기준이라 일시정지 중에는 줄지 않습니다. 방/레벨을 옮겨도 이어집니다.
 public class PlayerInvisibility : MonoBehaviour
@@ -136,6 +137,7 @@ public class PlayerInvisibility : MonoBehaviour
     private static bool UsesDitherFade(Renderer r)
     {
         if (r is ParticleSystemRenderer || r is TrailRenderer || r is LineRenderer) return false;
+        if (PlayerEffectExclude.IsExcluded(r)) return false; // 헤일로 등 연출 제외 대상
         Material[] mats = r.sharedMaterials;
         for (int i = 0; i < mats.Length; i++)
         {

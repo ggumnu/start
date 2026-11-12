@@ -23,7 +23,7 @@
 // [아이템 에셋 설정]
 // ItemDefinition: Item Id = 74, Category = Active, Active Cost = 1, Active Effect에 DashActiveEffect를 고릅니다.
 [System.Serializable]
-public class DashActiveEffect : IActiveItemUseRules
+public class DashActiveEffect : IActiveItemUseRules, IHasOwnUseSound
 {
     [Header("돌진")]
     [Tooltip("돌진 거리입니다(월드 단위).")]

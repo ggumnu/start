@@ -7,6 +7,16 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: M_SD_AccBack_Reisa01
+    second: {fileID: 2100000, guid: 909aeb0816207704f879824329d218bd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_SD_AccFront_Reisa01
+    second: {fileID: 2100000, guid: 1558fdf6eb0dd89459146f5ff21b4269, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: M_SD_FaceEye
     second: {fileID: 2100000, guid: 9f6e7231ffee08d4591e044830926a47, type: 2}
   - first:
@@ -22,8 +32,18 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: M_SD_Gun_Reisa01
+    second: {fileID: 2100000, guid: dd82842be07e7a24794fba913bf4efdb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: M_SD_Hair_Reisa01
     second: {fileID: 2100000, guid: bf3cf924e7b401e48a74fdf947297acf, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_SD_Hair_Reisa02
+    second: {fileID: 2100000, guid: 999aaaa9808315f49b6c13c6fa349866, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule

@@ -10,6 +10,7 @@ using UnityEngine.Rendering;
 //   MeshRenderer(총/파츠 등 고정 메시)는 메시를 그대로 가져와 같은 위치/회전/크기에 둡니다. 레이사와 SD 캐릭터 모두 자동입니다.
 // - 꺼져 있는 렌더러(비활성 오브젝트, 피격 점멸로 잠깐 꺼진 순간 포함)와, 재질이 전부 반투명(Render Queue 3000 이상 - 얼굴
 //   표정 평면 등 투명 PNG 그림)인 렌더러는 건너뜁니다(단색으로 칠하면 사각형이 그대로 보이기 때문).
+//   PlayerEffectExclude가 붙은 오브젝트 아래(헤일로 등)도 건너뜁니다.
 // - 잔상 재질은 Inspector의 Material 칸에 넣은 것을 쓰고, 비워두면 URP Unlit 반투명 재질을 코드로 하나 만들어 씁니다.
 //   잔상 색은 재질의 _BaseColor/_Color에 Color 값(알파 = 시작 불투명도)을 덮어써서 정합니다(MaterialPropertyBlock).
 // - 잔상은 플레이어의 자식이 아니라 따로 생성되어 그 자리에 남고, Lifetime 동안 투명해지며 사라진 뒤 복사한 메시까지 정리됩니다.
@@ -75,6 +76,7 @@ public class DashAfterimage : MonoBehaviour
         {
             if (rend == null || !rend.enabled || !rend.gameObject.activeInHierarchy) continue;
             if (IsAllTransparent(rend)) continue;
+            if (PlayerEffectExclude.IsExcluded(rend)) continue; // 헤일로 등 연출 제외 대상
 
             if (rend is SkinnedMeshRenderer skinned)
             {

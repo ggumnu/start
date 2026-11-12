@@ -51,17 +51,12 @@ public class SlotDropSettings : ScriptableObject
     [Tooltip("창이 열려 있는 동안 화면 전체를 덮는 색입니다(반투명 검정).")]
     public Color dimColor = new Color(0f, 0f, 0f, 0.55f);
 
-    [Header("첫 창 (흰 창)")]
+    [Header("첫 창 (흰 창 - 바탕/모서리/무늬/글자 색은 PopupStyle)")]
     public string title = "해제할 슬롯 아이템을 선택하세요";
     public string dropLabel = "버리기";
     public string cancelLabel = "취소하기";
     public Vector2 windowSize = new Vector2(760f, 560f);
-    public Color windowColor = new Color(1f, 1f, 1f, 0.9f);
-    public Color windowOutlineColor = new Color(0.08f, 0.08f, 0.1f, 1f);
-    [Min(0f)] public float windowOutlineThickness = 5f;
-    [Min(0f)] public float windowCornerRadius = 24f;
     public int titleFontSize = 34;
-    public Color titleColor = new Color(0.1f, 0.1f, 0.1f, 1f);
     [Tooltip("창 위쪽 끝에서 제목까지의 거리입니다.")]
     public float titleTopMargin = 60f;
 
@@ -74,27 +69,24 @@ public class SlotDropSettings : ScriptableObject
     [Tooltip("선택한 아이템 아이콘의 크기 배율입니다(1보다 작으면 작아짐).")]
     [Range(0.1f, 1f)] public float selectedScale = 0.75f;
 
-    [Header("첫 창 버튼 (색/글자 색/못 누를 때 불투명도는 PopupStyle)")]
+    [Header("첫 창 버튼 (색/모양/글자 색/못 누를 때 불투명도는 PopupStyle - [버리기]/[취소하기] 모두 하늘색)")]
     public Vector2 mainButtonSize = new Vector2(220f, 90f);
     public float mainButtonSpacing = 60f;
     [Tooltip("창 아래쪽 끝에서 버튼까지의 거리입니다.")]
     public float mainButtonBottomMargin = 45f;
-    [Min(0f)] public float mainButtonCornerRadius = 18f;
-    public Color mainButtonOutlineColor = new Color(0.08f, 0.08f, 0.1f, 1f);
-    [Min(0f)] public float mainButtonOutlineThickness = 4f;
     public int mainButtonFontSize = 34;
 
-    [Header("확인 창 (검은 창 - '교체 시 확인' 아이템을 버릴 때)")]
+    [Header("확인 창 (작은 흰 창 - '교체 시 확인' 아이템을 버릴 때. [버리기] = 노랑, [취소하기] = 하늘색)")]
     public string confirmMessage = "정말 버리시겠습니까?";
     public Vector2 confirmSize = new Vector2(520f, 300f);
-    [Header("버릴 수 없음 창 (검은 창)")]
+    [Header("버릴 수 없음 창 (작은 흰 창, [확인] = 노랑)")]
     public string noSpaceMessage = "현재 방에서 버릴 수 없습니다";
     public string okLabel = "확인";
     public Vector2 noSpaceSize = new Vector2(480f, 220f);
 
-    [Header("검은 창 공통 (바탕색/모서리/버튼 색/버튼 모서리는 PopupStyle)")]
+    [Header("작은 흰 창 공통 (바탕/모서리/글자 색/버튼 색/모양은 PopupStyle)")]
     public int darkMessageFontSize = 26;
-    public Color darkMessageColor = Color.white;
+    [Tooltip("확인 창의 아이템 이름(이름 판) 글자 크기입니다.")]
     public int darkDetailFontSize = 21;
     public Vector2 darkButtonSize = new Vector2(140f, 46f);
     public float darkButtonSpacing = 30f;

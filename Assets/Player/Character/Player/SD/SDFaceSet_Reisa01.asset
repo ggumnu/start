@@ -18,6 +18,11 @@ MonoBehaviour:
     mouthCell: 1
     priority: 0
     allowBlink: 1
+  - expression: 5
+    eyeCell: 4
+    mouthCell: 1
+    priority: 5
+    allowBlink: 0
   - expression: 3
     eyeCell: 3
     mouthCell: 1

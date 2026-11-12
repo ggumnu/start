@@ -188,6 +188,7 @@ public class BossShield : MonoBehaviour, IEnemyControlFilter
         Flash(hitFlashIntensity, hitFlashTime);
 
         if (current <= 0f) Break();
+        else GameAudio.Play(SfxId.BossShieldHit);
     }
 
     // [해킹툴 직접 사용] 보호막이 남아 있으면 최대 보호막 x 비율만큼 보호막에 추가 피해(받는 피해 배율 등은 TakeDamage를 그대로 거침).
@@ -227,6 +228,7 @@ public class BossShield : MonoBehaviour, IEnemyControlFilter
         phase = Phase.None;
         SetTriggers(false);
         breakElapsed = visual != null ? 0f : -1f; // 파괴 연출(판정은 이미 꺼짐)
+        GameAudio.Play(SfxId.BossShieldBreak);
         OnShieldBroken?.Invoke();
     }
 

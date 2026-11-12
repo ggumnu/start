@@ -87,6 +87,7 @@ public class EnemyProjectile : MonoBehaviour
 
     public void Launch(Vector3 fireDirection, float bulletDamage, float bulletRange, float bulletSpeed, float bulletSize)
     {
+        GameAudio.Play(SfxId.EnemyShot); // [사운드] 적 사격(전방위/샷건처럼 한꺼번에 여러 발이면 한 번 - 겹침 방지 간격)
         direction = fireDirection.normalized;
         damage = bulletDamage;
         maxRange = bulletRange;

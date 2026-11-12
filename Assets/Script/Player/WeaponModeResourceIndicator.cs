@@ -46,7 +46,8 @@ public class WeaponModeResourceIndicator : MonoBehaviour
     [Tooltip("아이콘 오른쪽 아래 모서리를 기준으로 한 숫자 중심 위치 오프셋입니다(픽셀).")]
     public Vector2 numberOffset = new Vector2(4f, 4f);
     public float numberFontSize = 28f;
-    public Color numberColor = Color.black;
+    [Tooltip("숫자 색입니다(UI 글자 기본색 #2C4563 - 예전 검정에서 변경).")]
+    public Color numberTextColor = new Color32(0x2C, 0x45, 0x63, 0xFF);
     public Color numberOutlineColor = Color.white;
     [Tooltip("흰 테두리 두께(픽셀)입니다. 0이면 테두리 없이 표시합니다.")]
     [Min(0f)] public float numberOutlinePixels = 2.5f;
@@ -130,7 +131,7 @@ public class WeaponModeResourceIndicator : MonoBehaviour
             numberText.fontSize = numberFontSize;
             foreach (var outline in outlineTexts) outline.fontSize = numberFontSize;
         }
-        numberText.color = numberColor;
+        numberText.color = numberTextColor;
         foreach (var outline in outlineTexts) outline.color = numberOutlineColor;
         ApplyOutlineOffsets(numberOutlinePixels);
 

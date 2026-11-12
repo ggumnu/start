@@ -6,17 +6,19 @@ using UnityEngine.UI;
 
 // [게임 중단 화면 (형빈 확정)]
 // 게임 중 ESC를 누르면 그 즉시 게임 전체가 멈추고(Time.timeScale = 0), 화면이 검은 반투명 막으로 서서히 가려진 뒤
-// "게임을 중단하시겠습니까?" 문구와 [계속하기] [도감] [재시작하기] [그만하기] 버튼(가로 한 줄)이 차례로 떠오릅니다.
+// "게임을 중단하시겠습니까?" 문구와 버튼 두 줄(윗줄 [계속하기] [설정] [도감], 아랫줄 [재시작하기] [그만하기])이 차례로 떠오릅니다.
 // 팝업 창 없이 막 위에 바로 그려집니다.
 //
 // [입력] (버튼은 다 떠오른 뒤에만 눌림 - 실수 방지)
 // - ESC / [계속하기]: 문구와 버튼이 사라지며 가라앉고 막이 서서히 밝아집니다. 막이 완전히 사라진 뒤에야 게임 시간과 플레이어
 //   조작이 다시 흐릅니다(ESC를 누르고 대비할 시간). 버튼이 다 뜨기 전에 ESC를 눌러도 그 자리에서 바로 사라지기 시작합니다.
+// - [설정]: 시작 화면과 같은 설정 창(SettingsUI - BGM/효과음 볼륨)을 중단 화면 위에 띄웁니다. 설정 창에서 ESC/[닫기]를 누르면
+//   설정 창만 닫히고 중단 화면으로 돌아옵니다(도감과 같은 방식).
 // - [도감]: 시작 화면과 같은 아이템 도감(ItemCodexUI)을 중단 화면 위에 띄웁니다. 도감에서 ESC/[돌아가기]를 누르면 도감만 닫히고
 //   중단 화면으로 돌아옵니다(도감이 떠 있는 동안 중단 화면은 입력을 받지 않음 - ESC 한 번에 둘 다 닫히지 않도록).
-// - [재시작하기] / [그만하기]: 검은 확인창("...하시겠습니까?" [실행] [취소하기])이 뜹니다. 확인창이 떠 있는 동안 중단 화면의 문구와
+// - [재시작하기] / [그만하기]: 흰 확인창("...하시겠습니까?" [실행] [취소하기])이 뜹니다. 확인창이 떠 있는 동안 중단 화면의 문구와
 //   버튼은 숨겨집니다. [취소하기] 또는 ESC = 확인창만 닫히고 중단 화면으로 돌아옵니다.
-// - Enter 키는 아무 동작도 하지 않습니다(형빈 확정).
+// - Enter 키는 아무 동작도 하지 않습니다(형빈 확정). 클릭은 버튼 위에서 눌렀다가 뗀 순간입니다(누르는 동안 버튼이 작아짐).
 // - 사라지는 동안에는 ESC를 다시 눌러도 열리지 않습니다 - 막이 완전히 사라지고 게임이 다시 흐른 뒤에 다시 열 수 있습니다.
 //
 // [열리지 않는 때 - 그때의 ESC는 원래 그 창의 닫기 키]
@@ -39,11 +41,14 @@ using UnityEngine.UI;
 // 지금은 이어하기가 없어서 진행 상황은 사라집니다 - 이어하기를 만들 때 LeaveScene()의 표시된 자리에서 저장하면 됩니다.
 //
 // [색/설정]
-// 버튼 색(평소/마우스 올림)과 버튼 글자 색, 확인창 바탕색/모서리는 공용 스타일 에셋(PopupStyle), 그 밖의 문구/크기/막 색/연출 시간은
-// PauseMenuSettings 에셋. [재시작하기]/[그만하기]와 확인창의 실행 버튼은 PopupStyle의 위험 버튼 색(빨강 + 흰 글자)입니다. 씬에 붙일 필요가 없습니다 - 게임이 시작되면 스스로 만들어집니다(씬이 바뀌어도 유지).
+// 버튼/확인창은 공용 부품 UIPatternBox(평행사변형 버튼, 흰 창 + 모서리 무늬)로 그리고 색/모양/글자 색은 PopupStyle, 그 밖의 문구/크기/
+// 막 색/연출 시간은 PauseMenuSettings 에셋. 버튼 종류: [계속하기]/확인창의 실행 버튼 = 긍정(노랑), [그만하기] = 그만두기(회색),
+// 나머지 = 일반(하늘색).
+// 되돌릴 수 없는 버튼([재시작하기]/[그만하기]/확인창 실행)의 소리는 위험 효과음 그대로입니다.
+// 씬에 붙일 필요가 없습니다 - 게임이 시작되면 스스로 만들어집니다(씬이 바뀌어도 유지).
 public class PauseMenuUI : MonoBehaviour
 {
-    private enum Mode { Closed, Opening, Ready, Codex, Confirm, Closing, Quitting }
+    private enum Mode { Closed, Opening, Ready, Settings, Codex, Confirm, Closing, Quitting }
     private enum ConfirmAction { None, Restart, Quit }
 
     // ------------------------------------------------------------------
@@ -106,9 +111,9 @@ public class PauseMenuUI : MonoBehaviour
     private class ButtonView
     {
         public RectTransform rect;
-        public Image image;
+        public UIPatternBox box;
         public TextMeshProUGUI label;
-        public bool danger; // 위험 버튼(빨강 + 흰 글자 - PopupStyle의 위험 버튼 색)
+        public UIButtonKind kind = UIButtonKind.Normal;
     }
 
     private GameObject canvasGO;
@@ -121,6 +126,7 @@ public class PauseMenuUI : MonoBehaviour
     private RectTransform buttonsRect;
     private CanvasGroup buttonsGroup;
     private ButtonView resumeButton;
+    private ButtonView settingsButton;
     private ButtonView codexButton;
     private ButtonView restartButton;
     private ButtonView quitButton;
@@ -128,7 +134,7 @@ public class PauseMenuUI : MonoBehaviour
     // 확인창(검은 창)
     private GameObject confirmRoot;
     private RectTransform confirmRect;
-    private Image confirmImage;
+    private UIPatternBox confirmBox;
     private TextMeshProUGUI confirmMessage;
     private ButtonView confirmOkButton;
     private ButtonView confirmCancelButton;
@@ -177,6 +183,10 @@ public class PauseMenuUI : MonoBehaviour
                 UpdateReady(s);
                 break;
 
+            case Mode.Settings:
+                UpdateSettings();
+                break;
+
             case Mode.Codex:
                 UpdateCodex();
                 break;
@@ -213,6 +223,7 @@ public class PauseMenuUI : MonoBehaviour
         if (IntroCutscene.BlocksInput) return false; // 입장 컷씬 중(ESC는 컷씬 건너뛰기 키)
         if (HeliExtraction.BlocksInput) return false; // 헬기 퇴각 연출 중(ESC는 건너뛰기 키)
         if (ItemCodexUI.BlocksInput) return false;
+        if (SettingsUI.BlocksInput) return false;
 
         var health = Object.FindFirstObjectByType<PlayerHealth>();
         return health != null && !health.IsDead;
@@ -220,6 +231,7 @@ public class PauseMenuUI : MonoBehaviour
 
     private void Open()
     {
+        GameAudio.Play(SfxId.PauseOpen);
         savedTimeScale = Time.timeScale;
         Time.timeScale = 0f;
 
@@ -281,28 +293,51 @@ public class PauseMenuUI : MonoBehaviour
     // 입력 대기
     // ------------------------------------------------------------------
 
+    private int lastHoveredButton = -1; // [사운드] 호버음용 - 마지막으로 마우스가 올라간 버튼 번호
+
     private void UpdateReady(PauseMenuSettings s)
     {
-        var style = PopupStyle.Get();
         bool overResume = IsPointerOver(resumeButton.rect);
+        bool overSettings = IsPointerOver(settingsButton.rect);
         bool overCodex = IsPointerOver(codexButton.rect);
         bool overRestart = IsPointerOver(restartButton.rect);
         bool overQuit = IsPointerOver(quitButton.rect);
-        resumeButton.image.color = ButtonColor(resumeButton, overResume, style);
-        codexButton.image.color = ButtonColor(codexButton, overCodex, style);
-        restartButton.image.color = ButtonColor(restartButton, overRestart, style);
-        quitButton.image.color = ButtonColor(quitButton, overQuit, style);
+        bool clickResume = resumeButton.box.TickButton(overResume, true);
+        bool clickSettings = settingsButton.box.TickButton(overSettings, true);
+        bool clickCodex = codexButton.box.TickButton(overCodex, true);
+        bool clickRestart = restartButton.box.TickButton(overRestart, true);
+        bool clickQuit = quitButton.box.TickButton(overQuit, true);
+        UISound.TrackHover(ref lastHoveredButton, UISound.HoveredId(0, overResume, overSettings, overCodex, overRestart, overQuit), Time.frameCount == modeFrame);
 
         if (Time.frameCount == modeFrame) return;
 
-        if (Input.GetKeyDown(s.pauseKey)) { BeginClose(); return; }
+        if (Input.GetKeyDown(s.pauseKey)) { UISound.Cancel(); BeginClose(); return; }
 
-        if (!Input.GetMouseButtonDown(0)) return;
+        if (clickResume) { UISound.Confirm(); BeginClose(); }
+        else if (clickSettings) { UISound.Confirm(); OpenSettings(); }
+        else if (clickCodex) { UISound.Confirm(); OpenCodex(); }
+        else if (clickRestart) { UISound.Danger(); OpenConfirm(ConfirmAction.Restart); }
+        else if (clickQuit) { UISound.Danger(); OpenConfirm(ConfirmAction.Quit); }
+    }
 
-        if (overResume) BeginClose();
-        else if (overCodex) OpenCodex();
-        else if (overRestart) OpenConfirm(ConfirmAction.Restart);
-        else if (overQuit) OpenConfirm(ConfirmAction.Quit);
+    // ------------------------------------------------------------------
+    // 설정
+    // ------------------------------------------------------------------
+
+    private void OpenSettings()
+    {
+        SetMainButtonsNormal();
+        // 이 중단 화면보다 위에 뜨도록(로딩 화면보다는 아래)
+        // 중단 화면의 검은 막을 그대로 쓰므로 설정 창 자체의 막은 투명하게(확인창과 같은 어둡기)
+        SettingsUI.Open(PauseMenuSettings.Get().canvasSortingOrder + 1, false);
+        SetMode(Mode.Settings);
+    }
+
+    // 설정 창이 닫히면(그 프레임도 지나면) 중단 화면으로 돌아옵니다 - 설정 창을 닫은 ESC로 중단 화면까지 닫히지 않도록.
+    private void UpdateSettings()
+    {
+        if (SettingsUI.BlocksInput) return;
+        SetMode(Mode.Ready);
     }
 
     // ------------------------------------------------------------------
@@ -338,9 +373,8 @@ public class PauseMenuUI : MonoBehaviour
         confirmOkButton.label.text = string.IsNullOrEmpty(s.confirmLabel) ? actionLabel : s.confirmLabel;
         confirmCancelButton.label.text = s.cancelLabel;
 
-        var style = PopupStyle.Get();
-        confirmOkButton.image.color = ButtonColor(confirmOkButton, false, style);
-        confirmCancelButton.image.color = ButtonColor(confirmCancelButton, false, style);
+        SetNormal(confirmOkButton);
+        SetNormal(confirmCancelButton);
         SetMainButtonsNormal();
 
         confirmRoot.SetActive(true);
@@ -356,21 +390,20 @@ public class PauseMenuUI : MonoBehaviour
 
     private void UpdateConfirm(PauseMenuSettings s)
     {
-        var style = PopupStyle.Get();
         bool overOk = IsPointerOver(confirmOkButton.rect);
         bool overCancel = IsPointerOver(confirmCancelButton.rect);
-        confirmOkButton.image.color = ButtonColor(confirmOkButton, overOk, style);
-        confirmCancelButton.image.color = ButtonColor(confirmCancelButton, overCancel, style);
+        bool clickOk = confirmOkButton.box.TickButton(overOk, true);
+        bool clickCancel = confirmCancelButton.box.TickButton(overCancel, true);
+        UISound.TrackHover(ref lastHoveredButton, UISound.HoveredId(10, overOk, overCancel), Time.frameCount == modeFrame);
 
         if (Time.frameCount == modeFrame) return;
 
-        if (Input.GetKeyDown(s.pauseKey)) { CloseConfirm(); return; }
+        if (Input.GetKeyDown(s.pauseKey)) { UISound.Cancel(); CloseConfirm(); return; }
 
-        if (!Input.GetMouseButtonDown(0)) return;
-
-        if (overCancel) { CloseConfirm(); return; }
-        if (overOk)
+        if (clickCancel) { UISound.Cancel(); CloseConfirm(); return; }
+        if (clickOk)
         {
+            UISound.Danger();
             if (confirmAction == ConfirmAction.Restart) RestartLevel();
             else if (confirmAction == ConfirmAction.Quit) QuitToTitle();
         }
@@ -536,17 +569,18 @@ public class PauseMenuUI : MonoBehaviour
 
     private void SetMainButtonsNormal()
     {
-        var style = PopupStyle.Get();
-        resumeButton.image.color = ButtonColor(resumeButton, false, style);
-        codexButton.image.color = ButtonColor(codexButton, false, style);
-        restartButton.image.color = ButtonColor(restartButton, false, style);
-        quitButton.image.color = ButtonColor(quitButton, false, style);
+        SetNormal(resumeButton);
+        SetNormal(settingsButton);
+        SetNormal(codexButton);
+        SetNormal(restartButton);
+        SetNormal(quitButton);
     }
 
-    // 버튼 면 색: 위험 버튼은 빨강(PopupStyle 위험 버튼 색), 나머지는 평소 버튼 색
-    private static Color ButtonColor(ButtonView button, bool hovered, PopupStyle style)
+    // 호버/누름 표시 없이 평소 색으로(입력을 받지 않는 동안)
+    private static void SetNormal(ButtonView button)
     {
-        return button.danger ? style.GetDangerButtonColor(hovered) : style.GetButtonColor(hovered, true);
+        button.box.ResetPress();
+        button.box.color = PopupStyle.Get().GetKindColor(button.kind, false, true);
     }
 
     // ------------------------------------------------------------------
@@ -586,7 +620,7 @@ public class PauseMenuUI : MonoBehaviour
         messageText = HUDText.AddTo(messageGO, TextAnchor.MiddleCenter, true);
         messageText.raycastTarget = false;
 
-        // 버튼 줄(왼쪽부터 계속하기 / 도감 / 재시작하기 / 그만하기)
+        // 버튼 두 줄(윗줄 계속하기 / 설정 / 도감, 아랫줄 재시작하기 / 그만하기)
         var buttonsGO = new GameObject("Buttons");
         buttonsGO.transform.SetParent(canvasGO.transform, false);
         buttonsRect = buttonsGO.AddComponent<RectTransform>();
@@ -598,20 +632,20 @@ public class PauseMenuUI : MonoBehaviour
         buttonsGroup.interactable = false;
 
         resumeButton = CreateButton(buttonsRect, "ResumeButton");
+        settingsButton = CreateButton(buttonsRect, "SettingsButton");
         codexButton = CreateButton(buttonsRect, "CodexButton");
         restartButton = CreateButton(buttonsRect, "RestartButton");
         quitButton = CreateButton(buttonsRect, "QuitButton");
-        restartButton.danger = true; // 되돌릴 수 없는 동작이라 빨간 버튼(형빈 확정)
-        quitButton.danger = true;
+        resumeButton.kind = UIButtonKind.Positive; // [계속하기] = 노랑(형빈 확정)
+        quitButton.kind = UIButtonKind.Quit;
 
-        // 확인창(검은 창) - 화면 가운데
+        // 확인창(흰 창) - 화면 가운데
         confirmRoot = new GameObject("ConfirmPopup");
         confirmRoot.transform.SetParent(canvasGO.transform, false);
         confirmRect = confirmRoot.AddComponent<RectTransform>();
         confirmRect.anchorMin = confirmRect.anchorMax = new Vector2(0.5f, 0.5f);
         confirmRect.pivot = new Vector2(0.5f, 0.5f);
-        confirmImage = confirmRoot.AddComponent<Image>();
-        confirmImage.raycastTarget = false;
+        confirmBox = UIPatternBox.AddTo(confirmRoot);
 
         var confirmMsgGO = new GameObject("Message");
         confirmMsgGO.transform.SetParent(confirmRect, false);
@@ -623,7 +657,7 @@ public class PauseMenuUI : MonoBehaviour
 
         confirmOkButton = CreateButton(confirmRect, "OkButton");
         confirmCancelButton = CreateButton(confirmRect, "CancelButton");
-        confirmOkButton.danger = true; // 실행 버튼만 빨강, [취소하기]는 평소 색
+        confirmOkButton.kind = UIButtonKind.Positive; // 재확인창의 실행 버튼 = 노랑, [취소하기] = 하늘색
         confirmOkButton.rect.anchorMin = confirmOkButton.rect.anchorMax = new Vector2(0.5f, 0f);
         confirmOkButton.rect.pivot = new Vector2(0.5f, 0f);
         confirmCancelButton.rect.anchorMin = confirmCancelButton.rect.anchorMax = new Vector2(0.5f, 0f);
@@ -641,8 +675,7 @@ public class PauseMenuUI : MonoBehaviour
         view.rect = go.AddComponent<RectTransform>();
         view.rect.anchorMin = view.rect.anchorMax = new Vector2(0.5f, 0.5f);
         view.rect.pivot = new Vector2(0.5f, 0.5f);
-        view.image = go.AddComponent<Image>();
-        view.image.raycastTarget = false;
+        view.box = UIPatternBox.AddTo(go);
 
         var labelGO = new GameObject("Label");
         labelGO.transform.SetParent(go.transform, false);
@@ -673,8 +706,8 @@ public class PauseMenuUI : MonoBehaviour
         dim.a *= dimAlpha;
         dimImage.color = dim;
 
-        // 확인창이 떠 있는 동안에는 중단 화면의 문구/버튼을 숨깁니다(검은 막 위에 확인창만).
-        bool confirmShown = mode == Mode.Confirm;
+        // 확인창/설정 창이 떠 있는 동안에는 중단 화면의 문구/버튼을 숨깁니다(검은 막 위에 그 창만).
+        bool confirmShown = mode == Mode.Confirm || mode == Mode.Settings;
 
         messageRect.sizeDelta = new Vector2(1600f, s.messageFontSize * 2f + 20f);
         messageRect.anchoredPosition = new Vector2(0f, s.messageOffsetY + messageOffset);
@@ -686,12 +719,14 @@ public class PauseMenuUI : MonoBehaviour
         buttonsRect.anchoredPosition = new Vector2(0f, s.buttonsOffsetY + buttonsOffset);
         buttonsGroup.alpha = confirmShown ? 0f : buttonsAlpha;
 
-        // 가로 한 줄, 왼쪽부터 [계속하기] [도감] [재시작하기] [그만하기] (형빈 확정)
+        // 두 줄(형빈 확정): 윗줄 [계속하기] [설정] [도감], 아랫줄 [재시작하기] [그만하기] - 각 줄 가운데 정렬
         float step = s.buttonSize.x + s.buttonSpacing;
-        LayoutButton(resumeButton, s.resumeLabel, new Vector2(-1.5f * step, 0f), s.buttonSize, s.buttonCornerRadius, s.buttonFontSize, style);
-        LayoutButton(codexButton, s.codexLabel, new Vector2(-0.5f * step, 0f), s.buttonSize, s.buttonCornerRadius, s.buttonFontSize, style);
-        LayoutButton(restartButton, s.restartLabel, new Vector2(0.5f * step, 0f), s.buttonSize, s.buttonCornerRadius, s.buttonFontSize, style);
-        LayoutButton(quitButton, s.quitLabel, new Vector2(1.5f * step, 0f), s.buttonSize, s.buttonCornerRadius, s.buttonFontSize, style);
+        float lowerY = -(s.buttonSize.y + s.buttonRowSpacing);
+        LayoutButton(resumeButton, s.resumeLabel, new Vector2(-step, 0f), s.buttonSize, s.buttonFontSize, style);
+        LayoutButton(settingsButton, s.settingsLabel, new Vector2(0f, 0f), s.buttonSize, s.buttonFontSize, style);
+        LayoutButton(codexButton, s.codexLabel, new Vector2(step, 0f), s.buttonSize, s.buttonFontSize, style);
+        LayoutButton(restartButton, s.restartLabel, new Vector2(-0.5f * step, lowerY), s.buttonSize, s.buttonFontSize, style);
+        LayoutButton(quitButton, s.quitLabel, new Vector2(0.5f * step, lowerY), s.buttonSize, s.buttonFontSize, style);
 
         if (confirmRoot.activeSelf) LayoutConfirm(s, style);
     }
@@ -701,7 +736,7 @@ public class PauseMenuUI : MonoBehaviour
         Vector2 size = new Vector2(Mathf.Max(100f, s.confirmSize.x), Mathf.Max(80f, s.confirmSize.y));
         confirmRect.sizeDelta = size;
         confirmRect.anchoredPosition = Vector2.zero;
-        UIRoundedBox.Apply(confirmImage, style.darkPanelColor, style.darkPanelCornerRadius, size);
+        confirmBox.SetupPanel(style);
 
         float pad = 20f;
         float buttonsTop = s.confirmButtonBottomMargin + s.confirmButtonSize.y;
@@ -709,24 +744,23 @@ public class PauseMenuUI : MonoBehaviour
         msgRect.sizeDelta = new Vector2(size.x - pad * 2f, Mathf.Max(10f, size.y - buttonsTop - pad - 8f));
         msgRect.anchoredPosition = new Vector2(0f, -pad);
         confirmMessage.fontSize = s.confirmMessageFontSize;
-        confirmMessage.color = s.confirmMessageColor;
+        confirmMessage.color = style.panelTextColor;
 
         float half = (s.confirmButtonSize.x + s.confirmButtonSpacing) * 0.5f;
         LayoutButton(confirmOkButton, confirmOkButton.label.text, new Vector2(-half, s.confirmButtonBottomMargin), s.confirmButtonSize,
-                     style.darkPanelButtonCornerRadius, s.confirmButtonFontSize, style);
+                     s.confirmButtonFontSize, style);
         LayoutButton(confirmCancelButton, confirmCancelButton.label.text, new Vector2(half, s.confirmButtonBottomMargin), s.confirmButtonSize,
-                     style.darkPanelButtonCornerRadius, s.confirmButtonFontSize, style);
+                     s.confirmButtonFontSize, style);
     }
 
-    private static void LayoutButton(ButtonView button, string text, Vector2 pos, Vector2 size, float cornerRadius, int fontSize,
-                                     PopupStyle style)
+    private static void LayoutButton(ButtonView button, string text, Vector2 pos, Vector2 size, int fontSize, PopupStyle style)
     {
         button.rect.sizeDelta = size;
         button.rect.anchoredPosition = pos;
-        // 색은 입력 대기 중 호버에 따라 정하고, 그 밖에는 평소 색(SetMainButtonsNormal/OpenConfirm에서 맞춤)
-        UIRoundedBox.Apply(button.image, button.image.color, cornerRadius, size);
+        // 색은 입력 대기 중 TickButton이 호버에 따라 정하고, 그 밖에는 평소 색(SetMainButtonsNormal/OpenConfirm에서 맞춤)
+        button.box.SetupButton(style, button.kind);
         button.label.text = text;
         button.label.fontSize = fontSize;
-        button.label.color = button.danger ? style.dangerButtonTextColor : style.GetButtonTextColor(true);
+        button.label.color = button.box.GetLabelColor(true);
     }
 }

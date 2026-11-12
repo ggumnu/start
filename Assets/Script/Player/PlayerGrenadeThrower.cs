@@ -188,6 +188,8 @@ public class PlayerGrenadeThrower : MonoBehaviour
     // 떨어질 수도 있어서 위치로는 방을 정할 수 없습니다. null이면(포격 등 방을 넘기지 않는 폭발) 받는 쪽이 예전 기준으로 판정합니다.
     public RoomInstance ExplodingRoom { get; private set; }
 
+    private bool wasAimingForSound;
+
     // ---- 다른 스크립트가 읽는 상태 ----
     public bool IsGrenadeMode => weaponMode != null && weaponMode.IsGrenade;
 
@@ -253,6 +255,15 @@ public class PlayerGrenadeThrower : MonoBehaviour
         // 진행 중인 투척 동작(손 떼는 시점/동작 종료)은 모드와 무관하게 끝까지 처리합니다.
         UpdateThrowSequence();
 
+        // [사운드] 우클릭 조준을 시작하는 순간 핀 뽑는 소리(수류탄이 있을 때만, 일시정지/사망 중 제외).
+        bool aimingNow = IsAimingGrenade;
+        if (aimingNow && !wasAimingForSound && GrenadeCount > 0 && Time.timeScale > 0f &&
+            (playerHealth == null || !playerHealth.IsDead))
+        {
+            GameAudio.Play(SfxId.GrenadePinPull);
+        }
+        wasAimingForSound = aimingNow;
+
         // 모드 전환(1/2/3키, 수류탄 0개 시 총 복귀)은 PlayerWeaponMode가 처리합니다.
         if (!IsGrenadeMode) return;
 
@@ -262,7 +273,7 @@ public class PlayerGrenadeThrower : MonoBehaviour
         // HUD 접기 버튼 위에서 누른 클릭은 버튼 조작용이라 던지지 않습니다(HUDClickBlocker).
         if (!isThrowing && IsAimingGrenade && Input.GetMouseButtonDown(0) && !HUDClickBlocker.BlocksLeftClick)
         {
-            TryThrow();
+            if (!TryThrow() && GrenadeCount <= 0) GameAudio.Play(SfxId.ActionFail); // [사운드] 수류탄 0개
         }
     }
 

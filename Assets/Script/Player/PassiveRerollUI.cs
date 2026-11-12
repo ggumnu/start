@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 // [패시브 교체 창 - 56번 일회용 (형빈 확정)]
 // 56번을 쓰면 화면이 반투명 검정으로 덮이고, 흰 창에 지금 가진 패시브 아이템 목록(화면 왼쪽 패시브 인벤토리와 같은 칸 배치/순서 -
-// 최근 것이 앞)이 보입니다. 교체할 아이템을 하나 고르고 [교체하기]를 누르면 검은 확인 창("OO을(를) 교체하시겠습니까?")이 뜨고,
+// 최근 것이 앞)이 보입니다. 교체할 아이템을 하나 고르고 [교체하기]를 누르면 작은 확인 창(윗줄 [OO 이름 판], 아랫줄 "정말 교체하시겠습니까?")이 뜨고,
 // 거기서 [교체하기]를 눌러야 교체됩니다. 실제 교체(후보 뽑기/잃기/얻기)는 56번 효과(Item56effect)가 하고, 이 창은 고르기만 맡습니다.
 //
 // [선택 창]
@@ -18,10 +18,10 @@ using UnityEngine.UI;
 // - 칸이 많으면 마우스 휠로 스크롤합니다.
 // - [교체하기]는 하나를 골랐을 때만 눌립니다. [취소하기] 또는 Esc = 아무 일 없이 닫힘(56번은 소모되지 않고 그대로).
 //
-// [확인 창 (검은 창)]
+// [확인 창 (작은 흰 창 - 아이템 이름은 등급 색 + 이름 판)]
 // [교체하기] = 교체 확정, [취소하기] 또는 Esc = 확인 창만 닫히고 선택 창은 그대로(고른 상태 유지).
 //
-// [사용할 수 없음 창 (검은 창)]
+// [사용할 수 없음 창 (작은 흰 창)]
 // 56번을 쓸 수 없을 때(교체할 수 있는 패시브가 없음) 이유를 알려주는 창입니다. 전투 중에는 창 없이 그냥 쓰이지 않습니다. [확인]/Enter/Esc로 닫힙니다.
 //
 // [창이 떠 있는 동안 - 다른 팝업과 같은 규칙]
@@ -34,7 +34,9 @@ using UnityEngine.UI;
 //
 // [설정]
 // 씬에 붙일 필요가 없습니다 - 처음 필요할 때 스스로 만들어집니다(씬이 바뀌어도 유지). 문구/크기는 PassiveRerollSettings 에셋,
-// 색/모서리는 PopupStyle 에셋.
+// 색/모양은 PopupStyle 에셋. 창/버튼은 공용 부품 UIPatternBox(흰 창 + 모서리 무늬, 평행사변형 버튼 - 떼는 순간 클릭)로 그립니다.
+// 선택 창 [교체하기]/[취소하기] = 하늘색, 확인 창 [교체하기] = 노랑 / [취소하기] = 하늘색, 사용할 수 없음 창 [확인] = 노랑.
+// 아이콘 선택은 예전처럼 누르는 순간입니다.
 public class PassiveRerollUI : MonoBehaviour
 {
     private enum Mode { Closed, Main, Confirm, Message }
@@ -147,9 +149,9 @@ public class PassiveRerollUI : MonoBehaviour
     private class ButtonView
     {
         public RectTransform rect;
-        public Image outline;
-        public Image image;
+        public UIPatternBox box;
         public TextMeshProUGUI label;
+        public UIButtonKind kind = UIButtonKind.Normal;
     }
 
     private class IconView
@@ -163,11 +165,11 @@ public class PassiveRerollUI : MonoBehaviour
     private CanvasScaler scaler;
 
     private GameObject dimGO;
+    private GameObject confirmDimGO; // 확인 창이 뜰 때 첫 창을 한 번 더 어둡게 덮는 막(흰 창 위 흰 창이 묻히지 않도록)
     private Image dimImage;
     private GameObject mainRoot;
     private RectTransform mainRect;
-    private Image windowOutline;
-    private Image windowImage;
+    private UIPatternBox windowBox;
     private TextMeshProUGUI titleText;
     private RectTransform gridPanelRect;
     private Image gridPanelImage;
@@ -179,8 +181,12 @@ public class PassiveRerollUI : MonoBehaviour
 
     private GameObject darkRoot;
     private RectTransform darkRect;
-    private Image darkImage;
-    private TextMeshProUGUI darkMessage;
+    private UIPatternBox darkBox;
+    private TextMeshProUGUI darkMessage;     // 사용할 수 없음 창 문구
+    private RectTransform confirmRowRect;    // 확인 창: 윗줄 [이름 판] / 아랫줄 "정말 교체하시겠습니까?"
+    private UINamePlate confirmNamePlate;
+    private TextMeshProUGUI confirmQuestionText;
+    private ItemDefinition confirmItem;
     private ButtonView darkLeftButton;  // 확인 창: [교체하기] / 사용할 수 없음 창: [확인]
     private ButtonView darkRightButton; // 확인 창: [취소하기] / 사용할 수 없음 창: 숨김
 
@@ -294,6 +300,7 @@ public class PassiveRerollUI : MonoBehaviour
         dimGO.SetActive(newMode != Mode.Message);
         mainRoot.SetActive(newMode == Mode.Main || newMode == Mode.Confirm);
         darkRoot.SetActive(newMode == Mode.Confirm || newMode == Mode.Message);
+        confirmDimGO.SetActive(newMode == Mode.Confirm);
 
         if (newMode == Mode.Confirm || newMode == Mode.Message) FillDarkPopup(newMode);
         ApplyLayout();
@@ -360,13 +367,18 @@ public class PassiveRerollUI : MonoBehaviour
     // 선택 창
     // ------------------------------------------------------------------
 
+    private int lastHoveredButton = -1; // [사운드] 호버음용 - 마지막으로 마우스가 올라간 버튼 번호
+
     private void UpdateMain()
     {
         bool canConfirm = selectedIndex >= 0;
         bool overConfirm = canConfirm && IsPointerOver(confirmButton.rect);
         bool overCancel = IsPointerOver(cancelButton.rect);
-        SetButtonColor(confirmButton, canConfirm, overConfirm);
-        SetButtonColor(cancelButton, true, overCancel);
+        bool clickConfirm = confirmButton.box.TickButton(overConfirm, canConfirm);
+        bool clickCancel = cancelButton.box.TickButton(overCancel, true);
+        confirmButton.label.color = confirmButton.box.GetLabelColor(canConfirm);
+        cancelButton.label.color = cancelButton.box.GetLabelColor(true);
+        UISound.TrackHover(ref lastHoveredButton, UISound.HoveredId(0, overConfirm, overCancel), Time.frameCount == openedFrame);
 
         // 마우스 휠 스크롤(목록 위에서만)
         if (IsPointerOver(viewportRect))
@@ -377,10 +389,13 @@ public class PassiveRerollUI : MonoBehaviour
 
         if (Time.frameCount == openedFrame) return;
 
-        if (Input.GetKeyDown(KeyCode.Escape)) { CloseAll(true); return; }
+        if (Input.GetKeyDown(KeyCode.Escape)) { UISound.Cancel(); CloseAll(true); return; }
 
+        if (clickConfirm) { UISound.Confirm(); SetMode(Mode.Confirm); return; }
+        if (clickCancel) { UISound.Cancel(); CloseAll(true); return; }
+
+        // 아이콘 선택은 누르는 순간
         if (!Input.GetMouseButtonDown(0)) return;
-
         int hovered = GetHoveredIndex();
         if (hovered >= 0)
         {
@@ -388,11 +403,9 @@ public class PassiveRerollUI : MonoBehaviour
             if (selectableItems.Contains(displayItems[hovered]))
             {
                 selectedIndex = selectedIndex == hovered ? -1 : hovered;
+                UISound.Confirm();
             }
-            return;
         }
-        if (overConfirm) { SetMode(Mode.Confirm); return; }
-        if (overCancel) { CloseAll(true); return; }
     }
 
     private int GetHoveredIndex()
@@ -406,31 +419,28 @@ public class PassiveRerollUI : MonoBehaviour
     }
 
     // ------------------------------------------------------------------
-    // 검은 창 (확인 / 사용할 수 없음)
+    // 작은 흰 창 (확인 / 사용할 수 없음)
     // ------------------------------------------------------------------
 
     private void UpdateConfirm()
     {
-        var style = PopupStyle.Get();
         bool overLeft = IsPointerOver(darkLeftButton.rect);
         bool overRight = IsPointerOver(darkRightButton.rect);
-        darkLeftButton.image.color = style.GetButtonColor(overLeft, true);
-        darkRightButton.image.color = style.GetButtonColor(overRight, true);
+        bool clickLeft = darkLeftButton.box.TickButton(overLeft, true);
+        bool clickRight = darkRightButton.box.TickButton(overRight, true);
 
-        // 뒤에 보이는 선택 창 버튼은 호버 표시 없이 평소 색으로
-        SetButtonColor(confirmButton, selectedIndex >= 0, false);
-        SetButtonColor(cancelButton, true, false);
+        // 뒤에 보이는 선택 창 버튼은 호버/누름 표시 없이 평소 색으로
+        SetIdle(confirmButton, selectedIndex >= 0);
+        SetIdle(cancelButton, true);
+        UISound.TrackHover(ref lastHoveredButton, UISound.HoveredId(10, overLeft, overRight), Time.frameCount == openedFrame);
 
         if (Time.frameCount == openedFrame) return;
 
         // Esc / [취소하기] = 확인 창만 닫고 선택 창으로(고른 상태 그대로)
-        if (Input.GetKeyDown(KeyCode.Escape)) { SetMode(Mode.Main); return; }
+        if (Input.GetKeyDown(KeyCode.Escape)) { UISound.Cancel(); SetMode(Mode.Main); return; }
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (overLeft) Confirm();
-            else if (overRight) SetMode(Mode.Main);
-        }
+        if (clickLeft) { UISound.Confirm(); Confirm(); }
+        else if (clickRight) { UISound.Cancel(); SetMode(Mode.Main); }
     }
 
     // 확인 창 [교체하기]: 창을 닫고(조작을 먼저 되돌림) 교체 콜백을 부릅니다.
@@ -447,44 +457,49 @@ public class PassiveRerollUI : MonoBehaviour
 
     private void UpdateMessage()
     {
-        var style = PopupStyle.Get();
         bool overOk = IsPointerOver(darkLeftButton.rect);
-        darkLeftButton.image.color = style.GetButtonColor(overOk, true);
+        bool clickOk = darkLeftButton.box.TickButton(overOk, true);
+        UISound.TrackHover(ref lastHoveredButton, UISound.HoveredId(20, overOk), Time.frameCount == openedFrame);
 
         if (Time.frameCount == openedFrame) return;
 
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Escape))
         {
+            UISound.Confirm();
             CloseAll(false);
             return;
         }
-        if (Input.GetMouseButtonDown(0) && overOk) CloseAll(false);
+        if (clickOk) { UISound.Confirm(); CloseAll(false); }
     }
 
     private void FillDarkPopup(Mode popupMode)
     {
         var s = PassiveRerollSettings.Get();
-        darkMessage.richText = true;
 
         if (popupMode == Mode.Confirm)
         {
             ItemDefinition chosen = selectedIndex >= 0 && selectedIndex < displayItems.Count ? displayItems[selectedIndex] : null;
-            string name = ItemName(chosen);
-            darkMessage.text = $"{ColoredName(chosen)}{ObjectParticle(name)} {s.confirmQuestion}";
+            confirmItem = chosen;
+            confirmQuestionText.text = s.confirmQuestionLine;
+            darkMessage.gameObject.SetActive(false);
+            confirmRowRect.gameObject.SetActive(true);
             darkLeftButton.label.text = s.confirmLabel;
             darkRightButton.label.text = s.cancelLabel;
             darkRightButton.rect.gameObject.SetActive(true);
         }
         else
         {
+            confirmItem = null;
             darkMessage.text = messageText;
+            darkMessage.gameObject.SetActive(true);
+            confirmRowRect.gameObject.SetActive(false);
             darkLeftButton.label.text = s.okLabel;
             darkRightButton.rect.gameObject.SetActive(false);
         }
 
-        var style = PopupStyle.Get();
-        darkLeftButton.image.color = style.GetButtonColor(false, true);
-        darkRightButton.image.color = style.GetButtonColor(false, true);
+        darkLeftButton.kind = UIButtonKind.Positive; // 확인 창 실행 / 알림 창 [확인]
+        darkLeftButton.box.ResetPress();
+        darkRightButton.box.ResetPress();
     }
 
     private static string ItemName(ItemDefinition item)
@@ -493,20 +508,11 @@ public class PassiveRerollUI : MonoBehaviour
         return string.IsNullOrEmpty(item.displayName) ? item.name : item.displayName;
     }
 
-    // 이름 마지막 글자에 받침이 있으면 "을", 없으면 "를". 한글이 아니면 "을(를)".
-    private static string ObjectParticle(string word)
+    // 아이템 이름 색 - 아이템 설명칸(PlayerItemInfoDisplay)의 등급별 이름 색을 그대로 씁니다(없으면 흰색).
+    private static Color TierColor(ItemDefinition item)
     {
-        if (string.IsNullOrEmpty(word)) return "을(를)";
-        char last = word[word.Length - 1];
-        if (last < 0xAC00 || last > 0xD7A3) return "을(를)";
-        return (last - 0xAC00) % 28 != 0 ? "을" : "를";
-    }
-
-    // 등급 색을 입힌 아이템 이름 - 아이템 설명칸(PlayerItemInfoDisplay)의 등급별 이름 색을 그대로 씁니다(없으면 흰색).
-    private static string ColoredName(ItemDefinition item)
-    {
-        if (item == null) return "-";
         Color color = Color.white;
+        if (item == null) return color;
         var info = UnityEngine.Object.FindFirstObjectByType<PlayerItemInfoDisplay>();
         if (info != null)
         {
@@ -522,7 +528,7 @@ public class PassiveRerollUI : MonoBehaviour
                 }
             }
         }
-        return $"<color=#{ColorUtility.ToHtmlStringRGBA(color)}>{ItemName(item)}</color>";
+        return color;
     }
 
     private static bool IsPointerOver(RectTransform rect)
@@ -635,8 +641,14 @@ public class PassiveRerollUI : MonoBehaviour
         mainRect.anchorMin = mainRect.anchorMax = new Vector2(0.5f, 0.5f);
         mainRect.pivot = new Vector2(0.5f, 0.5f);
 
-        windowOutline = CreateImage(mainRect, "Outline");
-        windowImage = CreateImage(mainRect, "Window");
+        var windowGO = new GameObject("Window");
+        windowGO.transform.SetParent(mainRect, false);
+        var windowRect = windowGO.AddComponent<RectTransform>();
+        windowRect.anchorMin = Vector2.zero;
+        windowRect.anchorMax = Vector2.one;
+        windowRect.offsetMin = Vector2.zero;
+        windowRect.offsetMax = Vector2.zero;
+        windowBox = UIPatternBox.AddTo(windowGO);
 
         var titleGO = new GameObject("Title");
         titleGO.transform.SetParent(mainRect, false);
@@ -668,17 +680,28 @@ public class PassiveRerollUI : MonoBehaviour
         contentRect.anchorMin = contentRect.anchorMax = new Vector2(0f, 1f);
         contentRect.pivot = new Vector2(0f, 1f);
 
-        confirmButton = CreateButton(mainRect, "ConfirmButton", true);
-        cancelButton = CreateButton(mainRect, "CancelButton", true);
+        confirmButton = CreateButton(mainRect, "ConfirmButton");
+        cancelButton = CreateButton(mainRect, "CancelButton");
 
-        // 검은 창
+        // 확인 창이 떠 있는 동안 첫 창 위를 덮는 막(첫 창과 작은 창 사이)
+        confirmDimGO = new GameObject("ConfirmDim");
+        confirmDimGO.transform.SetParent(canvasGO.transform, false);
+        var confirmDimRect = confirmDimGO.AddComponent<RectTransform>();
+        confirmDimRect.anchorMin = Vector2.zero;
+        confirmDimRect.anchorMax = Vector2.one;
+        confirmDimRect.offsetMin = Vector2.zero;
+        confirmDimRect.offsetMax = Vector2.zero;
+        var confirmDimImage = confirmDimGO.AddComponent<Image>();
+        confirmDimImage.raycastTarget = false;
+        confirmDimGO.SetActive(false);
+
+        // 작은 흰 창(확인 / 사용할 수 없음)
         darkRoot = new GameObject("DarkPopup");
         darkRoot.transform.SetParent(canvasGO.transform, false);
         darkRect = darkRoot.AddComponent<RectTransform>();
         darkRect.anchorMin = darkRect.anchorMax = new Vector2(0.5f, 0.5f);
         darkRect.pivot = new Vector2(0.5f, 0.5f);
-        darkImage = darkRoot.AddComponent<Image>();
-        darkImage.raycastTarget = false;
+        darkBox = UIPatternBox.AddTo(darkRoot);
 
         var msgGO = new GameObject("Message");
         msgGO.transform.SetParent(darkRect, false);
@@ -688,20 +711,24 @@ public class PassiveRerollUI : MonoBehaviour
         darkMessage = HUDText.AddTo(msgGO, TextAnchor.MiddleCenter, true);
         darkMessage.raycastTarget = false;
 
-        darkLeftButton = CreateButton(darkRect, "LeftButton", false);
-        darkRightButton = CreateButton(darkRect, "RightButton", false);
-    }
+        var rowGO = new GameObject("ConfirmRow");
+        rowGO.transform.SetParent(darkRect, false);
+        confirmRowRect = rowGO.AddComponent<RectTransform>();
+        confirmRowRect.anchorMin = confirmRowRect.anchorMax = new Vector2(0.5f, 1f);
+        confirmRowRect.pivot = new Vector2(0.5f, 0.5f);
+        confirmNamePlate = UINamePlate.Create(confirmRowRect, "NamePlate");
+        confirmNamePlate.rect.anchorMin = confirmNamePlate.rect.anchorMax = new Vector2(0.5f, 1f);
+        confirmNamePlate.rect.pivot = new Vector2(0.5f, 1f);
+        var questionGO = new GameObject("Question");
+        questionGO.transform.SetParent(confirmRowRect, false);
+        var questionRect = questionGO.AddComponent<RectTransform>();
+        questionRect.anchorMin = questionRect.anchorMax = new Vector2(0.5f, 0f);
+        questionRect.pivot = new Vector2(0.5f, 0f);
+        confirmQuestionText = HUDText.AddTo(questionGO, TextAnchor.MiddleCenter);
+        confirmQuestionText.raycastTarget = false;
 
-    private static Image CreateImage(Transform parent, string name)
-    {
-        var go = new GameObject(name);
-        go.transform.SetParent(parent, false);
-        var rect = go.AddComponent<RectTransform>();
-        rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        var image = go.AddComponent<Image>();
-        image.raycastTarget = false;
-        return image;
+        darkLeftButton = CreateButton(darkRect, "LeftButton");
+        darkRightButton = CreateButton(darkRect, "RightButton");
     }
 
     private void EnsureIconViews(int count)
@@ -725,8 +752,8 @@ public class PassiveRerollUI : MonoBehaviour
         }
     }
 
-    // 버튼: 테두리(뒤, 선택 창 버튼만) + 버튼 면 + 글자
-    private static ButtonView CreateButton(Transform parent, string name, bool withOutline)
+    // 버튼: 평행사변형 면(UIPatternBox) + 글자
+    private static ButtonView CreateButton(Transform parent, string name)
     {
         var view = new ButtonView();
 
@@ -735,27 +762,7 @@ public class PassiveRerollUI : MonoBehaviour
         view.rect = go.AddComponent<RectTransform>();
         view.rect.anchorMin = view.rect.anchorMax = new Vector2(0.5f, 0f);
         view.rect.pivot = new Vector2(0.5f, 0f);
-
-        if (withOutline)
-        {
-            var outlineGO = new GameObject("Outline");
-            outlineGO.transform.SetParent(go.transform, false);
-            var outlineRect = outlineGO.AddComponent<RectTransform>();
-            outlineRect.anchorMin = outlineRect.anchorMax = new Vector2(0.5f, 0.5f);
-            outlineRect.pivot = new Vector2(0.5f, 0.5f);
-            view.outline = outlineGO.AddComponent<Image>();
-            view.outline.raycastTarget = false;
-        }
-
-        var faceGO = new GameObject("Face");
-        faceGO.transform.SetParent(go.transform, false);
-        var faceRect = faceGO.AddComponent<RectTransform>();
-        faceRect.anchorMin = Vector2.zero;
-        faceRect.anchorMax = Vector2.one;
-        faceRect.offsetMin = Vector2.zero;
-        faceRect.offsetMax = Vector2.zero;
-        view.image = faceGO.AddComponent<Image>();
-        view.image.raycastTarget = false;
+        view.box = UIPatternBox.AddTo(go);
 
         var labelGO = new GameObject("Label");
         labelGO.transform.SetParent(go.transform, false);
@@ -786,6 +793,7 @@ public class PassiveRerollUI : MonoBehaviour
             scaler.matchWidthOrHeight = screenAspect > 1920f / 1080f ? 1f : 0f; // HUD와 같은 규칙
         }
         dimImage.color = s.dimColor;
+        confirmDimGO.GetComponent<Image>().color = s.dimColor;
 
         if (mainRoot.activeSelf) LayoutMain(s);
         if (darkRoot.activeSelf) LayoutDark(s, style);
@@ -797,23 +805,15 @@ public class PassiveRerollUI : MonoBehaviour
         mainRect.sizeDelta = size;
         mainRect.anchoredPosition = Vector2.zero;
 
-        float t = s.windowOutlineThickness;
-        Vector2 outlineSize = size + new Vector2(t * 2f, t * 2f);
-        windowOutline.rectTransform.sizeDelta = outlineSize;
-        windowOutline.rectTransform.anchoredPosition = Vector2.zero;
-        windowOutline.enabled = t > 0f;
-        UIRoundedBox.Apply(windowOutline, s.windowOutlineColor, s.windowCornerRadius + t, outlineSize);
-
-        windowImage.rectTransform.sizeDelta = size;
-        windowImage.rectTransform.anchoredPosition = Vector2.zero;
-        UIRoundedBox.Apply(windowImage, s.windowColor, s.windowCornerRadius, size);
+        var style = PopupStyle.Get();
+        windowBox.SetupPanel(style);
 
         var titleRect = titleText.rectTransform;
         titleRect.sizeDelta = new Vector2(size.x - 40f, s.titleFontSize + 16f);
         titleRect.anchoredPosition = new Vector2(0f, -s.titleTopMargin);
         titleText.text = s.title;
         titleText.fontSize = s.titleFontSize;
-        titleText.color = s.titleColor;
+        titleText.color = style.panelTextColor;
 
         LayoutGrid(s);
 
@@ -909,33 +909,19 @@ public class PassiveRerollUI : MonoBehaviour
 
     private void LayoutMainButton(ButtonView button, string text, Vector2 pos, PassiveRerollSettings s)
     {
-        Vector2 size = s.mainButtonSize;
-        button.rect.sizeDelta = size;
+        button.rect.sizeDelta = s.mainButtonSize;
         button.rect.anchoredPosition = pos;
-        UIRoundedBox.Apply(button.image, button.image.color, s.mainButtonCornerRadius, size); // 색은 Update에서 호버/활성에 따라
-
-        if (button.outline != null)
-        {
-            float t = s.mainButtonOutlineThickness;
-            Vector2 outlineSize = size + new Vector2(t * 2f, t * 2f);
-            button.outline.rectTransform.sizeDelta = outlineSize;
-            button.outline.rectTransform.anchoredPosition = Vector2.zero;
-            button.outline.enabled = t > 0f;
-            Color c = s.mainButtonOutlineColor;
-            c.a *= button.image.color.a; // 못 누르는(반투명) 버튼이면 테두리도 같이 흐리게
-            UIRoundedBox.Apply(button.outline, c, s.mainButtonCornerRadius + t, outlineSize);
-        }
-
+        button.box.SetupButton(PopupStyle.Get(), button.kind); // 색/글자 색은 Update의 TickButton이 호버/누를 수 있는지에 따라 정함
         button.label.text = text;
         button.label.fontSize = s.mainButtonFontSize;
-        Color tc = PopupStyle.Get().buttonTextColor;
-        tc.a *= button.image.color.a;
-        button.label.color = tc;
     }
 
-    private static void SetButtonColor(ButtonView button, bool enabled, bool hovered)
+    // 입력을 받지 않는 버튼: 호버/누름 표시 없이 평소 색(못 누르면 반투명)
+    private static void SetIdle(ButtonView button, bool enabled)
     {
-        button.image.color = PopupStyle.Get().GetButtonColor(hovered, enabled);
+        button.box.ResetPress();
+        button.box.color = PopupStyle.Get().GetKindColor(button.kind, false, enabled);
+        button.label.color = button.box.GetLabelColor(enabled);
     }
 
     private void LayoutDark(PassiveRerollSettings s, PopupStyle style)
@@ -944,15 +930,18 @@ public class PassiveRerollUI : MonoBehaviour
         size = new Vector2(Mathf.Max(100f, size.x), Mathf.Max(80f, size.y));
         darkRect.sizeDelta = size;
         darkRect.anchoredPosition = Vector2.zero;
-        UIRoundedBox.Apply(darkImage, style.darkPanelColor, style.darkPanelCornerRadius, size);
+        darkBox.SetupPanel(style);
 
         float pad = 20f;
         float buttonsTop = s.darkButtonBottomMargin + s.darkButtonSize.y;
+        float areaHeight = Mathf.Max(10f, size.y - buttonsTop - pad - 8f);
         var msgRect = darkMessage.rectTransform;
-        msgRect.sizeDelta = new Vector2(size.x - pad * 2f, Mathf.Max(10f, size.y - buttonsTop - pad - 8f));
+        msgRect.sizeDelta = new Vector2(size.x - pad * 2f, areaHeight);
         msgRect.anchoredPosition = new Vector2(0f, -pad);
         darkMessage.fontSize = s.darkMessageFontSize;
-        darkMessage.color = s.darkMessageColor;
+        darkMessage.color = style.panelTextColor;
+
+        if (confirmRowRect.gameObject.activeSelf) LayoutConfirmRow(s, style, size.x - pad * 2f, -pad - areaHeight * 0.5f);
 
         if (mode == Mode.Confirm)
         {
@@ -966,12 +955,32 @@ public class PassiveRerollUI : MonoBehaviour
         }
     }
 
+    // 확인 창 두 줄 = 윗줄 [이름 판], 아랫줄 "정말 교체하시겠습니까?" - 둘 다 가로 가운데. 이름이 길면 판이 창 폭에 맞춰 줄고 글자도 줄어듭니다.
+    private void LayoutConfirmRow(PassiveRerollSettings s, PopupStyle style, float maxWidth, float y)
+    {
+        const float gap = 14f;
+        int fontSize = s.darkMessageFontSize;
+        float plateHeight = UINamePlate.Height(fontSize, style);
+        float questionHeight = fontSize + 8f;
+        confirmNamePlate.Fit(ItemName(confirmItem), TierColor(confirmItem), fontSize, maxWidth, style);
+
+        confirmRowRect.sizeDelta = new Vector2(maxWidth, plateHeight + gap + questionHeight);
+        confirmRowRect.anchoredPosition = new Vector2(0f, y);
+        confirmNamePlate.rect.anchoredPosition = Vector2.zero;
+
+        confirmQuestionText.fontSize = fontSize;
+        confirmQuestionText.color = style.panelTextColor;
+        var questionRect = confirmQuestionText.rectTransform;
+        questionRect.sizeDelta = new Vector2(maxWidth, questionHeight);
+        questionRect.anchoredPosition = Vector2.zero;
+    }
+
     private static void LayoutDarkButton(ButtonView button, Vector2 pos, PassiveRerollSettings s, PopupStyle style)
     {
         button.rect.sizeDelta = s.darkButtonSize;
         button.rect.anchoredPosition = pos;
-        UIRoundedBox.Apply(button.image, button.image.color, style.darkPanelButtonCornerRadius, s.darkButtonSize);
+        button.box.SetupButton(style, button.kind); // 색은 Update의 TickButton이 호버에 따라 정함
         button.label.fontSize = s.darkButtonFontSize;
-        button.label.color = style.GetButtonTextColor(true);
+        button.label.color = button.box.GetLabelColor(true);
     }
 }

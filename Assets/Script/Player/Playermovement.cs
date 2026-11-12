@@ -32,14 +32,48 @@ public class PlayerMovement : MonoBehaviour
     private PlayerStats stats;
     private Vector3 velocity;
     private Vector3 moveInput;
+    private float footstepDistanceAcc; // [사운드] 걸음 소리용 누적 이동 거리
     private PlayerDash dash; // [74번] 처음 사용할 때 자동으로 붙으므로 없으면 매 프레임 다시 찾습니다(가벼운 GetComponent)
+    private PlayerTravelBoost travelBoost; // [비전투 가속] 프리팹 3개를 고치지 않도록 여기서 자동으로 붙입니다
+    private float lastMoveSpeed;           // [뛰기 애니메이션] 이번 프레임 실제 이동 속도(RunSpeed 계산용)
+    private float runStopTimer;            // [뛰기 애니메이션] 이동 입력이 끊긴 시간(짧게 끊길 땐 뛰기 유지)
+    private Animator runParamAnimator;     // [뛰기 애니메이션] 아래 두 값을 확인한 Animator(바뀌면 다시 확인)
+    private bool hasIsRunningParam, hasRunSpeedParam;
+    private Transform meshRotationOffset;       // [뛰기 애니메이션] 프리팹의 MeshRotationOffset(없으면 null)
+    private Quaternion meshRotationOriginal;    // 실행 시작 때의 원래 회전(-20 보정)
+    private float runYawBlend;                  // 0 = 원래 회전, 1 = 뛸 때 회전
+    private static readonly int IsRunningHash = Animator.StringToHash("IsRunning");
+    private static readonly int RunSpeedHash = Animator.StringToHash("RunSpeed");
+
+    // [비전투 가속] 가속 전용 애니메이션 등에서 읽을 수 있게 엽니다(붙기 전이면 null).
+    public PlayerTravelBoost TravelBoost => travelBoost;
+    // [뛰기 애니메이션] 지금 뛰기 모션(IsRunning)을 켜고 있는지 - 뛰기 표정(SDFaceGameEvents)이 읽습니다.
+    public bool IsRunAnimating { get; private set; }
 
     void Awake()
     {
         controller = GetComponent<CharacterController>();
         stats = GetComponent<PlayerStats>();
+        travelBoost = GetComponent<PlayerTravelBoost>();
+        if (travelBoost == null) travelBoost = gameObject.AddComponent<PlayerTravelBoost>();
         if (mainCamera == null) mainCamera = Camera.main;
         if (animator == null) animator = GetComponentInChildren<Animator>();
+        meshRotationOffset = FindChildRecursive(transform, "MeshRotationOffset");
+        if (meshRotationOffset != null) meshRotationOriginal = meshRotationOffset.localRotation;
+        // [뛰기 흙먼지] 프리팹 3개를 고치지 않도록 여기서 자동으로 붙입니다(설정 = TravelBoostSettings).
+        if (GetComponent<PlayerRunDust>() == null) gameObject.AddComponent<PlayerRunDust>();
+    }
+
+    private static Transform FindChildRecursive(Transform parent, string name)
+    {
+        for (int i = 0; i < parent.childCount; i++)
+        {
+            Transform c = parent.GetChild(i);
+            if (c.name == name) return c;
+            Transform found = FindChildRecursive(c, name);
+            if (found != null) return found;
+        }
+        return null;
     }
 
     void Update()
@@ -98,18 +132,52 @@ public class PlayerMovement : MonoBehaviour
 
         moveInput = inputDir;
 
+        if (dash == null) dash = GetComponent<PlayerDash>();
+        bool dashing = dash != null && dash.IsDashing;
+
+        // [비전투 가속] 돌진/넉백 중엔 가속 상태를 그대로 두고(액티브 사용은 가속 유지 - 형빈 확정), 로딩/컷씬/헬기 연출 중엔
+        // 조작이 아닌 이동이라 가속을 끕니다(시작방 컷씬에서 걸어오다 빨라지지 않도록).
+        bool boostFreeze = dashing || ForcedPush.BlocksPlayerInput || PlayerDash.BlocksPlayerInput;
+        bool boostHardReset = LoadingScreen.BlocksPlayerInput || IntroCutscene.OverridesMovement || HeliExtraction.OverridesMovement;
+        float moveSpeed = travelBoost != null
+            ? travelBoost.Tick(stats.MoveSpeed, moveInput.sqrMagnitude > 0.0001f, boostFreeze, boostHardReset)
+            : stats.MoveSpeed;
+        lastMoveSpeed = moveSpeed;
+
         // [74번 돌진] 돌진 중에는 이동 입력 대신 돌진 방향을 moveInput으로 둡니다 - 걷기 애니메이션과 비조준 시 바라보는 방향이
         // 돌진 방향을 따라가게 하기 위함입니다. 실제 이동은 PlayerDash가 하므로 여기서는 움직이지 않습니다(아래 Move 생략).
-        if (dash == null) dash = GetComponent<PlayerDash>();
-        if (dash != null && dash.IsDashing)
+        if (dashing)
         {
             moveInput = dash.DashDirection;
             return;
         }
 
-        // moveSpeed는 이제 PlayerStats에서 가져옵니다 (아이템으로 조절될 예정).
-        Vector3 horizontalMove = moveInput * stats.MoveSpeed;
+        Vector3 horizontalMove = moveInput * moveSpeed;
+        Vector3 beforeMove = transform.position;
         controller.Move(new Vector3(horizontalMove.x, 0f, horizontalMove.z) * Time.deltaTime);
+        UpdateFootstep(beforeMove);
+    }
+
+    // [사운드] 실제로 움직인 수평 거리를 쌓아 SoundLibrary의 걸음 간격마다 걸음 소리를 냅니다(벽에 막혀 제자리면 소리 없음).
+    // 멈췄다 다시 걸으면 첫 걸음이 조금 빨리 나오도록 간격의 일부를 미리 채워 둡니다.
+    void UpdateFootstep(Vector3 beforeMove)
+    {
+        float stepDistance = GameAudio.FootstepDistance;
+        if (moveInput.sqrMagnitude < 0.0001f)
+        {
+            footstepDistanceAcc = stepDistance * 0.6f;
+            return;
+        }
+
+        Vector3 delta = transform.position - beforeMove;
+        delta.y = 0f;
+        footstepDistanceAcc += delta.magnitude;
+        if (footstepDistanceAcc >= stepDistance)
+        {
+            footstepDistanceAcc -= stepDistance;
+            if (footstepDistanceAcc > stepDistance) footstepDistanceAcc = 0f;
+            GameAudio.Play(SfxId.Footstep);
+        }
     }
 
     void ApplyGravity()
@@ -138,6 +206,56 @@ public class PlayerMovement : MonoBehaviour
         animator.SetFloat("MoveX", localMove.x);
         animator.SetFloat("MoveZ", localMove.z);
         animator.SetFloat("Speed", moveInput.magnitude);
+        UpdateRunAnimator();
+    }
+
+    // [뛰기 애니메이션] 비전투 가속이 최대(runAnimStartRatio)에 이른 뒤 걷는 동안 IsRunning을 켜고, 재생 속도 RunSpeed를 실제 이동 속도에 맞춥니다
+    // (설정 = TravelBoostSettings). 가속이 오르는 2초 동안은 평소 걷기(형빈 확정).
+    // 파라미터가 없는 컨트롤러(메뉴 'MobArchive/애니메이션/비전투 달리기 - A/B'를 아직 안 누름)에서는 아무것도 하지 않습니다 - 경고 로그 방지.
+    void UpdateRunAnimator()
+    {
+        IsRunAnimating = false;
+        if (runParamAnimator != animator)
+        {
+            runParamAnimator = animator;
+            hasIsRunningParam = hasRunSpeedParam = false;
+            foreach (var p in animator.parameters)
+            {
+                if (p.nameHash == IsRunningHash && p.type == AnimatorControllerParameterType.Bool) hasIsRunningParam = true;
+                if (p.nameHash == RunSpeedHash && p.type == AnimatorControllerParameterType.Float) hasRunSpeedParam = true;
+            }
+        }
+        if (!hasIsRunningParam) return;
+
+        TravelBoostSettings s = TravelBoostSettings.Get();
+        bool boosting = travelBoost != null && travelBoost.IsBoosting &&
+                        travelBoost.BoostRatio >= Mathf.Min(s.runAnimStartRatio, 0.999f);
+        if (moveInput.sqrMagnitude > 0.0001f) runStopTimer = 0f;
+        else runStopTimer += Time.deltaTime;
+        bool running = boosting && runStopTimer <= s.runAnimStopGraceTime;
+        animator.SetBool(IsRunningHash, running);
+        IsRunAnimating = running;
+        UpdateRunMeshYaw(running, s);
+
+        if (hasRunSpeedParam && running)
+        {
+            float animSpeed = lastMoveSpeed / Mathf.Max(0.1f, s.runAnimReferenceSpeed);
+            animator.SetFloat(RunSpeedHash, Mathf.Clamp(animSpeed, s.runAnimSpeedMin, Mathf.Max(s.runAnimSpeedMin, s.runAnimSpeedMax)));
+        }
+    }
+
+    // [뛰기 애니메이션] MeshRotationOffset의 -20 보정은 Mixamo 모션용이라, 정면 기준으로 만든 SD_Run 동안만 Y를 runMeshYaw로 돌립니다.
+    // 원래 값은 Awake에서 읽어 두므로 프리팹 값을 바꿔도 따라갑니다. 다 돌아온(0) 뒤에는 더 쓰지 않습니다.
+    void UpdateRunMeshYaw(bool running, TravelBoostSettings s)
+    {
+        if (meshRotationOffset == null) return;
+        float target = running ? 1f : 0f;
+        if (runYawBlend == 0f && target == 0f) return;
+
+        runYawBlend = Mathf.MoveTowards(runYawBlend, target, Time.deltaTime / Mathf.Max(0.01f, s.runMeshYawBlendTime));
+        Vector3 e = meshRotationOriginal.eulerAngles;
+        Quaternion runRotation = Quaternion.Euler(e.x, s.runMeshYaw, e.z);
+        meshRotationOffset.localRotation = Quaternion.Slerp(meshRotationOriginal, runRotation, runYawBlend);
     }
 
     public Vector3 GetMoveInput() => moveInput;

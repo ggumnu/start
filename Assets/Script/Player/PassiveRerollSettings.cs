@@ -16,8 +16,8 @@ public class PassiveRerollSettings : ScriptableObject
     public string title = "교체할 패시브 아이템을 선택하세요";
     public string confirmLabel = "교체하기";
     public string cancelLabel = "취소하기";
-    [Tooltip("확인 창 문구입니다. 앞에 \"(아이템 이름)을(를) \"이 자동으로 붙습니다.")]
-    public string confirmQuestion = "교체하시겠습니까?";
+    [Tooltip("확인 창 아랫줄 문구입니다(윗줄은 고른 아이템의 이름 판).")]
+    public string confirmQuestionLine = "정말 교체하시겠습니까?";
     [Tooltip("교체할 수 있는 패시브가 하나도 없을 때(패시브가 없거나, 모든 패시브가 교체 후보가 없을 때) 문구입니다.")]
     public string noItemMessage = "교체할 수 있는 아이템이 없습니다";
     public string okLabel = "확인";
@@ -28,14 +28,9 @@ public class PassiveRerollSettings : ScriptableObject
     [Tooltip("창이 열려 있는 동안 화면 전체를 덮는 색입니다(반투명 검정).")]
     public Color dimColor = new Color(0f, 0f, 0f, 0.55f);
 
-    [Header("선택 창 (흰 창)")]
+    [Header("선택 창 (흰 창 - 바탕/모서리/무늬/글자 색은 PopupStyle)")]
     public Vector2 windowSize = new Vector2(760f, 720f);
-    public Color windowColor = new Color(1f, 1f, 1f, 0.9f);
-    public Color windowOutlineColor = new Color(0.08f, 0.08f, 0.1f, 1f);
-    [Min(0f)] public float windowOutlineThickness = 5f;
-    [Min(0f)] public float windowCornerRadius = 24f;
     public int titleFontSize = 34;
-    public Color titleColor = new Color(0.1f, 0.1f, 0.1f, 1f);
     [Tooltip("창 위쪽 끝에서 제목까지의 거리입니다.")]
     public float titleTopMargin = 60f;
 
@@ -55,21 +50,17 @@ public class PassiveRerollSettings : ScriptableObject
     [Tooltip("교체 후보가 없어 선택할 수 없는 아이템 아이콘에 곱하는 색입니다(어둡게 - 크기/불투명도는 그대로라 선택한 아이콘과 구분됨).")]
     public Color unavailableTint = new Color(0.3f, 0.3f, 0.3f, 1f);
 
-    [Header("선택 창 버튼 (색/글자 색은 PopupStyle)")]
+    [Header("선택 창 버튼 (색/모양/글자 색은 PopupStyle - [교체하기]/[취소하기] 모두 하늘색)")]
     public Vector2 mainButtonSize = new Vector2(220f, 90f);
     public float mainButtonSpacing = 60f;
     [Tooltip("창 아래쪽 끝에서 버튼까지의 거리입니다.")]
     public float mainButtonBottomMargin = 45f;
-    [Min(0f)] public float mainButtonCornerRadius = 18f;
-    public Color mainButtonOutlineColor = new Color(0.08f, 0.08f, 0.1f, 1f);
-    [Min(0f)] public float mainButtonOutlineThickness = 4f;
     public int mainButtonFontSize = 34;
 
-    [Header("검은 창 (확인 창 / 사용할 수 없음 창 - 바탕색/모서리/버튼 색은 PopupStyle)")]
+    [Header("작은 흰 창 (확인 창 [교체하기] = 노랑 / [취소하기] = 하늘색, 사용할 수 없음 창 [확인] = 노랑 - 바탕/글자 색/버튼은 PopupStyle)")]
     public Vector2 confirmSize = new Vector2(560f, 240f);
     public Vector2 messageSize = new Vector2(480f, 220f);
     public int darkMessageFontSize = 26;
-    public Color darkMessageColor = Color.white;
     public Vector2 darkButtonSize = new Vector2(140f, 46f);
     public float darkButtonSpacing = 30f;
     public float darkButtonBottomMargin = 24f;

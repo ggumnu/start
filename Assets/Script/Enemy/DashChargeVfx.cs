@@ -25,6 +25,8 @@ public static class DashChargeVfx
     // 이펙트를 재생하고 그 인스턴스를 돌려줍니다(없으면 null). 연출이라 오류가 나도 공격은 그대로 진행합니다.
     public static GameObject Play(DashChargeVfxSettings settings, Transform owner)
     {
+        // [사운드] 이펙트 칸이 비어 있어도 충전 예고음은 냅니다(부르는 곳은 충전 시작마다 항상 부름).
+        if (owner != null) GameAudio.Play(SfxId.EnemyAttackWarn);
         if (settings == null || settings.prefab == null || owner == null) return null;
         try
         {

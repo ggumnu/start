@@ -20,7 +20,7 @@ using UnityEngine;
 // ItemDefinition: Item Id = 87, Category = Active, Active Cost = 6, Active Effect = RecruitEnemyActiveEffect.
 // Ally Settings > Outline Material 칸에 AllyOutline 셰이더로 만든 재질을 넣습니다.
 [System.Serializable]
-public class RecruitEnemyActiveEffect : IActiveItemUseRules
+public class RecruitEnemyActiveEffect : IActiveItemUseRules, IHasOwnUseSound
 {
     [Tooltip("포섭된 아군의 수치 환산/무적/표시 설정입니다.")]
     public AllyFaction.Settings allySettings = new AllyFaction.Settings();
@@ -45,6 +45,7 @@ public class RecruitEnemyActiveEffect : IActiveItemUseRules
 
     public void Activate(ActiveEffectContext context)
     {
+        GameAudio.Play(SfxId.Active87); // [사운드] 전용 사용음(공용 발동음 대신)
         if (context == null || context.PlayerObject == null) return;
 
         AllyFaction.CollectConvertible(candidates);

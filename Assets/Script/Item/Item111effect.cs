@@ -235,7 +235,7 @@ public class NoDamageClearDamageEffect : IPassiveItemEffect, IRemovablePassiveEf
             }
 
             CreditPopupDisplay.Show(player, player.transform.position, HeadAlertRoomRules.Sanitize(failurePopup, false), ItemIcon,
-                                    followTarget: true, onStarted: onStarted);
+                                    followTarget: true, onStarted: onStarted, sound: SfxId.ItemFail);
         }
         catch (Exception e)
         {

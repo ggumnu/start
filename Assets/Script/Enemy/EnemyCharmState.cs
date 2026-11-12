@@ -186,6 +186,9 @@ public class EnemyCharmState : MonoBehaviour
     // 같습니다.
     public bool TryApplyCharm(float duration, float immunityDuration, float speedMultiplier, Color color, float postCharmAttackDelay)
     {
+        // [보스 제외 - 형빈 확정] 보스는 매료에 걸리지 않습니다. 예전에는 공격 억제만 빼고 매료가 등록되어 보스 색이 매료 색(보라)으로
+        // 바뀌어, 효과가 걸린 것처럼 보였습니다. 이제는 색/감속/재매료 면역 모두 없이 바로 false를 돌려줍니다(91번 오한과 같은 방식).
+        if (isBoss) return false;
         if (health != null && health.IsDead) return false;
         // 매료 중이거나 재매료 면역 중이면 무시합니다(기존 규칙 그대로).
         if (immunityTimer > 0f || IsCharmed) return false;

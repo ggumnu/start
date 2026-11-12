@@ -439,6 +439,8 @@ public class ItemPedestal : MonoBehaviour, IMinimapMultiMarker, IBasicItemContai
             anyConsumedThisTry = true;
         }
 
+        if (anyConsumedThisTry) GameAudio.Play(SfxId.ItemPickup); // [사운드] 기본 아이템을 하나라도 가져가면 획득음 한 번
+
         if (assignedItem != null && playerInventory != null)
         {
             ItemDefinition passiveToAcquire = assignedItem;

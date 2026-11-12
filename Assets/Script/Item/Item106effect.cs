@@ -22,7 +22,7 @@ using UnityEngine;
 // ItemDefinition: Item Id = 106, Category = Active, Active Cost = 5, Active Effect = ChestGambleActiveEffect.
 // Failure Vfx Prefab 칸에 Assets/VFX/VFXPACK_IMPACT_WALLCOEUR_FreeVersion/00_Prefab/2_Impact_1.1.0/VFX_ImpactCritical_1.1.0_Pink를 넣습니다.
 [System.Serializable]
-public class ChestGambleActiveEffect : IActiveItemUseRules
+public class ChestGambleActiveEffect : IActiveItemUseRules, IHasOwnUseSound
 {
     [Header("확률 / 배수")]
     [Tooltip("성공(상자 복제) 확률입니다(기본 0.25 = 25%). 실패하면 방의 상자가 전부 사라집니다. 행운 보정은 LuckOdds를 거칩니다(지금은 영향 없음).")]
@@ -79,6 +79,7 @@ public class ChestGambleActiveEffect : IActiveItemUseRules
 
     public void Activate(ActiveEffectContext context)
     {
+        GameAudio.Play(SfxId.Active106); // [사운드] 전용 사용음(공용 발동음 대신)
         if (context == null) return;
 
         var aliveChests = new List<GameObject>();

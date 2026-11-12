@@ -1,0 +1,392 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &118765104333318498
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2039667556331769103}
+  - component: {fileID: 6161309656282405206}
+  m_Layer: 0
+  m_Name: Pane1 (3)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2039667556331769103
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 118765104333318498}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.215, y: 0.023, z: -0.044}
+  m_LocalScale: {x: 0.4, y: 0.31, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1048640782600004186}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6161309656282405206
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 118765104333318498}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a190af874d1626d4b930cbaca5ccc399, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NightLight
+  kind: 0
+  lightChance: 1
+  color: {r: 1, g: 0.8, b: 0.5, a: 1}
+  glowMaterial: {fileID: 2100000, guid: 57e97369c91c71648b92eaa6880bb406, type: 2}
+  panelWidth: 1
+  panelHeight: 1
+  panelOffset: {x: 0, y: 0, z: 0.02}
+  panelIntensity: 1.5
+  panelSoftness: 0.04
+  spillWidth: 1.4
+  spillLength: 1.5
+  spillOffset: {x: 0, y: 0.02, z: 0}
+  spillIntensity: 0.5
+  spillSoftness: 0.35
+  spillFade: 1
+  coneHeight: 3
+  coneTopRadius: 0.15
+  coneBottomRadius: 1.4
+  coneSegments: 24
+  coneIntensity: 0.35
+  coneFalloff: 1.3
+  coneEdgePower: 1.5
+  poolRadius: 1.8
+  poolLift: 0.02
+  poolIntensity: 0.6
+  poolFalloff: 1.5
+  bulbSize: 0.6
+  bulbIntensity: 2
+  bulbFalloff: 2
+--- !u!1 &1580672921388786317
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4851167173590331319}
+  - component: {fileID: 1659901278436724301}
+  m_Layer: 0
+  m_Name: Pane1 (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4851167173590331319
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1580672921388786317}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.607, y: 0.023, z: -0.044}
+  m_LocalScale: {x: 0.34, y: 0.31, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1048640782600004186}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1659901278436724301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1580672921388786317}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a190af874d1626d4b930cbaca5ccc399, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NightLight
+  kind: 0
+  lightChance: 1
+  color: {r: 1, g: 0.8, b: 0.5, a: 1}
+  glowMaterial: {fileID: 2100000, guid: 57e97369c91c71648b92eaa6880bb406, type: 2}
+  panelWidth: 1
+  panelHeight: 1
+  panelOffset: {x: 0, y: 0, z: 0.02}
+  panelIntensity: 1.5
+  panelSoftness: 0.04
+  spillWidth: 1.4
+  spillLength: 1.5
+  spillOffset: {x: 0, y: 0.02, z: 0}
+  spillIntensity: 0.5
+  spillSoftness: 0.35
+  spillFade: 1
+  coneHeight: 3
+  coneTopRadius: 0.15
+  coneBottomRadius: 1.4
+  coneSegments: 24
+  coneIntensity: 0.35
+  coneFalloff: 1.3
+  coneEdgePower: 1.5
+  poolRadius: 1.8
+  poolLift: 0.02
+  poolIntensity: 0.6
+  poolFalloff: 1.5
+  bulbSize: 0.6
+  bulbIntensity: 2
+  bulbFalloff: 2
+--- !u!1 &5003079599850463850
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 648017340958999334}
+  - component: {fileID: 3020639761525769470}
+  m_Layer: 0
+  m_Name: Pane1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &648017340958999334
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5003079599850463850}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.607, y: 0.023, z: -0.044}
+  m_LocalScale: {x: 0.34, y: 0.31, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1048640782600004186}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3020639761525769470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5003079599850463850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a190af874d1626d4b930cbaca5ccc399, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NightLight
+  kind: 0
+  lightChance: 1
+  color: {r: 1, g: 0.8, b: 0.5, a: 1}
+  glowMaterial: {fileID: 2100000, guid: 57e97369c91c71648b92eaa6880bb406, type: 2}
+  panelWidth: 1
+  panelHeight: 1
+  panelOffset: {x: 0, y: 0, z: 0.02}
+  panelIntensity: 1.5
+  panelSoftness: 0.04
+  spillWidth: 1.4
+  spillLength: 1.5
+  spillOffset: {x: 0, y: 0.02, z: 0}
+  spillIntensity: 0.5
+  spillSoftness: 0.35
+  spillFade: 1
+  coneHeight: 3
+  coneTopRadius: 0.15
+  coneBottomRadius: 1.4
+  coneSegments: 24
+  coneIntensity: 0.35
+  coneFalloff: 1.3
+  coneEdgePower: 1.5
+  poolRadius: 1.8
+  poolLift: 0.02
+  poolIntensity: 0.6
+  poolFalloff: 1.5
+  bulbSize: 0.6
+  bulbIntensity: 2
+  bulbFalloff: 2
+--- !u!1 &6485567202584518498
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7103608081696193936}
+  - component: {fileID: 4441046745682910949}
+  m_Layer: 0
+  m_Name: Pane1 (2)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7103608081696193936
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6485567202584518498}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.217, y: 0.023, z: -0.044}
+  m_LocalScale: {x: 0.4, y: 0.31, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1048640782600004186}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4441046745682910949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6485567202584518498}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a190af874d1626d4b930cbaca5ccc399, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NightLight
+  kind: 0
+  lightChance: 1
+  color: {r: 1, g: 0.8, b: 0.5, a: 1}
+  glowMaterial: {fileID: 2100000, guid: 57e97369c91c71648b92eaa6880bb406, type: 2}
+  panelWidth: 1
+  panelHeight: 1
+  panelOffset: {x: 0, y: 0, z: 0.02}
+  panelIntensity: 1.5
+  panelSoftness: 0.04
+  spillWidth: 1.4
+  spillLength: 1.5
+  spillOffset: {x: 0, y: 0.02, z: 0}
+  spillIntensity: 0.5
+  spillSoftness: 0.35
+  spillFade: 1
+  coneHeight: 3
+  coneTopRadius: 0.15
+  coneBottomRadius: 1.4
+  coneSegments: 24
+  coneIntensity: 0.35
+  coneFalloff: 1.3
+  coneEdgePower: 1.5
+  poolRadius: 1.8
+  poolLift: 0.02
+  poolIntensity: 0.6
+  poolFalloff: 1.5
+  bulbSize: 0.6
+  bulbIntensity: 2
+  bulbFalloff: 2
+--- !u!1 &7036422482238235121
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1048640782600004186}
+  m_Layer: 0
+  m_Name: NL_Window_Long
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1048640782600004186
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7036422482238235121}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 65919678604107334}
+  - {fileID: 648017340958999334}
+  - {fileID: 4851167173590331319}
+  - {fileID: 7103608081696193936}
+  - {fileID: 2039667556331769103}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &7715778651812374677
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1048640782600004186}
+    m_Modifications:
+    - target: {fileID: 6106799856622155001, guid: 26ad19fe753ff2249ad4024ab4136db1, type: 3}
+      propertyPath: m_Name
+      value: Window_Long_1_Wall
+      objectReference: {fileID: 0}
+    - target: {fileID: 7780463501456602835, guid: 26ad19fe753ff2249ad4024ab4136db1, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7780463501456602835, guid: 26ad19fe753ff2249ad4024ab4136db1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7780463501456602835, guid: 26ad19fe753ff2249ad4024ab4136db1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7780463501456602835, guid: 26ad19fe753ff2249ad4024ab4136db1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7780463501456602835, guid: 26ad19fe753ff2249ad4024ab4136db1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7780463501456602835, guid: 26ad19fe753ff2249ad4024ab4136db1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7780463501456602835, guid: 26ad19fe753ff2249ad4024ab4136db1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7780463501456602835, guid: 26ad19fe753ff2249ad4024ab4136db1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7780463501456602835, guid: 26ad19fe753ff2249ad4024ab4136db1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7780463501456602835, guid: 26ad19fe753ff2249ad4024ab4136db1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 26ad19fe753ff2249ad4024ab4136db1, type: 3}
+--- !u!4 &65919678604107334 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7780463501456602835, guid: 26ad19fe753ff2249ad4024ab4136db1, type: 3}
+  m_PrefabInstance: {fileID: 7715778651812374677}
+  m_PrefabAsset: {fileID: 0}

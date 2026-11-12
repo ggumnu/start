@@ -16,6 +16,10 @@ public class GameFlowManager : MonoBehaviour
     [Tooltip("레벨이 늘어날 때마다 여기에 RoomGenerationConfig 에셋을 순서대로 추가하세요.")]
     public List<RoomGenerationConfig> combatLevelConfigs;
 
+    [Header("밤 전용 빛 자동 부착")]
+    [Tooltip("Night Light Auto Rules 에셋. 전투 레벨이 만들어진 직후 같은 모델을 쓰는 오브젝트에 밤 전용 빛을 자동으로 붙입니다. 비우면 자동 부착 안 함.")]
+    public NightLightAutoRules nightLightRules;
+
     [Header("현재 상태 (자동 갱신 - 직접 수정하지 마세요)")]
     [SerializeField] private int currentLevelNumber = 1;
     [SerializeField] private LevelPhase currentPhase = LevelPhase.Combat;
@@ -243,6 +247,10 @@ public class GameFlowManager : MonoBehaviour
                 currentPhase = LevelPhase.Combat;
                 // 1회성 지급 기록(grantedOneTimeIds)은 런 전체에서 유지합니다(위 [획득 시 1회성 지급 기록] 참고).
                 assignedUniqueItemIdsThisLevel.Clear();
+                // [들고 온 슬롯 아이템 - 형빈 확정] 지금 가지고 있는 슬롯 아이템(액티브/장신구/일회용/음식)은 이 레벨에 이미 나온 것으로
+                // 기록합니다. 예전에는 장착 중일 때만 걸러져서, 이 레벨에서 교체/버리기/칸 감소로 내려놓는 순간 다른 보물상자/상점에서
+                // 같은 아이템이 또 나와 레벨 안에 두 개가 생겼습니다. 들고 온 일회용/음식을 이 레벨에서 다 써도 이 레벨에서는 다시 나오지 않습니다.
+                MarkCarriedSlotItemsAssigned(playerToKeep);
                 break;
         }
 
@@ -257,6 +265,33 @@ public class GameFlowManager : MonoBehaviour
         if (player == null) return;
         var health = player.GetComponent<PlayerHealth>();
         if (health != null) health.ApplyLevelEndMaxHealthLoss();
+    }
+
+    // [들고 온 슬롯 아이템] 플레이어가 지금 장착 중인 슬롯 아이템을 전부 "이 레벨에 이미 나온 아이템"으로 기록합니다.
+    private void MarkCarriedSlotItemsAssigned(GameObject player)
+    {
+        if (player == null) return;
+
+        var active = player.GetComponent<PlayerActiveItem>();
+        if (active != null && active.EquippedItem != null) MarkItemAssignedThisLevel(active.EquippedItem.itemId);
+
+        var trinket = player.GetComponent<PlayerTrinket>();
+        if (trinket != null) MarkAll(trinket.EquippedItems);
+
+        var disposable = player.GetComponent<PlayerDisposableItem>();
+        if (disposable != null) MarkAll(disposable.EquippedItems);
+
+        var food = player.GetComponent<PlayerFoodItem>();
+        if (food != null) MarkAll(food.EquippedItems);
+    }
+
+    private void MarkAll(IReadOnlyList<ItemDefinition> items)
+    {
+        if (items == null) return;
+        for (int i = 0; i < items.Count; i++)
+        {
+            if (items[i] != null) MarkItemAssignedThisLevel(items[i].itemId);
+        }
     }
 
     [ContextMenu("TEST: Advance To Next Phase")]
@@ -277,11 +312,15 @@ public class GameFlowManager : MonoBehaviour
                 var combatConfig = GetCombatConfigFor(currentLevelNumber);
                 if (combatConfig == null) return; // 경고는 GetCombatConfigFor 안에서 이미 출력됨
                 levelBuilder.config = combatConfig;
+                // [레벨별 조명] 레벨을 만들기 전에 적용합니다(밤 전용 조명 프리팹이 만들어지는 순간 밤인지 알 수 있도록). 비어 있으면 원래 조명.
+                LevelLighting.Apply(combatConfig.lightingProfile);
                 levelBuilder.BuildLevel(existingPlayer);
+                NightLightAutoRules.AttachInLevel(levelBuilder, nightLightRules); // [밤 전용 빛] 같은 모델에 견본 빛 자동 부착(밤이 아니면 숨겨진 채로 있음)
                 LevelBackground.Apply(combatConfig.backgroundMaterial); // [레벨별 배경] 비어 있으면 원래 배경
                 break;
 
             case LevelPhase.Choice:
+                LevelLighting.Apply(null); // [레벨별 조명] n.5 선택방 레벨은 항상 원래 조명(1레벨과 같은 밝은 낮 - 형빈 확정)
                 levelBuilder.BuildChoiceLevel(existingPlayer);
                 LevelBackground.Apply(levelBuilder.choiceLevelConfig != null ? levelBuilder.choiceLevelConfig.backgroundMaterial : null);
                 break;

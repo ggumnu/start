@@ -123,7 +123,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
   maxHealth: 3
+  maxHealthCap: 10
   moveSpeed: 2
+  moveSpeedCap: 4
   attackSpeed: 2
   reloadTime: 1.5
   luck: 0
@@ -224,6 +226,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   invincibilityDuration: 1.5
+  maxShield: 5
+  startingShield: 0
 --- !u!114 &6567477965101801178
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1512,6 +1516,8 @@ MonoBehaviour:
     stateName: Death
   - layerName: Locomotion
     stateName: Death
+  - layerName: UpperBody
+    stateName: Run
   blendSpeed: 8
   drawGizmo: 1
 --- !u!114 &1252749195544058211

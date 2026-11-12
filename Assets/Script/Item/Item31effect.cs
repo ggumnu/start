@@ -44,7 +44,7 @@ using UnityEngine;
 // ItemDefinition: Item Id = 31, Category = Active, Active Cost = 4, Active Effect =
 // RoomWideSleepEffect.
 [System.Serializable]
-public class RoomWideSleepEffect : IDelayedActiveItemEffect
+public class RoomWideSleepEffect : IDelayedActiveItemEffect, IHasOwnUseSound
 {
     [Tooltip("기본 수면 지속시간(초). 실제 적용값은 6번 패시브 보너스가 합산된 뒤의 값입니다" +
              "(EnemyControlState.TryApplyStrong 참고).")]
@@ -100,6 +100,7 @@ public class RoomWideSleepEffect : IDelayedActiveItemEffect
 
     public void Activate(ActiveEffectContext context)
     {
+        GameAudio.Play(SfxId.Active31); // [사운드] 전용 사용음(공용 발동음 대신)
         var enemies = GetRoomEnemies(context);
         if (enemies == null) return;
 

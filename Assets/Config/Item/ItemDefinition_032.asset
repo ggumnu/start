@@ -21,6 +21,7 @@ MonoBehaviour:
   rarity: 0
   category: 2
   confirmBeforeReplace: 0
+  incompatibleItemIds: []
   tags: []
   activeCost: 1
   activeEffect:
@@ -55,3 +56,29 @@ MonoBehaviour:
         firstEquipHealAmount: 2
         healChancePerKill: 0.25
         healAmountPerKill: 1
+        healPopup:
+          icon: {fileID: 21300000, guid: 087222fd11188714882472c522db3f87, type: 3}
+          iconSize: 48
+          headroom: 0.15
+          maxScreenHeightAboveFeet: 140
+          riseDistance: 30
+          sinkDistance: 25
+          appearDuration: 0.25
+          holdDuration: 0.35
+          vanishDuration: 0.35
+          canvasSortingOrder: 8
+          enableGlow: 1
+          glowSprite: {fileID: 0}
+          glowColor: {r: 1, g: 0.3, b: 0.3, a: 0.85}
+          glowSizeMultiplier: 2.2
+          glowPulseAmount: 0.08
+          glowPulseSpeed: 8
+          enableSparkles: 1
+          sparkleSprite: {fileID: 0}
+          sparkleColor: {r: 1, g: 0.45, b: 0.45, a: 1}
+          sparkleCount: 8
+          sparkleSizeRange: {x: 6, y: 14}
+          sparkleSpeedRange: {x: 40, y: 90}
+          sparkleLifetimeRange: {x: 0.35, y: 0.6}
+          sparkleSpawnWindow: 0.25
+          sparkleRiseAcceleration: 80

@@ -87,6 +87,7 @@ public class PlayerDash : MonoBehaviour
         elapsedTime = 0f;
 
         dashing = true;
+        GameAudio.Play(SfxId.Dash);
         activeDashes++;
 
         // 잔상: 출발하는 자리에 하나 남기고, 이후 간격마다 남깁니다.

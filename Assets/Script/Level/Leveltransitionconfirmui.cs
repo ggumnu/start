@@ -11,9 +11,11 @@ using UnityEngine.EventSystems;
 //
 // [모양/입력 - 다른 팝업과 같은 기준 (형빈 확정)]
 // - 1920x1080 기준 크기로 화면 해상도에 맞춰 커지고 줄어듭니다(다른 HUD/팝업과 같은 규칙).
-// - 창 바탕색/모서리, 버튼 색(평소/마우스 올림)/글자 색/모서리는 공용 스타일 에셋(PopupStyle)에서 읽습니다.
+// - 창/버튼은 블루 아카이브 스타일 공용 부품(UIPatternBox - 흰 창 + 모서리 무늬, 평행사변형 버튼)으로 그리고, 색/모양/글자 색은
+//   공용 스타일 에셋(PopupStyle)에서 읽습니다. [예] = 긍정(노랑), [아니오] = 일반(하늘색).
 // - 입력은 다른 팝업과 같이 EventSystem 없이 마우스 좌표를 직접 비교합니다.
-//   [예] = 클릭 또는 F/Enter, [아니오] = 클릭 또는 Esc. 창을 연 그 프레임의 입력(포탈에 누른 F)은 무시합니다.
+//   [예] = 클릭 또는 F/Enter, [아니오] = 클릭 또는 Esc. 클릭은 버튼 위에서 눌렀다가 뗀 순간(누르는 동안 버튼이 작아짐).
+//   창을 연 그 프레임의 입력(포탈에 누른 F)은 무시합니다.
 // - 창이 떠 있는 동안(+ 닫힌 그 프레임)에는 상자/포탈/좌대/상인의 F와 공격 좌클릭을 막습니다(BlocksInteract - InteractionTargetSelector/
 //   HUDClickBlocker가 확인). 그래서 확인창의 F(예)나 버튼 클릭이 포탈/사격으로 다시 전달되지 않습니다.
 // - 플레이어 이동은 예전처럼 막지 않습니다.
@@ -33,10 +35,9 @@ public class LevelTransitionConfirmUI : MonoBehaviour
     [Tooltip("이 키를 누르면 [아니오]와 같습니다.")]
     public KeyCode cancelKey = KeyCode.Escape;
 
-    [Header("창 모양 (1920x1080 기준 px - 바탕색/모서리/버튼 색은 PopupStyle)")]
+    [Header("창 모양 (1920x1080 기준 px - 바탕색/모서리/글자 색/버튼 색은 PopupStyle)")]
     public Vector2 panelSize = new Vector2(480f, 200f);
     public int messageFontSize = 26;
-    public Color messageColor = Color.white;
 
     [Header("버튼")]
     public Vector2 buttonSize = new Vector2(140f, 46f);
@@ -83,13 +84,13 @@ public class LevelTransitionConfirmUI : MonoBehaviour
     private CanvasScaler scaler;
     private GameObject panelRoot;
     private RectTransform panelRect;
-    private Image panelImage;
+    private UIPatternBox panelBox;
     private TextMeshProUGUI messageText;
     private RectTransform yesRect;
-    private Image yesImage;
+    private UIPatternBox yesBox;
     private TextMeshProUGUI yesText;
     private RectTransform noRect;
-    private Image noImage;
+    private UIPatternBox noBox;
     private TextMeshProUGUI noText;
 
     void Awake()
@@ -118,12 +119,13 @@ public class LevelTransitionConfirmUI : MonoBehaviour
         isOpen = true;
         openedFrame = Time.frameCount;
 
-        var style = PopupStyle.Get();
-        yesImage.color = style.GetButtonColor(false, true); // 첫 프레임부터 버튼 색이 맞게
-        noImage.color = style.GetButtonColor(false, true);
+        yesBox.ResetPress();
+        noBox.ResetPress();
         panelRoot.SetActive(true);
         ApplyLayout();
     }
+
+    private int lastHoveredButton = -1; // [사운드] 호버음용 - 마지막으로 마우스가 올라간 버튼 번호
 
     void Update()
     {
@@ -131,11 +133,11 @@ public class LevelTransitionConfirmUI : MonoBehaviour
 
         ApplyLayout();
 
-        var style = PopupStyle.Get();
         bool overYes = IsPointerOver(yesRect);
         bool overNo = IsPointerOver(noRect);
-        yesImage.color = style.GetButtonColor(overYes, true);
-        noImage.color = style.GetButtonColor(overNo, true);
+        bool clickYes = yesBox.TickButton(overYes, true);
+        bool clickNo = noBox.TickButton(overNo, true);
+        UISound.TrackHover(ref lastHoveredButton, UISound.HoveredId(0, overYes, overNo), Time.frameCount == openedFrame);
 
         // 창을 연 그 프레임의 입력(포탈에 누른 F)은 무시합니다.
         if (Time.frameCount == openedFrame) return;
@@ -151,11 +153,8 @@ public class LevelTransitionConfirmUI : MonoBehaviour
             return;
         }
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (overYes) OnYesClicked();
-            else if (overNo) OnNoClicked();
-        }
+        if (clickYes) OnYesClicked();
+        else if (clickNo) OnNoClicked();
     }
 
     // 게임 오버 등으로 진행 없이 창만 닫습니다.
@@ -175,6 +174,7 @@ public class LevelTransitionConfirmUI : MonoBehaviour
 
     private void OnYesClicked()
     {
+        UISound.Confirm();
         Hide();
         var portal = pendingPortal;
         pendingPortal = null;
@@ -183,6 +183,7 @@ public class LevelTransitionConfirmUI : MonoBehaviour
 
     private void OnNoClicked()
     {
+        UISound.Cancel();
         Hide();
         var portal = pendingPortal;
         pendingPortal = null;
@@ -226,8 +227,7 @@ public class LevelTransitionConfirmUI : MonoBehaviour
         panelRect = panelRoot.AddComponent<RectTransform>();
         panelRect.anchorMin = panelRect.anchorMax = new Vector2(0.5f, 0.5f);
         panelRect.pivot = new Vector2(0.5f, 0.5f);
-        panelImage = panelRoot.AddComponent<Image>();
-        panelImage.raycastTarget = false;
+        panelBox = UIPatternBox.AddTo(panelRoot);
 
         var textGO = new GameObject("Message");
         textGO.transform.SetParent(panelRect, false);
@@ -237,19 +237,18 @@ public class LevelTransitionConfirmUI : MonoBehaviour
         messageText = HUDText.AddTo(textGO, TextAnchor.MiddleCenter, true);
         messageText.raycastTarget = false;
 
-        CreateButton(panelRect, "YesButton", out yesRect, out yesImage, out yesText);
-        CreateButton(panelRect, "NoButton", out noRect, out noImage, out noText);
+        CreateButton(panelRect, "YesButton", out yesRect, out yesBox, out yesText);
+        CreateButton(panelRect, "NoButton", out noRect, out noBox, out noText);
     }
 
-    private static void CreateButton(Transform parent, string name, out RectTransform rect, out Image image, out TextMeshProUGUI label)
+    private static void CreateButton(Transform parent, string name, out RectTransform rect, out UIPatternBox box, out TextMeshProUGUI label)
     {
         var go = new GameObject(name);
         go.transform.SetParent(parent, false);
         rect = go.AddComponent<RectTransform>();
         rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0f);
         rect.pivot = new Vector2(0.5f, 0f);
-        image = go.AddComponent<Image>();
-        image.raycastTarget = false;
+        box = UIPatternBox.AddTo(go);
 
         var labelGO = new GameObject("Label");
         labelGO.transform.SetParent(go.transform, false);
@@ -277,7 +276,7 @@ public class LevelTransitionConfirmUI : MonoBehaviour
         Vector2 size = new Vector2(Mathf.Max(100f, panelSize.x), Mathf.Max(80f, panelSize.y));
         panelRect.sizeDelta = size;
         panelRect.anchoredPosition = Vector2.zero;
-        UIRoundedBox.Apply(panelImage, style.darkPanelColor, style.darkPanelCornerRadius, size);
+        panelBox.SetupPanel(style);
 
         // 문구: 위 여백 ~ 버튼 위 공간의 가운데
         float pad = 20f;
@@ -287,20 +286,20 @@ public class LevelTransitionConfirmUI : MonoBehaviour
         msgRect.anchoredPosition = new Vector2(0f, -pad);
         messageText.text = message;
         messageText.fontSize = messageFontSize;
-        messageText.color = messageColor;
+        messageText.color = style.panelTextColor;
 
         float half = (buttonSize.x + buttonSpacing) * 0.5f;
-        LayoutButton(yesRect, yesImage, yesText, yesLabel, new Vector2(-half, buttonBottomMargin), style);
-        LayoutButton(noRect, noImage, noText, noLabel, new Vector2(half, buttonBottomMargin), style);
+        LayoutButton(yesRect, yesBox, yesText, yesLabel, UIButtonKind.Positive, new Vector2(-half, buttonBottomMargin), style);
+        LayoutButton(noRect, noBox, noText, noLabel, UIButtonKind.Normal, new Vector2(half, buttonBottomMargin), style);
     }
 
-    private void LayoutButton(RectTransform rect, Image image, TextMeshProUGUI label, string text, Vector2 pos, PopupStyle style)
+    private void LayoutButton(RectTransform rect, UIPatternBox box, TextMeshProUGUI label, string text, UIButtonKind kind, Vector2 pos, PopupStyle style)
     {
         rect.sizeDelta = buttonSize;
         rect.anchoredPosition = pos;
-        UIRoundedBox.Apply(image, image.color, style.darkPanelButtonCornerRadius, buttonSize); // 색은 Update에서 호버에 따라 정함
+        box.SetupButton(style, kind); // 색은 Update의 TickButton이 호버에 따라 정함
         label.text = text;
         label.fontSize = buttonFontSize;
-        label.color = style.GetButtonTextColor(true);
+        label.color = box.GetLabelColor(true);
     }
 }

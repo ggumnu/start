@@ -125,7 +125,7 @@ public class ChargeShotIndicator : MonoBehaviour
         faceRect.anchorMax = Vector2.one;
         faceRect.sizeDelta = Vector2.zero;
         numberText = HUDText.AddTo(faceGO, TextAnchor.MiddleCenter);
-        numberText.color = Color.black;
+        numberText.color = new Color32(0x2C, 0x45, 0x63, 0xFF); // UI 글자 기본색(예전 검정에서 변경)
 
         root.SetActive(false);
     }

@@ -35,6 +35,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _IdMap:
+        m_Texture: {fileID: 2800000, guid: 9b7bb0458bf096645a7e5182af6dd55b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -55,7 +59,10 @@ Material:
     - _BumpScale: 1
     - _Cull: 2
     - _Cutoff: 0.5
+    - _DitherFade: 1
     - _DstBlend: 0
+    - _IdRegionCount: 4
+    - _IdSkinRegion: 0
     - _OutlineBaseColorBlend: 1
     - _OutlineEnabled: 1
     - _OutlineWidth: 1
@@ -73,12 +80,45 @@ Material:
     - _SpecularStrength: 0
     - _SrcBlend: 1
     - _Surface: 0
+    - _UseIdMap: 0
     - _WholeSkin: 0
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _IdColor01: {r: 0.2627451, g: 0.30588236, b: 0.41960785, a: 1}
+    - _IdColor02: {r: 0.9529412, g: 0.9529412, b: 0.9529412, a: 1}
+    - _IdColor03: {r: 0.79607844, g: 0.8235294, b: 0.85490197, a: 1}
+    - _IdColor04: {r: 0.1882353, g: 0.21568628, b: 0.29411766, a: 1}
+    - _IdColor05: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor06: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor07: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor08: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor09: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor10: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor11: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor12: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor13: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor14: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor15: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor16: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor17: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor18: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor19: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor20: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor21: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor22: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor23: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor24: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor25: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor26: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor27: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor28: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor29: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor30: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor31: {r: 1, g: 1, b: 1, a: 1}
+    - _IdColor32: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineColor: {r: 0.21999994, g: 0.17999995, b: 0.23999992, a: 1}
     - _RegionColorA: {r: 0.1882353, g: 0.21568628, b: 0.29411766, a: 1}
     - _RegionColorB: {r: 0.79607844, g: 0.8235294, b: 0.85490197, a: 1}

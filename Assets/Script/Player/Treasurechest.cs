@@ -300,6 +300,8 @@ public class TreasureChest : MonoBehaviour, IBasicItemContainer, IMinimapMultiMa
             anyConsumedThisTry = true;
         }
 
+        if (anyConsumedThisTry) GameAudio.Play(SfxId.ItemPickup); // [사운드] 기본 아이템을 하나라도 가져가면 획득음 한 번
+
         // 패시브/액티브/장신구/일회용 아이템 (분류에 따라 습득 경로가 다릅니다)
         if (passiveItem != null)
         {

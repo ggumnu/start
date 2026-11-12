@@ -129,7 +129,8 @@ public class EnemyDotState : MonoBehaviour
         }
 
         SpawnVfx(dot);
-        if (amount > 0f && health != null) health.TakeDamage(amount);
+        // 지속 피해 전용 입구 - 피해 숫자가 항상 Weak로 뜹니다(DamagePopupDisplay).
+        if (amount > 0f && health != null) health.TakeDotDamage(amount);
     }
 
     private void SpawnVfx(Dot dot)

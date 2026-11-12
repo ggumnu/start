@@ -52,7 +52,7 @@ public class EnemyHealth : MonoBehaviour
     // 어떤 적이든 체력에 피해를 받을 때(최종 피해량 전체, 남은 체력으로 자르지 않음) - 피해 숫자/적 체력바용 알림 전용.
     public static event Action<EnemyHealth, float> OnAnyEnemyDamaged;
 
-    // [2레벨 보스] 보호막(BossShield)이 피해를 흡수했을 때(흡수한 최종 피해량, 남은 보호막으로 자르지 않음) - 주황 피해 숫자용 알림 전용.
+    // [2레벨 보스] 보호막(BossShield)이 피해를 흡수했을 때(흡수한 최종 피해량, 남은 보호막으로 자르지 않음) - Resist 피해 숫자용 알림 전용.
     // 이때는 OnAnyEnemyDamaged가 울리지 않고 체력/피격 색도 그대로입니다(보호막이 흰색으로 깜빡임).
     public static event Action<EnemyHealth, float> OnAnyEnemyShieldDamaged;
 
@@ -188,6 +188,31 @@ public class EnemyHealth : MonoBehaviour
                 rend.material.SetColor("_EmissionColor", e);
             }
         }
+    }
+
+    // [피해 숫자] 지금 들어가는 피해가 지속 피해(EnemyDotState)인지 - 피해 알림(OnAnyEnemyDamaged)을 받는 쪽이 그 순간에 읽습니다
+    // (DamagePopupDisplay: 지속 피해는 항상 Weak). 알림 인자를 늘리지 않아 기존 구독 코드는 그대로 둡니다.
+    public static bool IsDotDamageInProgress { get; private set; }
+
+    // 지속 피해 전용 입구입니다. 처리 자체는 TakeDamage와 완전히 같고, 그동안만 IsDotDamageInProgress가 켜집니다.
+    public void TakeDotDamage(float amount)
+    {
+        bool previous = IsDotDamageInProgress;
+        IsDotDamageInProgress = true;
+        try { TakeDamage(amount); }
+        finally { IsDotDamageInProgress = previous; }
+    }
+
+    // [피해 숫자] "항상 Weak"로 보여야 하는 피해(4번 폭발, 81번 연소, 수류탄, 해킹툴, 118번 포격)인지 - 읽는 방식은 위와 같습니다.
+    public static bool IsForcedWeakDamageInProgress { get; private set; }
+
+    // "항상 Weak" 피해 전용 입구입니다. 처리 자체는 TakeDamage와 완전히 같고, 그동안만 IsForcedWeakDamageInProgress가 켜집니다.
+    public void TakeWeakDamage(float amount)
+    {
+        bool previous = IsForcedWeakDamageInProgress;
+        IsForcedWeakDamageInProgress = true;
+        try { TakeDamage(amount); }
+        finally { IsForcedWeakDamageInProgress = previous; }
     }
 
     public void TakeDamage(float amount)

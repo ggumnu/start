@@ -21,12 +21,13 @@ using System.Collections.Generic;
 // (단수형) 대신 GetComponentsInChildren(복수형)로 전부 모아서, 캐릭터 전체가 함께
 // 깜빡이도록 합니다.
 //
-// [참고 - 항상 숨겨둔 렌더러가 있는 경우]
-// GetComponentsInChildren<Renderer>()는 기본값(includeInactive: false)으로 호출됩니다.
-// 즉, 처음부터 비활성화(enabled = false)해둔 렌더러가 있다면 수집 대상에서 제외되어
-// 무적 연출과 무관하게 그대로 안 보이는 상태를 유지합니다(의도적인 선택입니다). 다만
-// 만약 그런 "항상 숨김" 렌더러가 활성 상태의 GameObject 위에 있는데 enabled만 꺼둔
-// 경우라면 이 스크립트가 수집해버릴 수 있으니, 그런 구조가 있다면 알려주세요.
+// [렌더러 모으기 - SD 파츠 교체 대응]
+// - 꺼진 오브젝트(수류탄 모드 등으로 숨긴 총)도 모아 둡니다. 꺼진 오브젝트의 렌더러는 껐다 켜도 안 보이므로 문제없고,
+//   다시 보이게 됐을 때 바로 깜빡임에 들어갑니다. 렌더러 자체를 꺼 둔(enabled = false) "항상 숨김" 렌더러는 모으지 않습니다.
+// - 이펙트(Particle/Trail/Line 렌더러)와 PlayerEffectExclude가 붙은 오브젝트 아래(헤일로 등)는 빼고 모읍니다.
+// - SDPartAttacher가 파츠를 붙이거나 떼면(OnPartsChanged) 원래 모습으로 되돌린 뒤 다시 모읍니다. 다른 스크립트가 총을 바꾸는 등
+//   렌더러 구성을 바꾸면 RefreshRenderers()를 부르면 됩니다.
+// - ResetToNormal()은 PlayerDeathHandler가 이름으로 찾아 부르므로 이름을 바꾸지 않습니다.
 [RequireComponent(typeof(PlayerHealth))]
 public class PlayerHitFlash : MonoBehaviour
 {
@@ -58,21 +59,57 @@ public class PlayerHitFlash : MonoBehaviour
     private readonly List<Renderer> portraitRestored = new List<Renderer>();
     private bool wasInvincible = false;
 
+    private SDPartAttacher partAttacher;
+
     void Awake()
     {
         if (playerHealth == null) playerHealth = GetComponent<PlayerHealth>();
+        CollectRenderers();
+
+        if (entries.Count == 0)
+        {
+            Debug.LogWarning("PlayerHitFlash: 캐릭터에서 Renderer를 하나도 찾지 못해 점멸 효과를 표시할 수 없습니다.");
+        }
+    }
+
+    void OnEnable()
+    {
+        if (partAttacher == null) partAttacher = GetComponentInChildren<SDPartAttacher>(true);
+        if (partAttacher != null)
+        {
+            partAttacher.OnPartsChanged -= RefreshRenderers;
+            partAttacher.OnPartsChanged += RefreshRenderers;
+        }
+    }
+
+    void OnDisable()
+    {
+        if (partAttacher != null) partAttacher.OnPartsChanged -= RefreshRenderers;
+    }
+
+    // 렌더러 구성이 바뀌었을 때 부릅니다. 깜빡이는 중이었다면 원래 모습으로 되돌린 뒤 다시 모으고, 무적이 남아 있으면
+    // 다음 깜빡임 간격부터 새 목록으로 이어서 깜빡입니다.
+    public void RefreshRenderers()
+    {
+        ResetToNormal();
+        CollectRenderers();
+    }
+
+    private void CollectRenderers()
+    {
+        entries.Clear();
 
         // 같은 Player 오브젝트에 AimTrajectoryIndicator(조준선)가 붙어있다면, 그 조준선
         // 렌더러는 캐릭터의 "몸"이 아니라 별도 표시 요소이므로 점멸/틴트 대상에서 제외합니다.
-        // (AimTrajectoryIndicator가 없는 경우 excludedRenderers는 null이 되어 아무것도 제외되지 않습니다.)
+        // 19번 패시브(양갈래 발사)로 조준선이 두 개로 늘어난 경우까지 전부 제외하기 위해 배열을 받습니다.
         var aimIndicator = GetComponent<AimTrajectoryIndicator>();
-        // 19번 패시브(양갈래 발사)로 조준선이 두 개로 늘어난 경우까지 전부 제외하기 위해
-        // 단일 참조 대신 배열을 받습니다 - AimTrajectoryIndicator.cs 쪽 변경 참고.
         Renderer[] excludedRenderers = aimIndicator != null ? aimIndicator.LineRenderers : null;
 
-        foreach (var rend in GetComponentsInChildren<Renderer>())
+        foreach (var rend in GetComponentsInChildren<Renderer>(true))
         {
-            if (IsExcluded(rend, excludedRenderers)) continue;
+            if (rend == null || !rend.enabled) continue;
+            if (rend is ParticleSystemRenderer || rend is TrailRenderer || rend is LineRenderer) continue;
+            if (IsExcluded(rend, excludedRenderers) || PlayerEffectExclude.IsExcluded(rend)) continue;
 
             var entry = new RendererEntry { renderer = rend };
             entry.supportsColor = rend.material.HasProperty("_Color");
@@ -81,11 +118,6 @@ public class PlayerHitFlash : MonoBehaviour
                 entry.originalColor = rend.material.color;
             }
             entries.Add(entry);
-        }
-
-        if (entries.Count == 0)
-        {
-            Debug.LogWarning("PlayerHitFlash: 캐릭터에서 Renderer를 하나도 찾지 못해 점멸 효과를 표시할 수 없습니다.");
         }
     }
 

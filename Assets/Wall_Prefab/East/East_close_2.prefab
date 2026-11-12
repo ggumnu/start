@@ -684,6 +684,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 4361517176417361769, guid: d77942d51c93f2d44a2043bd932fd920, type: 3}
+    - {fileID: 2079362609305755527, guid: d77942d51c93f2d44a2043bd932fd920, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d77942d51c93f2d44a2043bd932fd920, type: 3}
@@ -1280,6 +1281,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1436339517184071889}
     m_Modifications:
+    - target: {fileID: 1380662813428495122, guid: 1d2d211f582260844874250baf56763f, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1380662813428495122, guid: 1d2d211f582260844874250baf56763f, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.49
+      objectReference: {fileID: 0}
+    - target: {fileID: 1380662813428495122, guid: 1d2d211f582260844874250baf56763f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.55
+      objectReference: {fileID: 0}
+    - target: {fileID: 1380662813428495122, guid: 1d2d211f582260844874250baf56763f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.116
+      objectReference: {fileID: 0}
     - target: {fileID: 3799403442307032451, guid: 1d2d211f582260844874250baf56763f, type: 3}
       propertyPath: m_Name
       value: Vending_Machine_Wall
@@ -1295,6 +1312,10 @@ PrefabInstance:
     - target: {fileID: 6436562587704072331, guid: 1d2d211f582260844874250baf56763f, type: 3}
       propertyPath: m_LocalPosition.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6588520844820296719, guid: 1d2d211f582260844874250baf56763f, type: 3}
+      propertyPath: spillOffset.y
+      value: -0.97
       objectReference: {fileID: 0}
     - target: {fileID: 9047239488563132675, guid: 1d2d211f582260844874250baf56763f, type: 3}
       propertyPath: m_LocalPosition.x

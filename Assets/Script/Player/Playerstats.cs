@@ -70,6 +70,11 @@ public class PlayerStats : MonoBehaviour
     [Header("2. 이동 속도")]
     public float moveSpeed = 6f;
 
+    // [이동 속도 상한] 최대 체력 상한과 달리 초과분을 버리지 않고 최종값만 자릅니다(형빈 확정): 4에서 +2를 먹으면 계산값 6 -> 실제 4,
+    // 여기서 -1을 먹으면 계산값 5 -> 여전히 4. 비전투 가속(PlayerTravelBoost)은 이 상한 뒤에 따로 붙고 상한도 따로 있습니다.
+    [Tooltip("이동 속도 최종값 상한입니다(기본 4, 0 이하 = 상한 없음). 넘는 증가분은 버리지 않고 계산에 남겨 두고, 최종값만 여기서 자릅니다.")]
+    public float moveSpeedCap = 4f;
+
     [Header("3. 공격 속도 (초당 발사 가능 횟수)")]
     [Tooltip("값이 높을수록 다음 공격까지의 대기시간이 짧아집니다. 예: 2 = 0.5초마다 공격 가능")]
     public float attackSpeed = 2f;
@@ -460,6 +465,12 @@ public class PlayerStats : MonoBehaviour
         if (type == StatType.MaxHealth && maxHealthCap > 0f && !testNoMaxHealthCap)
         {
             result = Mathf.Min(result, maxHealthCap);
+        }
+
+        // [이동 속도 상한] 최종값만 자릅니다 - 모디파이어는 그대로 남으므로 초과분이 기억됩니다(moveSpeedCap 설명 참고).
+        if (type == StatType.MoveSpeed && moveSpeedCap > 0f)
+        {
+            result = Mathf.Min(result, moveSpeedCap);
         }
 
         return result;

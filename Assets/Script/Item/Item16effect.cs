@@ -38,7 +38,7 @@ using UnityEngine;
 // [아이템 에셋 설정]
 // ItemDefinition: Item Id = 16, Category = Active, Active Cost = 7, Active Effect = SpawnExtraRoomEffect.
 [Serializable]
-public class SpawnExtraRoomEffect : IDelayedActiveItemEffect
+public class SpawnExtraRoomEffect : IDelayedActiveItemEffect, IHasOwnUseSound
 {
     [Tooltip("사용할 때 뽑힐 방의 종류와 가중치 목록입니다. 새 방을 추가하려면 Element를 하나 늘리고 " +
              "Category와 Weight를 채우세요(확률 = 그 Element의 Weight / 전체 Weight 합). " +
@@ -58,6 +58,7 @@ public class SpawnExtraRoomEffect : IDelayedActiveItemEffect
 
     public void Activate(ActiveEffectContext context)
     {
+        GameAudio.Play(SfxId.Active16); // [사운드] 전용 사용음(공용 발동음 대신)
         if (context == null || context.LevelBuilder == null) return;
 
         if (!TryRollCategory(context.LevelBuilder, out RoomCategory category)) return;

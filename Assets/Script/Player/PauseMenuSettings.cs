@@ -3,7 +3,7 @@
 // [게임 중단 화면 설정 에셋]
 // ESC로 여는 게임 중단 화면(PauseMenuUI)의 문구/크기/연출 시간 값을 모아둔 에셋입니다.
 // Assets/Resources 폴더에 "PauseMenuSettings"라는 이름으로 만들어두면 자동으로 읽습니다. 에셋이 없으면 아래 기본값으로 동작합니다.
-// 버튼 색(평소/마우스 올림)과 버튼 글자 색, 확인창 바탕색/모서리는 공용 스타일 에셋(PopupStyle)에서 읽습니다.
+// 버튼 색/모양/글자 색, 확인창 바탕/모서리/글자 색은 공용 스타일 에셋(PopupStyle)에서 읽습니다.
 //
 // 만들기: Project 창에서 Assets/Resources 폴더 우클릭 > Create > MobArchive > Pause Menu Settings, 이름을 PauseMenuSettings로.
 [CreateAssetMenu(fileName = "PauseMenuSettings", menuName = "MobArchive/Pause Menu Settings")]
@@ -18,11 +18,12 @@ public class PauseMenuSettings : ScriptableObject
     [Header("문구")]
     public string message = "게임을 중단하시겠습니까?";
     public string resumeLabel = "계속하기";
+    public string settingsLabel = "설정";
     public string codexLabel = "도감";
     public string restartLabel = "재시작하기";
     public string quitLabel = "그만하기";
 
-    [Header("확인창 문구 ([재시작하기]/[그만하기]를 누르면 뜨는 검은 창)")]
+    [Header("확인창 문구 ([재시작하기]/[그만하기]를 누르면 뜨는 흰 창)")]
     [TextArea] public string restartConfirmMessage = "게임을 재시작하시겠습니까?\n지금까지의 진행 상황은 사라집니다.";
     [TextArea] public string quitConfirmMessage = "시작 화면으로 돌아가시겠습니까?\n지금까지의 진행 상황은 사라집니다.";
     [Tooltip("확인창의 실행 버튼 글자입니다. 비우면 누른 버튼 이름([재시작하기]/[그만하기])을 그대로 씁니다.")]
@@ -45,19 +46,19 @@ public class PauseMenuSettings : ScriptableObject
     [Tooltip("문구의 세로 위치입니다(화면 중앙 기준, 양수면 위로).")]
     public float messageOffsetY = 70f;
 
-    [Header("버튼 모양 (색/글자 색은 PopupStyle)")]
+    [Header("버튼 모양 (색/모양/글자 색은 PopupStyle)")]
     public Vector2 buttonSize = new Vector2(220f, 80f);
-    [Tooltip("버튼 사이 간격입니다(가로 한 줄 - 계속하기/도감/재시작하기/그만하기).")]
+    [Tooltip("같은 줄 버튼 사이 가로 간격입니다(윗줄 계속하기/설정/도감, 아랫줄 재시작하기/그만하기).")]
     public float buttonSpacing = 60f;
-    [Tooltip("버튼 줄의 세로 위치입니다(화면 중앙 기준, 음수면 아래로).")]
+    [Tooltip("윗줄과 아랫줄 버튼 사이 세로 간격입니다.")]
+    public float buttonRowSpacing = 30f;
+    [Tooltip("윗줄 버튼의 세로 위치입니다(화면 중앙 기준, 음수면 아래로). 아랫줄은 그 아래에 붙습니다.")]
     public float buttonsOffsetY = -60f;
-    [Min(0f)] public float buttonCornerRadius = 18f;
     public int buttonFontSize = 32;
 
-    [Header("확인창 모양 (바탕색/모서리/버튼 색은 PopupStyle)")]
+    [Header("확인창 모양 (바탕/모서리/글자 색/버튼 색은 PopupStyle)")]
     public Vector2 confirmSize = new Vector2(620f, 260f);
     public int confirmMessageFontSize = 30;
-    public Color confirmMessageColor = Color.white;
     public Vector2 confirmButtonSize = new Vector2(200f, 64f);
     [Tooltip("확인창 두 버튼 사이 간격입니다.")]
     public float confirmButtonSpacing = 40f;

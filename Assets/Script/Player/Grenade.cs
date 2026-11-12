@@ -529,6 +529,7 @@ public class Grenade : MonoBehaviour
     {
         claymoreInstalled = true;
         transform.position = end;
+        if (claymoreVisible) GameAudio.Play(SfxId.ClaymoreInstall); // [사운드] 플레이어가 있는 방에서만
 
         claymoreGlow = ClaymoreGlow.Attach(gameObject, claymoreSettings);
         if (claymoreGlow != null) claymoreGlow.SetVisible(claymoreVisible);
@@ -783,7 +784,7 @@ public class Grenade : MonoBehaviour
             if (enemyHealth.IsDead) continue;
             if (!damaged.Add(enemyHealth)) continue;
 
-            enemyHealth.TakeDamage(enemyDamage);
+            enemyHealth.TakeWeakDamage(enemyDamage); // 피해 숫자 항상 Weak(형빈 확정)
         }
     }
 

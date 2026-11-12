@@ -155,6 +155,7 @@ public class PlayerChargeShot : MonoBehaviour
 
             holdTimer -= interval;
             chargeCount++;
+            GameAudio.Play(SfxId.ChargeShotCharge);
             SpawnImplosion();
         }
 
@@ -172,6 +173,9 @@ public class PlayerChargeShot : MonoBehaviour
 
         if (charges > 0 && settings != null && shooting != null)
         {
+            // [사운드] 강화 총알도 사격 알림(OnShotFired)을 보내므로 같은 프레임의 일반 사격 소리는 막고 전용 소리만 냅니다.
+            GameAudio.SuppressThisFrame(SfxId.GunShot);
+            GameAudio.Play(SfxId.ChargeShotFire);
             shooting.FireChargedShot(direction, charges, settings);
         }
     }

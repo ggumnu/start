@@ -19,8 +19,11 @@ using UnityEngine;
 // GetComponentsInChildren<EnemyHealth>(true))으로 "이 방의 적 전체"를 모으고 있어 동일한
 // 패턴을 그대로 사용했습니다. EnemyHealth.TakeDamage()는 이미 죽은 적에게 다시 호출해도
 // 안전합니다(isDead 가드).
+//
+// [사용 조건 - 형빈 확정] 지금 방에 살아 있는 적이 하나도 없으면 사용할 수 없습니다(코스트도 소모하지 않음). 손해만 보는 사용을 막는
+// 다른 액티브(106번 등)와 같은 방식입니다 - IActiveItemUseRules.CanActivateNow로 코스트를 내기 전에 확인합니다. 87번 아군은 적으로 세지 않습니다.
 [System.Serializable]
-public class RoomWideAttackDamageEffect : IActiveItemEffect
+public class RoomWideAttackDamageEffect : IActiveItemUseRules, IHasOwnUseSound
 {
     [Tooltip("현재 공격력(PlayerStats.Damage) 대비 피해 비율입니다. 1.0 = 100%.")]
     public float damageRatio = 1.0f;
@@ -39,8 +42,32 @@ public class RoomWideAttackDamageEffect : IActiveItemEffect
     // ExplodeOnImpactEffect.explosionVfxLifetime의 기본값과 동일합니다.
     private const float DamageVfxLifetime = 2f;
 
+    // [사용 조건] 쿨타임 없음, 코스트는 평소와 같음.
+    public float CooldownRemaining01 => 0f;
+
+    public int ResolveUseCost(ActiveEffectContext context, int effectiveCost) => effectiveCost;
+
+    // [사용 조건] 플레이어가 살아 있고, 지금 방에 살아 있는 적(아군 제외)이 하나라도 있어야 사용할 수 있습니다.
+    public bool CanActivateNow(ActiveEffectContext context)
+    {
+        if (context == null || context.Stats == null) return false;
+        if (context.Health != null && context.Health.IsDead) return false;
+
+        var enemies = GetRoomEnemies(context);
+        if (enemies == null) return false;
+
+        foreach (var enemy in enemies)
+        {
+            if (enemy == null || enemy.IsDead || !enemy.gameObject.activeInHierarchy) continue;
+            if (enemy.GetComponent<AllyFaction>() != null) continue;
+            return true;
+        }
+        return false;
+    }
+
     public void Activate(ActiveEffectContext context)
     {
+        GameAudio.Play(SfxId.Active29); // [사운드] 전용 사용음(공용 발동음 대신)
         if (context?.Stats == null) return;
 
         var enemies = GetRoomEnemies(context);

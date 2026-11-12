@@ -206,7 +206,8 @@ public class GlassCannonTrinketEffect : ITrinketEffect
             CreditPopupDisplay.Show(player, player.transform.position, penaltyPopup, itemIcon, followTarget: true,
                 onStarted: prefab != null
                     ? () => GlassCannonPenaltyVfxRunner.Spawn(playerT, prefab, delay, offset, scale, follow, lifetime)
-                    : (Action)null);
+                    : (Action)null,
+                sound: SfxId.ItemFail);
         }
         catch (Exception e)
         {

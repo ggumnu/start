@@ -12,15 +12,19 @@ using UnityEngine;
 // - 몸통/손/발 파츠를 붙이면 그 자리의 알바디 메시(Body_Torso 등)를 숨기고, 떼면 다시 보이게 합니다.
 //   (렌더러를 끄지 않고 오브젝트를 끄기 때문에 PlayerHitFlash의 깜빡임과 겹치지 않습니다.)
 // - 붙인 뒤에는 SDCharacterSkin.Apply()를 불러 새 파츠에도 피부색을 입힙니다.
+// - 새 파츠 오브젝트는 캐릭터와 같은 레이어로 맞춥니다(초상화 카메라가 바로 그리도록).
+// - 붙이거나 뗄 때마다 OnPartsChanged를 알립니다. PlayerHitFlash가 이걸 듣고 깜빡임 대상 렌더러를 다시 모읍니다
+//   (112번 투명/74번 잔상은 원래 그 순간의 렌더러를 매번 찾으므로 따로 할 일 없음).
+// - 뗀 파츠는 캐릭터 밖으로 빼낸 뒤 지웁니다(Destroy는 프레임 끝에 지워지므로, 같은 프레임에 렌더러를 다시 모으는 스크립트가
+//   곧 사라질 파츠를 잡지 않게 하기 위함).
 //
 // [에디터 설정]
 // 캐릭터 최상위 오브젝트(SD_AltBody_v02, SDCharacterSkin이 붙은 곳)에 붙이고, "시작 파츠"에 파츠 정의
 // 에셋을 넣으면 플레이를 누를 때 자동으로 붙습니다. 뼈대 루트는 비워두면 "Bip001"을 자동으로 찾습니다.
 //
 // [알아둘 점]
-// - 시작 파츠는 Awake에서 다른 스크립트보다 먼저 붙입니다(PlayerHitFlash가 렌더러 목록을 모으기 전에 붙여서
-//   피격 깜빡임에 포함되게 하기 위함). 게임 도중 Equip()으로 새로 붙인 파츠는 지금은 PlayerHitFlash의
-//   깜빡임 대상에 들어가지 않습니다. 아이템으로 외형이 바뀌는 기능을 붙일 때 함께 처리할 예정입니다.
+// - 시작 파츠는 Awake에서 다른 스크립트보다 먼저 붙입니다. 게임 도중 Equip()으로 붙인 파츠도 OnPartsChanged로
+//   피격 깜빡임 대상에 들어갑니다.
 // - 플레이 중에만 동작합니다(에디터 화면에서 미리 붙여 보는 기능은 없음).
 [DefaultExecutionOrder(-100)]
 [DisallowMultipleComponent]
@@ -52,6 +56,10 @@ public class SDPartAttacher : MonoBehaviour
     private readonly Dictionary<SDPartSlot, EquippedPart> equipped = new Dictionary<SDPartSlot, EquippedPart>();
     private Dictionary<string, Transform> boneMap;
 
+    // 파츠를 붙이거나 뗀 직후 알립니다(PlayerHitFlash가 구독).
+    public event System.Action OnPartsChanged;
+    private bool suppressChangeEvent; // Equip 안에서 부르는 Unequip은 알림을 한 번만 보내기 위함
+
     void Awake()
     {
         foreach (SDPartDefinition def in startingParts)
@@ -78,11 +86,14 @@ public class SDPartAttacher : MonoBehaviour
         }
         if (!EnsureBoneMap()) return null;
 
+        suppressChangeEvent = true;
         Unequip(def.slot);
+        suppressChangeEvent = false;
 
         var part = new EquippedPart { definition = def };
         part.holder = new GameObject("Part_" + def.slot + "_" + def.name);
         part.holder.transform.SetParent(transform, false);
+        part.holder.layer = gameObject.layer;
 
         // 파츠 FBX를 잠깐 꺼낸 상태에서 본을 옮겨 연결한 뒤, 남은 껍데기(본 사본 등)는 지웁니다.
         GameObject instance = Instantiate(def.modelPrefab);
@@ -108,6 +119,7 @@ public class SDPartAttacher : MonoBehaviour
 
             // 파츠 메시를 캐릭터 쪽으로 옮깁니다. 스키닝된 메시는 본을 따라 그려지므로 위치값은 영향이 없습니다.
             smr.transform.SetParent(part.holder.transform, false);
+            smr.gameObject.layer = gameObject.layer;
         }
 
         Destroy(instance);
@@ -127,6 +139,7 @@ public class SDPartAttacher : MonoBehaviour
         var skin = GetComponent<SDCharacterSkin>();
         if (skin != null) skin.Apply();
 
+        OnPartsChanged?.Invoke();
         return part.holder;
     }
 
@@ -136,7 +149,13 @@ public class SDPartAttacher : MonoBehaviour
         if (!equipped.TryGetValue(slot, out EquippedPart part)) return;
         equipped.Remove(slot);
 
-        if (part.holder != null) Destroy(part.holder);
+        if (part.holder != null)
+        {
+            // 캐릭터 밖으로 빼낸 뒤 지웁니다(위 [원리] 마지막 줄 참고).
+            part.holder.SetActive(false);
+            part.holder.transform.SetParent(null, false);
+            Destroy(part.holder);
+        }
         foreach (GameObject bone in part.extraBones)
         {
             if (bone != null) Destroy(bone);
@@ -147,6 +166,28 @@ public class SDPartAttacher : MonoBehaviour
             if (body == null || IsHiddenByOtherPart(body)) continue;
             body.SetActive(true);
         }
+
+        if (!suppressChangeEvent) OnPartsChanged?.Invoke();
+    }
+
+    // [테스트용] Play 중 이 컴포넌트의 ⋮ 메뉴에서 실행: 시작 파츠를 모두 뗐다가 다시 붙입니다(게임 도중 교체 동작 확인용).
+    [ContextMenu("테스트 - 시작 파츠 떼었다 다시 붙이기")]
+    private void TestReattachStartingParts()
+    {
+        if (!Application.isPlaying)
+        {
+            Debug.LogWarning("SDPartAttacher: Play 중에만 쓸 수 있습니다.", this);
+            return;
+        }
+        foreach (SDPartDefinition def in startingParts)
+        {
+            if (def != null) Unequip(def.slot);
+        }
+        foreach (SDPartDefinition def in startingParts)
+        {
+            if (def != null) Equip(def);
+        }
+        Debug.Log("SDPartAttacher: 시작 파츠를 다시 붙였습니다(" + equipped.Count + "개).", this);
     }
 
     // ------------------------------------------------------------------ 도우미

@@ -65,6 +65,10 @@ public class RoomGenerationConfig : ScriptableObject
     [Tooltip("이 레벨의 화면 배경 재질(ScreenBackground 셰이더, BG_ScreenSky를 복사해 색만 바꾼 것). 재질의 초상화 칸 색으로 HUD 초상화 하늘도 바뀝니다.")]
     public Material backgroundMaterial;
 
+    [Header("조명 (비워두면 원래 조명 - 1레벨 밝은 낮)")]
+    [Tooltip("이 레벨의 조명 분위기(LevelLightingProfile - 해 색온도, 그늘 색, 밝기, 밤 여부). 2레벨 노을/3레벨 밤 등. n.5 선택방 레벨은 항상 원래 조명입니다.")]
+    public LevelLightingProfile lightingProfile;
+
     [Header("확장 방 크기 허용 (배치 기능 미구현 - 꺼 둘 것)")]
     [Tooltip("1x2/2x1/2x2 방용 예약 칸. 실제 배치 로직이 아직 없음.")]
     public bool allowMultiCellRooms = false;

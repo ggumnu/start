@@ -9,19 +9,22 @@ using UnityEngine;
 //
 // [하는 일] 아래 순서로 처리하며, 여러 번 실행해도 안전합니다(이미 된 것은 건너뜀).
 // 1) 텍스처 가져오기 설정 (SD/Textures 폴더)
-//    - 이름이 "_Mask"로 끝나는 텍스처: sRGB 끔, 압축 없음(색 영역 경계가 번지지 않게), 알파 채널 그대로 사용
 //    - 이름이 "_Base"로 끝나는 텍스처: sRGB 켬, 고품질 압축, 알파 그대로 사용(알파 0 = 피부 영역)
+//    - 이름이 "_ID"로 끝나는 텍스처(색 영역 ID 맵, 번호 그림): sRGB 끔, 압축 없음, Filter Point, 밉맵 끔
 // 2) 재질 만들기 (SD/Materials 폴더)
 //    - T_SD_{부위}_Base 텍스처마다 M_SD_{부위} 재질을 "MobArchive/Toon_Character_SD" 셰이더로 만듭니다.
-//    - 처음 만들 때만: 명암/림라이트/외곽선 값을 레이사 재질(Player_Body)에서 복사하고, 영역 기본 색과
-//      "전체 피부"(Head, Hand)를 넣습니다. 이미 있는 재질은 직접 조정한 값을 덮어쓰지 않고, 비어 있는 텍스처 칸만 채웁니다.
+//    - 처음 만들 때만: 명암/림라이트/외곽선 값을 레이사 재질(Player_Body)에서 복사하고,
+//      "전체 피부"(Head, Hand)를 켭니다. 이미 있는 재질은 직접 조정한 값을 덮어쓰지 않고, 비어 있는 텍스처 칸만 채웁니다.
+//    - T_SD_{부위}_ID가 있으면 ID 맵 칸에 넣습니다(ID 맵 칸이 비어 있을 때만). 이때 같은 폴더에
+//      T_SD_{부위}_IDColors.txt(영역 색표)가 있으면 영역 색/피부 번호/보일 영역 수도 함께 넣습니다.
+//      색표 형식: 한 줄에 "번호 #RRGGBB" (예: 03 #F3C8EB), 피부 번호는 "skin 번호", "//"로 시작하는 줄은 메모.
 // 3) FBX 재질 연결 (SD 폴더 안의 모든 FBX)
 //    - 3ds Max에서 지정한 재질 이름(M_SD_Head 등)과 같은 이름의 재질을 FBX에 연결(Remap)합니다.
 //      그래서 앞으로 파츠 FBX를 같은 재질 이름으로 내보내면 이 메뉴 한 번으로 연결됩니다.
 //
 // [새 파츠를 추가할 때]
-// 텍스처를 T_SD_{부위}_Base / T_SD_{부위}_Mask 이름으로 SD/Textures에 넣고, 3ds Max에서 재질 이름을
-// M_SD_{부위}로 지정해 내보낸 뒤 이 메뉴를 다시 실행하면 됩니다. 영역 기본 색은 만든 뒤 재질에서 직접 고칩니다.
+// 텍스처를 T_SD_{부위}_Base / T_SD_{부위}_ID / T_SD_{부위}_IDColors.txt 이름으로 SD/Textures에 넣고, 3ds Max에서 재질 이름을
+// M_SD_{부위}로 지정해 내보낸 뒤 이 메뉴를 다시 실행하면 됩니다. 영역 색은 만든 뒤 재질에서 직접 고쳐도 됩니다.
 public class SDCharacterMaterialSetup : AssetPostprocessor
 {
     private const string SdRoot = "Assets/Player/Character/Player/SD";
@@ -29,17 +32,6 @@ public class SDCharacterMaterialSetup : AssetPostprocessor
     private const string MaterialFolder = SdRoot + "/Materials";
     private const string ShaderName = "MobArchive/Toon_Character_SD";
     private const string ReferenceMaterialPath = "Assets/Player/Character/Player/Player_Mat/Player_Body.mat";
-
-    // 처음 재질을 만들 때 넣을 영역 기본 색(R, G, B, A). 만든 뒤에는 재질 인스펙터에서 직접 바꾸면 됩니다.
-    private static readonly Dictionary<string, string[]> DefaultRegionColors = new Dictionary<string, string[]>
-    {
-        // 외투 / 세일러 옷깃 / 상의·치마 / 리본·단추·선
-        { "Torso", new[] { "#434E6B", "#F3F3F3", "#CBD2DA", "#30374B" } },
-        // 신발 본체 / 밑창·토캡·끈·입구 테두리 / 파란 포인트 / 양말
-        { "Foot", new[] { "#FBD5F8", "#F6F6F8", "#4F96C8", "#F8F8FA" } },
-        // 하늘 머리색 / 분홍 가닥 / 별 머리핀 / (사용 안 함). 머리끈은 텍스처에 고정색으로 그려져 있음
-        { "Hair_Reisa01", new[] { "#CFDDF6", "#F3C8EB", "#B4A5EE", "#FFFFFF" } },
-    };
 
     // 처음 만들 때 "전체 피부"를 켤 부위
     private static readonly HashSet<string> WholeSkinParts = new HashSet<string> { "Head", "Hand" };
@@ -88,7 +80,7 @@ public class SDCharacterMaterialSetup : AssetPostprocessor
 
         // 1) 텍스처 가져오기 설정
         var basePaths = new Dictionary<string, string>();
-        var maskPaths = new Dictionary<string, string>();
+        var idPaths = new Dictionary<string, string>();
         foreach (string guid in AssetDatabase.FindAssets("t:Texture2D", new[] { TextureFolder }))
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
@@ -105,7 +97,7 @@ public class SDCharacterMaterialSetup : AssetPostprocessor
             string part = GetPartName(file);
             if (part == null) continue;
             if (file.EndsWith("_Base")) basePaths[part] = path;
-            else if (file.EndsWith("_Mask")) maskPaths[part] = path;
+            else if (file.EndsWith("_ID")) idPaths[part] = path;
         }
 
         // 2) 재질 만들기 / 텍스처 채우기
@@ -140,9 +132,10 @@ public class SDCharacterMaterialSetup : AssetPostprocessor
             {
                 mat.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(pair.Value));
             }
-            if (maskPaths.TryGetValue(part, out string maskPath) && (created || mat.GetTexture("_MaskMap") == null))
+            if (idPaths.TryGetValue(part, out string idPath) && mat.HasProperty("_IdMap") && mat.GetTexture("_IdMap") == null)
             {
-                mat.SetTexture("_MaskMap", AssetDatabase.LoadAssetAtPath<Texture2D>(maskPath));
+                mat.SetTexture("_IdMap", AssetDatabase.LoadAssetAtPath<Texture2D>(idPath));
+                log.Add("ID 맵 연결: M_SD_" + part + ApplyIdColorTable(part, mat));
             }
 
             EditorUtility.SetDirty(mat);
@@ -190,24 +183,26 @@ public class SDCharacterMaterialSetup : AssetPostprocessor
     private static bool ApplyTextureSettings(TextureImporter importer, string path)
     {
         string file = Path.GetFileNameWithoutExtension(path);
-        bool isMask = file.EndsWith("_Mask");
         bool isBase = file.EndsWith("_Base");
-        if (!isMask && !isBase) return false;
+        bool isId = file.EndsWith("_ID");
+        if (!isBase && !isId) return false;
 
         bool changed = false;
         if (importer.textureType != TextureImporterType.Default) { importer.textureType = TextureImporterType.Default; changed = true; }
 
-        bool wantSrgb = !isMask;
+        bool wantSrgb = isBase;
         if (importer.sRGBTexture != wantSrgb) { importer.sRGBTexture = wantSrgb; changed = true; }
 
-        // 마스크의 A 채널은 네 번째 색 영역, 기본 텍스처의 A 채널은 "피부 영역" 표시라서 둘 다 "투명도"가
-        // 아닙니다. Alpha Is Transparency가 켜지면 Unity가 알파 0인 곳의 색을 바꿔버리므로 반드시 끕니다.
+        // 기본 텍스처의 A 채널은 "피부 영역" 표시라서 "투명도"가 아닙니다. Alpha Is Transparency가 켜지면 Unity가 알파 0인 곳의 색을 바꿔버리므로 반드시 끕니다.
         if (importer.alphaSource != TextureImporterAlphaSource.FromInput) { importer.alphaSource = TextureImporterAlphaSource.FromInput; changed = true; }
         if (importer.alphaIsTransparency) { importer.alphaIsTransparency = false; changed = true; }
 
-        if (isMask)
+        if (isId)
         {
+            // ID 맵은 픽셀 값이 "영역 번호"라서 압축/필터/밉맵이 값을 섞으면 엉뚱한 영역 색이 나옵니다.
             if (importer.textureCompression != TextureImporterCompression.Uncompressed) { importer.textureCompression = TextureImporterCompression.Uncompressed; changed = true; }
+            if (importer.filterMode != FilterMode.Point) { importer.filterMode = FilterMode.Point; changed = true; }
+            if (importer.mipmapEnabled) { importer.mipmapEnabled = false; changed = true; }
         }
         else
         {
@@ -250,15 +245,42 @@ public class SDCharacterMaterialSetup : AssetPostprocessor
     private static void ApplyDefaults(string part, Material mat)
     {
         if (WholeSkinParts.Contains(part)) mat.SetFloat("_WholeSkin", 1f);
+    }
 
-        if (DefaultRegionColors.TryGetValue(part, out string[] colors))
+    // T_SD_{부위}_IDColors.txt를 읽어 영역 색/피부 번호/보일 영역 수를 넣습니다. 로그에 붙일 문구를 돌려줍니다.
+    private static string ApplyIdColorTable(string part, Material mat)
+    {
+        string tablePath = TextureFolder + "/T_SD_" + part + "_IDColors.txt";
+        var table = AssetDatabase.LoadAssetAtPath<TextAsset>(tablePath);
+        if (table == null) return " (색표 없음 - 영역 색은 재질에서 직접 지정)";
+
+        int applied = 0;
+        int maxId = 0;
+        string[] lines = table.text.Split('\n');
+        foreach (string raw in lines)
         {
-            string[] props = { "_RegionColorR", "_RegionColorG", "_RegionColorB", "_RegionColorA" };
-            for (int i = 0; i < props.Length && i < colors.Length; i++)
+            string line = raw.Trim();
+            if (line.Length == 0 || line.StartsWith("//")) continue;
+
+            string[] tokens = line.Split(new[] { ' ', '\t' }, System.StringSplitOptions.RemoveEmptyEntries);
+            if (tokens.Length < 2) continue;
+
+            if (tokens[0].ToLowerInvariant() == "skin")
             {
-                if (ColorUtility.TryParseHtmlString(colors[i], out Color c)) mat.SetColor(props[i], c);
+                if (int.TryParse(tokens[1], out int skinId) && skinId >= 0 && skinId <= 32) mat.SetFloat("_IdSkinRegion", skinId);
+                continue;
             }
+
+            if (!int.TryParse(tokens[0], out int id) || id < 1 || id > 32) continue;
+            if (!ColorUtility.TryParseHtmlString(tokens[1], out Color c)) continue;
+
+            mat.SetColor("_IdColor" + id.ToString("00"), c);
+            applied++;
+            if (id > maxId) maxId = id;
         }
+
+        if (maxId > 0) mat.SetFloat("_IdRegionCount", maxId);
+        return " (색표 " + applied + "개 적용)";
     }
 
     private static void EnsureFolder(string folder)

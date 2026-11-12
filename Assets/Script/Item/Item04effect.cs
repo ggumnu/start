@@ -97,7 +97,7 @@ public class ExplodeOnImpactEffect : IPassiveItemEffect, IRemovablePassiveEffect
             EnemyHealth enemyHealth = hit.GetComponent<EnemyHealth>();
             if (enemyHealth != null)
             {
-                enemyHealth.TakeDamage(damage);
+                enemyHealth.TakeWeakDamage(damage); // 피해 숫자 항상 Weak(형빈 확정)
                 if (!hitEnemies.Contains(enemyHealth)) hitEnemies.Add(enemyHealth);
             }
         }

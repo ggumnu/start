@@ -190,6 +190,7 @@ public class PlayerDisposableItem : MonoBehaviour
         if (!effect.CanUse(effectContext))
         {
             Debug.Log($"PlayerDisposableItem: '{item.displayName}' 지금은 사용할 수 없어 소모되지 않았습니다.");
+            GameAudio.Play(SfxId.ActionFail);
             return;
         }
 

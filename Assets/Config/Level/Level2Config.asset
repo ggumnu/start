@@ -81,5 +81,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 07ba68a96f352ef43ad947210956fa5d, type: 2}
   - {fileID: 11400000, guid: 6026fd75472a3d14a99e7cb0724e5f53, type: 2}
   backgroundMaterial: {fileID: 2100000, guid: ffb10e7ff4c84d4f87ceee27e32e5391, type: 2}
+  lightingProfile: {fileID: 11400000, guid: 59f64bc832f161d469fe96cc5b4e5a75, type: 2}
   allowMultiCellRooms: 0
   maxGenerationAttempts: 100

@@ -232,7 +232,9 @@ public class PlayerHealth : MonoBehaviour
     {
         if (IsDead) return;
         if (amount > 0f) amount *= HealBoostOverride.GetMultiplier();
+        float before = currentHealth;
         currentHealth = Mathf.Min(currentHealth + amount, stats.MaxHealth);
+        if (currentHealth > before) GameAudio.Play(SfxId.PlayerHeal); // [사운드] 실제로 찼을 때만
     }
 
     // 최대 체력 자체를 늘려주는 아이템(체력방 등)을 위한 함수 - 나중에 사용

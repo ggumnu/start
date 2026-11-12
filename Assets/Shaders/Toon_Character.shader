@@ -103,6 +103,11 @@ Shader "MobArchive/Toon_Character"
             half _Cutoff;
         CBUFFER_END
 
+        // [레벨 조명 - LevelLighting.cs] 레벨마다 그림자 색/전체 밝기를 바꾸는 전역 값입니다(재질 값 아님). 값이 0이면(기본, 1레벨/n.5레벨/
+        // 테스트 씬) 아무 변화가 없도록 "빼는 양"으로 받습니다: 그림자 색 x (1 - ShadowSub), 최종 색 x (1 - Darken).
+        half4 _MobLvCharShadowSub;
+        half _MobLvCharDarken;
+
         TEXTURE2D(_BaseMap);          SAMPLER(sampler_BaseMap);
         TEXTURE2D(_BumpMap);          SAMPLER(sampler_BumpMap);
         TEXTURE2D(_MetallicGlossMap); SAMPLER(sampler_MetallicGlossMap);
@@ -213,8 +218,10 @@ Shader "MobArchive/Toon_Character"
                 half castShadow = lerp(1.0h, mainLight.shadowAttenuation, _ReceiveShadowAmount);
                 half lit = ramp * castShadow;
 
-                half3 shade = lerp(_ShadowColor.rgb, lightHue, lit);
-                half3 color = albedo.rgb * shade * _Brightness;
+                // [레벨 조명] 그림자 색과 전체 밝기에 레벨 값을 곱합니다(기본 0 = 변화 없음).
+                half3 levelShadow = _ShadowColor.rgb * saturate(1.0h - _MobLvCharShadowSub.rgb);
+                half3 shade = lerp(levelShadow, lightHue, lit);
+                half3 color = albedo.rgb * shade * _Brightness * saturate(1.0h - _MobLvCharDarken);
 
                 // 가장자리 빛(림라이트): 윤곽 쪽을 살짝 밝혀 배경에서 캐릭터가 또렷하게 떠 보이게 합니다.
                 if (_RimStrength > 0.0h)

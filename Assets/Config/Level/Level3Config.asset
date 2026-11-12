@@ -69,5 +69,6 @@ MonoBehaviour:
   normalEnemyCountWeights: []
   normalEnemyPool: []
   backgroundMaterial: {fileID: 2100000, guid: 9c40a12467e444edadee354a6a5e7af8, type: 2}
+  lightingProfile: {fileID: 11400000, guid: 7abb6e0e5bcf37e4c8d50d89fa8ddef7, type: 2}
   allowMultiCellRooms: 0
   maxGenerationAttempts: 100

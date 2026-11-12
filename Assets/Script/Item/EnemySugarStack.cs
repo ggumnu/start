@@ -121,7 +121,8 @@ public class SugarStackDisplay : MonoBehaviour
     private readonly List<View> pool = new List<View>();
     private readonly List<EnemySugarStack> removeBuffer = new List<EnemySugarStack>();
     private readonly HashSet<EnemySugarStack> seen = new HashSet<EnemySugarStack>();
-    private readonly Vector3[] corners = new Vector3[8];
+    // [위치 기준 - 회전 떨림 수정] 적마다 처음 표시할 때 한 번 잰 몸통 크기입니다(x = 수평 반지름, y = 적 위치에서 몸통 바닥까지 높이 차).
+    private readonly Dictionary<EnemySugarStack, Vector2> bodySizes = new Dictionary<EnemySugarStack, Vector2>();
 
     private Canvas canvas;
     private RectTransform canvasRect;
@@ -215,44 +216,53 @@ public class SugarStackDisplay : MonoBehaviour
         {
             var view = views[key];
             views.Remove(key);
+            bodySizes.Remove(key);
             ReturnView(view);
         }
     }
 
-    // 적 몸통을 화면에 비춘 사각형의 오른쪽 아래 모서리(캔버스 좌표)입니다.
+    // 적 몸통 오른쪽 아래 모서리(캔버스 좌표)입니다.
+    // [회전 떨림 수정 - 형빈 확인] 예전에는 매 프레임 몸통 경계 상자의 화면 모서리를 썼는데, 경계 상자는 적이 회전할 때마다 크기가
+    // 바뀌어서 회전이 잦은 적(접촉형)에서 아이콘이 심하게 떨렸습니다. 이제는 적의 위치(transform)를 기준으로 하고, 몸통 크기는 처음
+    // 표시할 때 한 번만 재서 고정합니다. 오른쪽 = 적 위치에서 화면 오른쪽으로 수평 반지름만큼, 아래 = 몸통 바닥 높이에서 카메라 쪽으로
+    // 수평 반지름만큼 나온 점입니다(예전 경계 상자 모서리와 비슷한 자리). 회전해도 바뀌지 않습니다.
     private bool TryGetScreenAnchor(EnemySugarStack stack, EnemyHealth health, out Vector2 localPoint)
     {
         localPoint = Vector2.zero;
-        Bounds bounds;
-        Renderer body = health.TargetRenderer;
-        if (body != null) bounds = body.bounds;
-        else
+        Vector3 pos = health.transform.position;
+
+        if (!bodySizes.TryGetValue(stack, out Vector2 size))
         {
-            var col = stack.GetComponent<Collider>();
-            if (col == null) return false;
-            bounds = col.bounds;
+            Bounds bounds;
+            Renderer body = health.TargetRenderer;
+            if (body != null) bounds = body.bounds;
+            else
+            {
+                var col = stack.GetComponent<Collider>();
+                if (col == null) return false;
+                bounds = col.bounds;
+            }
+            float radius = Mathf.Max(bounds.extents.x, bounds.extents.z);
+            size = new Vector2(radius, bounds.min.y - pos.y);
+            bodySizes[stack] = size;
         }
 
-        Vector3 min = bounds.min, max = bounds.max;
-        corners[0] = new Vector3(min.x, min.y, min.z);
-        corners[1] = new Vector3(max.x, min.y, min.z);
-        corners[2] = new Vector3(min.x, max.y, min.z);
-        corners[3] = new Vector3(max.x, max.y, min.z);
-        corners[4] = new Vector3(min.x, min.y, max.z);
-        corners[5] = new Vector3(max.x, min.y, max.z);
-        corners[6] = new Vector3(min.x, max.y, max.z);
-        corners[7] = new Vector3(max.x, max.y, max.z);
+        Vector3 camRight = mainCamera.transform.right;
+        camRight.y = 0f;
+        camRight = camRight.sqrMagnitude > 0.0001f ? camRight.normalized : Vector3.right;
+        Vector3 camForward = mainCamera.transform.forward;
+        camForward.y = 0f;
+        camForward = camForward.sqrMagnitude > 0.0001f ? camForward.normalized : Vector3.forward;
 
-        float right = float.MinValue, bottom = float.MaxValue;
-        for (int i = 0; i < corners.Length; i++)
-        {
-            Vector3 sp = mainCamera.WorldToScreenPoint(corners[i]);
-            if (sp.z < 0f) return false; // 카메라 뒤
-            if (sp.x > right) right = sp.x;
-            if (sp.y < bottom) bottom = sp.y;
-        }
+        Vector3 bottomCenter = new Vector3(pos.x, pos.y + size.y, pos.z);
+        Vector3 rightPoint = bottomCenter + camRight * size.x;
+        Vector3 nearPoint = bottomCenter - camForward * size.x;
 
-        return RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, new Vector2(right, bottom), null, out localPoint);
+        Vector3 rightScreen = mainCamera.WorldToScreenPoint(rightPoint);
+        Vector3 nearScreen = mainCamera.WorldToScreenPoint(nearPoint);
+        if (rightScreen.z < 0f || nearScreen.z < 0f) return false; // 카메라 뒤
+
+        return RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, new Vector2(rightScreen.x, nearScreen.y), null, out localPoint);
     }
 
     private void ApplyView(View view, Settings settings, Sprite icon, Vector2 anchor, int count)

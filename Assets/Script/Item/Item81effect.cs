@@ -101,6 +101,8 @@ public class IncendiaryFireZone : MonoBehaviour
     }
     private readonly List<Flame> flames = new List<Flame>();
 
+    private int burnLoopHandle;
+
     // center(바닥 위치)에 구역을 만듭니다. baseEnemyDamage는 던진 순간의 수류탄 피해(비율을 곱하기 전)입니다.
     public static IncendiaryFireZone Spawn(PlayerGrenadeThrower owner, Vector3 center, float radius, float height, string enemyTag,
                                            float baseEnemyDamage, IncendiaryGrenadeOverride.Settings settings)
@@ -139,6 +141,9 @@ public class IncendiaryFireZone : MonoBehaviour
         }
 
         CreateMarker();
+
+        // [사운드] 연소 반복 소리. 플레이어가 없는 방에서 생긴 구역은 소리 없음(방 범위 규칙 - 방을 나가면 GameAudio가 자동으로 끔).
+        if (RoomScope.IsPlayerInRoom(RoomScope.RoomOf(center))) burnLoopHandle = GameAudio.PlayLoop(SfxId.IncendiaryBurn);
     }
 
     void Update()
@@ -181,7 +186,7 @@ public class IncendiaryFireZone : MonoBehaviour
         {
             try
             {
-                if (enemyDamage > 0f) enemy.TakeDamage(enemyDamage);
+                if (enemyDamage > 0f) enemy.TakeWeakDamage(enemyDamage); // 피해 숫자 항상 Weak(형빈 확정)
                 if (hackTool != null && !enemy.IsDead) hackTool.ApplyHackToEnemy(enemy);
             }
             catch (System.Exception e)
@@ -480,6 +485,7 @@ public class IncendiaryFireZone : MonoBehaviour
     private void Finish()
     {
         finished = true;
+        GameAudio.StopLoop(ref burnLoopHandle);
         DestroyMarker();
 
         // 남은 불꽃은 새 불길을 멈추고 자연스럽게 사라지게 합니다(구역 오브젝트와 별개로 남아서 정리됨).
@@ -495,6 +501,7 @@ public class IncendiaryFireZone : MonoBehaviour
     // 씬 전환 등으로 구역이 갑자기 사라져도 표시가 남지 않게 합니다.
     void OnDestroy()
     {
+        GameAudio.StopLoop(ref burnLoopHandle);
         DestroyMarker();
         foreach (var f in flames)
         {

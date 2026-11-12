@@ -1,0 +1,66 @@
+﻿효과음 클립 출처 (Claude가 효과음번들에서 골라 편집 - 원본 번들 폴더는 그대로)
+
+라이선스: Kenney(CC0, 표기 불필요) / Sonniss GDC 2026 Game Audio Bundle(로열티 프리, 표기 불필요, 효과음 파일만 따로 재배포 금지)
+
+파일 이름 = SFX_<소리 종류>(_번호). 메뉴 MobArchive/사운드/효과음 클립 자동 배치 (빈 칸만)으로 SoundLibrary에 들어갑니다.
+
+SFX_UIConfirm  (0.29s)  <-  confirmation_001.ogg
+SFX_UICancel  (0.09s)  <-  back_002.ogg
+SFX_UIHover  (0.04s)  <-  select_002.ogg
+SFX_UIDanger  (0.59s)  <-  Interface Sci-Fi Ping Down
+SFX_PauseOpen  (0.26s)  <-  maximize_001.ogg
+SFX_GameOverShow  (0.78s)  <-  Interface Arp Reveal Down Long
+SFX_HoldRestart  (1.85s)  <-  Impact Cut Sweep
+SFX_ChestOpen  (0.16s)  <-  MECHLtch_Click Deep Mechanism Latch
+SFX_ItemPickup  (0.65s)  <-  Interface Plucks Happy
+SFX_ShopPurchase  (0.83s)  <-  Ting Coins
+SFX_ShopPurchaseFail  (0.58s)  <-  Deny Muted
+SFX_ItemActivate  (1.39s)  <-  Button Arp Twinkle
+SFX_ItemFail  (0.47s)  <-  Interface Deny Low Fat Dark
+SFX_ActionFail  (0.1s)  <-  error_004.ogg
+SFX_Footstep  (0.27s)  <-  FFG002.wav (슬리퍼 발소리 4개 잘라냄)
+SFX_Dash  (1.9s)  <-  Woosh Debris
+SFX_GunEmpty  (0.18s)  <-  MECHClik_USALightSwitch_On05
+SFX_ReloadStart  (0.27s)  <-  MACHMech_Mechanism Counting Machine
+SFX_ReloadComplete  (0.33s)  <-  OBJLug_Case_Closed06
+SFX_BulletHitWall  (0.37s)  <-  GOREMisc_Concrete_MetalPipe02
+SFX_WeaponSwitch  (0.16s)  <-  switch_002.ogg
+SFX_GrenadePinPull  (0.42s)  <-  Flicking Carabiner On Rope
+SFX_GrenadeThrow  (1.04s)  <-  WINDDsgn_Wind, Rush, Whoosh, Long x5
+SFX_GrenadeExplode  (1.24s)  <-  EXPLDsgn_Explosion Small Blast
+SFX_HackDeploy  (1.01s)  <-  ELECArc_ArcDesign15
+SFX_ArtilleryFall  (1.51s)  <-  Aztec Death Whistle DryPitch12
+SFX_ClaymoreInstall  (0.21s)  <-  BEEPMed_Thermometer_Beep11
+SFX_IncendiaryBurn  (12.35s)  <-  FIREBurn_Loop (반복용 원본)
+SFX_RoomWave  (1.15s)  <-  WATRMisc_Water, Liquid Impact
+SFX_ChargeShotCharge  (0.44s)  <-  phaserUp3.ogg
+SFX_PlayerHit  (0.91s)  <-  FGHTImpt_Combat Punch Impact
+SFX_ShieldBlock  (0.12s)  <-  glass_002.ogg
+SFX_PlayerDeath  (3.15s)  <-  Cartoon Transition Bass Down
+SFX_PlayerHeal  (0.41s)  <-  UIMisc_Kalimba 3 Up
+SFX_ShieldGain  (0.28s)  <-  UIAlert_Collect Scifi Futuristic
+SFX_EnemyHit  (0.33s)  <-  METLImpt_Metal Old File Impact Tap
+SFX_EnemyKill  (1.27s)  <-  ELECMisc_Impact Electric Tonal Deep
+SFX_EnemyAttackWarn  (1.35s)  <-  ELECArc_ArcPowerUpDesign04
+SFX_BossArtilleryExplode  (2.34s)  <-  EffectiveTrailer_Booms_Vol2_075
+SFX_BossSummonWave  (2.48s)  <-  UIAlert_Alert Designed Transition Swell
+SFX_EnemyShot  (0.67s)  <-  laser3.ogg
+SFX_BossShieldHit  (0.03s)  <-  glitch_002.ogg
+SFX_BossShieldBreak  (2.0s)  <-  ICEBrk_Skill Freeze Whoosh Break
+SFX_BossGroggy  (1.02s)  <-  Cartoon Confused Dizzy
+SFX_BossKill  (4.23s)  <-  EffectiveTrailer_Booms_Vol2_011
+SFX_RoomClear  (0.34s)  <-  Game Entry Happy Short
+SFX_SpecialRoomUnlock  (2.41s)  <-  GLASMvmt_Whoosh Glass Crystal
+SFX_HeliRotor  (13.95s)  <-  장난감 쿼드콥터 → 0.55배 낮춤 + 고음 깎기 + 반복용 이음
+SFX_CombatStart  (1.25s)  <-  DOORMetl_StairWellDoor01
+SFX_BossRoomAlert  (2.6s)  <-  EffectiveTrailer_Alarms_Vol2_HalfNotes_003
+SFX_SummonAppear  (2.3s)  <-  MAGAngl_Magic Light Spell
+SFX_IntroPose  (1.35s)  <-  DSGNStngr_Power Up Bright Positive
+SFX_Active16  (0.94s)  <-  ROBTMvmt_Tower Deploy Hitech
+SFX_Active29  (2.2s)  <-  Impact Hit Rapid Chord Reverb
+SFX_Active31  (2.08s)  <-  SBmb_Music Box A 013
+SFX_Active85  (2.23s)  <-  Vibrato Impact Snap Spin Transition
+SFX_Active87  (2.39s)  <-  GAMEMisc_Magic Creation 23
+SFX_Active93  (1.79s)  <-  Cartoon Pull Swoosh Readout
+SFX_Active106  (1.02s)  <-  OBJMisc_ScratchCard_CoinTapScratch_01
+SFX_Active112  (0.39s)  <-  phaseJump3.ogg

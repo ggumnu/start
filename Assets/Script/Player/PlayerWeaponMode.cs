@@ -30,6 +30,10 @@ using UnityEngine;
 //   끄는 이유: 피격 무적 점멸(PlayerHitFlash)이 Renderer를 껐다 켰다 하므로, Renderer만 끄면 점멸 중에
 //   숨긴 총이 다시 보이게 됩니다. 총구(FirePoint)는 총 모델의 자식이 아니라 플레이어 바로 아래에 있어서
 //   총 모델을 꺼도 영향이 없습니다.
+// - [총 숨기기 - 형빈 확정, 등에 메기 대체] 수류탄/해킹툴 모드, 비전투 뛰기 모션 동안(hideGunWhileRunning), 아이템 획득 연출 중에는
+//   총을 숨깁니다(블루 아카이브처럼 연출상 사라졌다 나타남). 등에 메던 기능은 가방(몸통 후면 악세서리)과 겹쳐서 삭제했습니다.
+//   표시 여부는 매 프레임(LateUpdate) 다시 계산하므로 뛰기가 끝나는 순간 바로 다시 보입니다. 헬기 연출은 이 컴포넌트를 끄고
+//   HeliExtraction이 직접 숨겼다가 되돌립니다(gunModel 칸을 같이 씀).
 // - 수류탄을 던지는 동작 중(PlayerGrenadeThrower.IsThrowing)에는 1/2/3키 전환과 "자원 0이면 총으로
 //   복귀"를 잠시 미룹니다. 던지는 순간 마지막 수류탄이 소모되어 바로 총 모드로 돌아가버리면 투척
 //   애니메이션이 중간에 끊기기 때문입니다. 마지막 수류탄의 총 복귀는 투척 동작이 끝난 뒤
@@ -78,7 +82,9 @@ public class PlayerWeaponMode : MonoBehaviour
     [Tooltip("수류탄 모드(2번)에서 총 모델을 숨길지 여부입니다.")]
     public bool hideGunInGrenadeMode = true;
     [Tooltip("해킹툴 모드(3번)에서 총 모델을 숨길지 여부입니다.")]
-    public bool hideGunInHackMode = false;
+    public bool hideGunInHackMode = true;
+    [Tooltip("비전투 뛰기 모션(PlayerMovement.IsRunAnimating) 동안 총을 숨깁니다. 뛰기가 끝나면(멈춤/사격/조준/장전/피격) 바로 다시 보입니다.")]
+    public bool hideGunWhileRunning = true;
 
     // 모드가 바뀔 때마다 새 모드를 알려줍니다(나중에 무기 모드 HUD가 생기면 구독용).
     public event Action<PlayerWeapon> OnModeChanged;
@@ -118,6 +124,14 @@ public class PlayerWeaponMode : MonoBehaviour
         if (resources == null) resources = GetComponent<PlayerResources>();
         if (resources == null) resources = FindFirstObjectByType<PlayerResources>();
         if (animator == null) animator = GetComponentInChildren<Animator>();
+    }
+
+    private PlayerMovement movement;
+
+    // 뛰기 모션은 모드 변경 없이 켜지고 꺼지므로 총 표시를 매 프레임 다시 맞춥니다(애니메이션 뒤).
+    void LateUpdate()
+    {
+        UpdateGunVisibility();
     }
 
     void Start()
@@ -283,13 +297,20 @@ public class PlayerWeaponMode : MonoBehaviour
             animator.SetInteger(weaponModeAnimatorParam, (int)current);
         }
 
-        if (gunModel != null)
-        {
-            bool hide = (current == PlayerWeapon.Grenade && hideGunInGrenadeMode) ||
-                        (current == PlayerWeapon.Hack && hideGunInHackMode) ||
-                        PlayerItemPickupPresenter.BlocksActions; // 아이템 획득 연출 중에는 항상 숨김
-            if (gunModel.activeSelf == hide) gunModel.SetActive(!hide);
-        }
+        UpdateGunVisibility();
+    }
+
+    // 총 모델을 지금 상황에 맞게 숨기거나 보입니다. 오브젝트 자체를 끄는 이유는 위 [애니메이션 연동] 설명 참고.
+    private void UpdateGunVisibility()
+    {
+        if (gunModel == null) return;
+        if (movement == null) movement = GetComponent<PlayerMovement>();
+
+        bool hide = (current == PlayerWeapon.Grenade && hideGunInGrenadeMode) ||
+                    (current == PlayerWeapon.Hack && hideGunInHackMode) ||
+                    (hideGunWhileRunning && movement != null && movement.IsRunAnimating) ||
+                    PlayerItemPickupPresenter.BlocksActions; // 아이템 획득 연출 중에는 항상 숨김
+        if (gunModel.activeSelf == hide) gunModel.SetActive(!hide);
     }
 
     private static bool HasIntParameter(Animator anim, string paramName)

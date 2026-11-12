@@ -8,7 +8,7 @@
 // 만들기: Project 창에서 Assets/Resources 폴더 우클릭 > Create > MobArchive > Item Codex Settings, 이름을 ItemCodexSettings로.
 // 그다음 Item Database 칸에 게임에서 쓰는 ItemDatabase 에셋을, Hud Prefab 칸에 플레이어 HUD 프리팹을 끌어다 넣습니다.
 //
-// 버튼 색(평소/마우스 올림)과 버튼 글자 색은 공용 스타일 에셋(PopupStyle)에서 읽습니다.
+// [돌아가기] 버튼(하늘색 평행사변형)의 색/모양/글자 색, 제목 글자 색은 공용 스타일 에셋(PopupStyle)에서 읽습니다.
 // 아이템 설명칸 모양(색/글자 크기/등급 스프라이트 등)은 HUD 프리팹 안의 PlayerItemInfoDisplay 값을 그대로 씁니다(인벤토리 설명칸과 항상 같은 모양).
 [CreateAssetMenu(fileName = "ItemCodexSettings", menuName = "MobArchive/Item Codex Settings")]
 public class ItemCodexSettings : ScriptableObject
@@ -62,9 +62,8 @@ public class ItemCodexSettings : ScriptableObject
     [Tooltip("바꾸면 삼각형 진하기 배치가 달라집니다.")]
     public float patternSeed = 0f;
 
-    [Header("제목")]
+    [Header("제목 (글자 색은 PopupStyle)")]
     public int titleFontSize = 56;
-    public Color titleColor = new Color32(0x34, 0x33, 0x65, 0xFF);
     [Tooltip("제목의 세로 위치입니다(화면 중앙 기준, 양수면 위로).")]
     public float titleOffsetY = 400f;
 
@@ -91,11 +90,10 @@ public class ItemCodexSettings : ScriptableObject
     [Tooltip("아이콘 스프라이트가 아직 없는 아이템 자리에 칠할 색입니다.")]
     public Color missingIconColor = new Color(0.6f, 0.6f, 0.6f, 1f);
 
-    [Header("돌아가기 버튼 (색/글자 색은 PopupStyle)")]
+    [Header("돌아가기 버튼 (색/모양/글자 색은 PopupStyle)")]
     public Vector2 buttonSize = new Vector2(220f, 80f);
     [Tooltip("버튼의 세로 위치입니다(화면 중앙 기준, 음수면 아래로).")]
     public float buttonOffsetY = -420f;
-    [Min(0f)] public float buttonCornerRadius = 18f;
     public int buttonFontSize = 32;
 
     [Header("아이템 설명칸 위치")]

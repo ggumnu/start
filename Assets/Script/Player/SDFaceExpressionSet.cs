@@ -10,6 +10,7 @@ public enum SDFaceExpression
     ItemPickup,  // 플레이어 아이템 획득 (획득 애니메이션 동안)
     Reload,      // 장전 (장전 애니메이션 동안)
     Death,       // 사망 (사망 이후 계속)
+    Run,         // 비전투 뛰기 (뛰기 모션 동안) - 에셋에 숫자로 저장되므로 새 표정은 항상 맨 끝에 추가
 }
 
 // SD 캐릭터 표정 세트(ScriptableObject)입니다. "표정 -> 눈 칸 / 입 칸" 대응표와 눈 깜빡임 설정을 담습니다.
@@ -20,6 +21,7 @@ public enum SDFaceExpression
 //
 //   표정          눈 칸  입 칸  우선순위  깜빡임
 //   기본            1     1       0       O
+//   뛰기            4     1       5       X
 //   장전            3     1      10       X
 //   아이템 획득     4     4      20       X
 //   피격            5     5      30       X
@@ -83,6 +85,7 @@ public class SDFaceExpressionSet : ScriptableObject
         expressions = new List<Entry>
         {
             new Entry { expression = SDFaceExpression.Default,    eyeCell = 1, mouthCell = 1, priority = 0,   allowBlink = true },
+            new Entry { expression = SDFaceExpression.Run,        eyeCell = 4, mouthCell = 1, priority = 5,   allowBlink = false },
             new Entry { expression = SDFaceExpression.Reload,     eyeCell = 3, mouthCell = 1, priority = 10,  allowBlink = false },
             new Entry { expression = SDFaceExpression.ItemPickup, eyeCell = 4, mouthCell = 4, priority = 20,  allowBlink = false },
             new Entry { expression = SDFaceExpression.Hit,        eyeCell = 5, mouthCell = 5, priority = 30,  allowBlink = false },

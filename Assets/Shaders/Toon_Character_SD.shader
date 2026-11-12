@@ -2,19 +2,18 @@
 // 기존 "MobArchive/Toon_Character"를 복사해서 만든 셰이더입니다. 명암/림라이트/외곽선/그림자 동작은 원본과
 // 완전히 같고, 아래 두 가지만 추가했습니다. 원본 셰이더와 레이사 등 기존 캐릭터 재질은 전혀 건드리지 않습니다.
 //
-// 1) 색 영역 바꾸기 (RGBA 마스크)
+// 1) 색 영역 바꾸기 (ID 맵, 32영역)
 //    - 기본 텍스처(Base Map)에서 색이 바뀔 부분은 흰색으로, 주름선/봉제선 같은 고정 디테일은 회색/검정으로 그립니다.
-//    - 마스크 텍스처(Mask Map)의 R/G/B/A 채널이 각각 하나의 색 영역입니다. 칠해진 곳만 "영역 R~A 색"이 곱해지고,
-//      아무 채널에도 칠해지지 않은 곳(흰 토글 단추 같은 고정색)은 기본 텍스처 색 그대로 나옵니다.
-//    - 마스크 텍스처는 반드시 가져오기 설정에서 sRGB를 꺼야 합니다(SD 재질 자동 설정 메뉴가 처리합니다).
-//    - 마스크를 비워두면 영역 색은 무시되고 기본 텍스처 색 그대로 나옵니다.
+//    - ID 맵은 흑백 한 장으로, 픽셀 값 = 영역 번호 x 7 (0 = 고정색, 기본 텍스처 색 그대로 / 1~32 = "영역 NN 색"이 곱해짐).
+//    - 번호 그림이라 반드시 sRGB 끔 + 압축 없음 + Filter Point + 밉맵 끔(SD 재질 자동 설정 메뉴가 처리).
+//      경계는 셰이더가 주변 4픽셀의 "색"을 직접 섞어서 부드럽게 보이게 합니다.
+//    - ID 맵을 비워두면 영역 색은 무시되고 기본 텍스처 색 그대로 나옵니다.
 //
 // 2) 피부색 연동
-//    - "전체 피부"를 켜면(머리, 맨손) 메시 전체가 피부색이 됩니다. 마스크는 필요 없습니다.
-//    - 일부만 피부인 파츠(예: 팔찌 찬 손)는 피부 영역을 마스크의 한 채널에 칠하고 "X 영역 = 피부색 사용"을 켭니다.
-//    - 마스크 채널 4개를 다 쓴 파츠(예: 토르소의 목 부분)는 "기본 텍스처의 알파"로 피부를 표시합니다.
-//      기본 텍스처에서 알파가 0인 곳은 자동으로 피부색이 됩니다(알파 잘라내기를 끈 재질만). 알파가 없는
-//      텍스처(전부 불투명)는 아무 영향이 없습니다.
+//    - "전체 피부"를 켜면(머리, 맨손) 메시 전체가 피부색이 됩니다. ID 맵은 필요 없습니다.
+//    - 일부만 피부인 파츠는 "피부색으로 쓸 영역 번호"로 지정합니다.
+//    - 기본 텍스처에서 알파가 0인 곳도 자동으로 피부색이 됩니다(알파 잘라내기를 끈 재질만, 예: 토르소의 목 부분).
+//      알파가 없는 텍스처(전부 불투명)는 아무 영향이 없습니다.
 //    - 피부색 값은 캐릭터마다 SDCharacterSkin 컴포넌트가 한 번에 덮어씁니다. 재질의 "피부색"은 그 컴포넌트가
 //      없을 때의 기본값입니다.
 //
@@ -29,20 +28,46 @@ Shader "MobArchive/Toon_Character_SD"
         [Normal][NoScaleOffset] _BumpMap ("노멀 맵 (Normal Map)", 2D) = "bump" {}
         _BumpScale ("노멀 맵 세기", Range(0, 2)) = 1
 
-        [Header(SD Color Regions)]
-        [NoScaleOffset] _MaskMap ("색 영역 마스크 (R/G/B/A 채널, sRGB 끔)", 2D) = "black" {}
-        _RegionColorR ("영역 R 색", Color) = (1, 1, 1, 1)
-        _RegionColorG ("영역 G 색", Color) = (1, 1, 1, 1)
-        _RegionColorB ("영역 B 색", Color) = (1, 1, 1, 1)
-        _RegionColorA ("영역 A 색", Color) = (1, 1, 1, 1)
+        [Header(SD Color Regions  ID Map 32)]
+        [NoScaleOffset] _IdMap ("색 영역 ID 맵 (번호 그림 - sRGB 끔, Point, 압축 없음)", 2D) = "black" {}
+        [IntRange] _IdSkinRegion ("피부색으로 쓸 영역 번호 (0 = 없음)", Range(0, 32)) = 0
+        [IntRange] _IdRegionCount ("인스펙터에 보일 영역 수 (표시 전용)", Range(1, 32)) = 8
+        _IdColor01 ("영역 01 색", Color) = (1, 1, 1, 1)
+        _IdColor02 ("영역 02 색", Color) = (1, 1, 1, 1)
+        _IdColor03 ("영역 03 색", Color) = (1, 1, 1, 1)
+        _IdColor04 ("영역 04 색", Color) = (1, 1, 1, 1)
+        _IdColor05 ("영역 05 색", Color) = (1, 1, 1, 1)
+        _IdColor06 ("영역 06 색", Color) = (1, 1, 1, 1)
+        _IdColor07 ("영역 07 색", Color) = (1, 1, 1, 1)
+        _IdColor08 ("영역 08 색", Color) = (1, 1, 1, 1)
+        _IdColor09 ("영역 09 색", Color) = (1, 1, 1, 1)
+        _IdColor10 ("영역 10 색", Color) = (1, 1, 1, 1)
+        _IdColor11 ("영역 11 색", Color) = (1, 1, 1, 1)
+        _IdColor12 ("영역 12 색", Color) = (1, 1, 1, 1)
+        _IdColor13 ("영역 13 색", Color) = (1, 1, 1, 1)
+        _IdColor14 ("영역 14 색", Color) = (1, 1, 1, 1)
+        _IdColor15 ("영역 15 색", Color) = (1, 1, 1, 1)
+        _IdColor16 ("영역 16 색", Color) = (1, 1, 1, 1)
+        _IdColor17 ("영역 17 색", Color) = (1, 1, 1, 1)
+        _IdColor18 ("영역 18 색", Color) = (1, 1, 1, 1)
+        _IdColor19 ("영역 19 색", Color) = (1, 1, 1, 1)
+        _IdColor20 ("영역 20 색", Color) = (1, 1, 1, 1)
+        _IdColor21 ("영역 21 색", Color) = (1, 1, 1, 1)
+        _IdColor22 ("영역 22 색", Color) = (1, 1, 1, 1)
+        _IdColor23 ("영역 23 색", Color) = (1, 1, 1, 1)
+        _IdColor24 ("영역 24 색", Color) = (1, 1, 1, 1)
+        _IdColor25 ("영역 25 색", Color) = (1, 1, 1, 1)
+        _IdColor26 ("영역 26 색", Color) = (1, 1, 1, 1)
+        _IdColor27 ("영역 27 색", Color) = (1, 1, 1, 1)
+        _IdColor28 ("영역 28 색", Color) = (1, 1, 1, 1)
+        _IdColor29 ("영역 29 색", Color) = (1, 1, 1, 1)
+        _IdColor30 ("영역 30 색", Color) = (1, 1, 1, 1)
+        _IdColor31 ("영역 31 색", Color) = (1, 1, 1, 1)
+        _IdColor32 ("영역 32 색", Color) = (1, 1, 1, 1)
 
         [Header(Skin)]
         _SkinColor ("피부색 (SDCharacterSkin이 캐릭터마다 덮어씀)", Color) = (0.984, 0.929, 0.91, 1)
         [ToggleUI] _WholeSkin ("전체 피부 (머리, 맨손)", Float) = 0
-        [ToggleUI] _SkinLinkR ("R 영역 = 피부색 사용", Float) = 0
-        [ToggleUI] _SkinLinkG ("G 영역 = 피부색 사용", Float) = 0
-        [ToggleUI] _SkinLinkB ("B 영역 = 피부색 사용", Float) = 0
-        [ToggleUI] _SkinLinkA ("A 영역 = 피부색 사용", Float) = 0
 
         [Header(Toon Shading)]
         _ShadowColor ("그림자 색", Color) = (0.82, 0.74, 0.84, 1)
@@ -127,18 +152,49 @@ Shader "MobArchive/Toon_Character_SD"
             half _OutlineBaseColorBlend;
             half _AlphaClip;
             half _Cutoff;
-            half4 _RegionColorR;
-            half4 _RegionColorG;
-            half4 _RegionColorB;
-            half4 _RegionColorA;
             half4 _SkinColor;
             half _WholeSkin;
-            half _SkinLinkR;
-            half _SkinLinkG;
-            half _SkinLinkB;
-            half _SkinLinkA;
             half _DitherFade;
+            half _IdSkinRegion;
+            float4 _IdMap_TexelSize;
+            half4 _IdColor01;
+            half4 _IdColor02;
+            half4 _IdColor03;
+            half4 _IdColor04;
+            half4 _IdColor05;
+            half4 _IdColor06;
+            half4 _IdColor07;
+            half4 _IdColor08;
+            half4 _IdColor09;
+            half4 _IdColor10;
+            half4 _IdColor11;
+            half4 _IdColor12;
+            half4 _IdColor13;
+            half4 _IdColor14;
+            half4 _IdColor15;
+            half4 _IdColor16;
+            half4 _IdColor17;
+            half4 _IdColor18;
+            half4 _IdColor19;
+            half4 _IdColor20;
+            half4 _IdColor21;
+            half4 _IdColor22;
+            half4 _IdColor23;
+            half4 _IdColor24;
+            half4 _IdColor25;
+            half4 _IdColor26;
+            half4 _IdColor27;
+            half4 _IdColor28;
+            half4 _IdColor29;
+            half4 _IdColor30;
+            half4 _IdColor31;
+            half4 _IdColor32;
         CBUFFER_END
+
+        // [레벨 조명 - LevelLighting.cs] 레벨마다 그림자 색/전체 밝기를 바꾸는 전역 값입니다(재질 값 아님). 값이 0이면(기본, 1레벨/n.5레벨/
+        // 테스트 씬) 아무 변화가 없도록 "빼는 양"으로 받습니다: 그림자 색 x (1 - ShadowSub), 최종 색 x (1 - Darken).
+        half4 _MobLvCharShadowSub;
+        half _MobLvCharDarken;
 
         // [실시간 초상화 조명 - PlayerPortraitCamera가 초상화를 그리는 동안에만 켜는 전역 값, 평소엔 0]
         // _SDPortraitLightAmount(0~1)만큼 태양 방향 대신 _SDPortraitLightDir(카메라 쪽에서 얼굴로 비추는 빛)으로 명암을 나누고,
@@ -150,26 +206,83 @@ Shader "MobArchive/Toon_Character_SD"
         TEXTURE2D(_BumpMap);          SAMPLER(sampler_BumpMap);
         TEXTURE2D(_MetallicGlossMap); SAMPLER(sampler_MetallicGlossMap);
         TEXTURE2D(_EmissionMap);      SAMPLER(sampler_EmissionMap);
-        TEXTURE2D(_MaskMap);          SAMPLER(sampler_MaskMap);
+        TEXTURE2D(_IdMap);
 
-        // 색 영역 마스크와 피부색 설정으로 "기본 텍스처에 곱할 색"을 계산합니다.
-        // 아무 채널에도 칠해지지 않은 곳은 1(흰색)이 곱해져서 기본 텍스처 색이 그대로 나옵니다.
+        // [ID 맵] 픽셀 하나의 영역 번호(0~32). 값 = 번호 x 7 / 255 로 저장되어 있습니다.
+        uint SDReadRegionId(int2 p)
+        {
+            int2 size = max(int2(_IdMap_TexelSize.zw), int2(1, 1));
+            p = clamp(p, int2(0, 0), size - 1);
+            float v = LOAD_TEXTURE2D(_IdMap, p).r;
+            return min((uint)round(v * 255.0 / 7.0), 32u);
+        }
+
+        // [ID 맵] 번호 하나를 곱할 색으로 바꿉니다. 0 = 고정색(흰색 = 기본 텍스처 그대로), 피부 번호 = 피부색.
+        #define SD_ID_TINT(colors, id) ((id) == 0u ? half3(1, 1, 1) : (((half)(id) == _IdSkinRegion) ? _SkinColor.rgb : colors[(id) - 1u].rgb))
+
+        // [ID 맵] 주변 4픽셀의 번호를 각각 색으로 바꾼 뒤 그 "색"을 섞습니다(번호끼리 섞으면 엉뚱한 영역 색이 나오기 때문).
+        half3 SDIdTint(float2 uv)
+        {
+            half4 colors[32] =
+            {
+                _IdColor01,
+                _IdColor02,
+                _IdColor03,
+                _IdColor04,
+                _IdColor05,
+                _IdColor06,
+                _IdColor07,
+                _IdColor08,
+                _IdColor09,
+                _IdColor10,
+                _IdColor11,
+                _IdColor12,
+                _IdColor13,
+                _IdColor14,
+                _IdColor15,
+                _IdColor16,
+                _IdColor17,
+                _IdColor18,
+                _IdColor19,
+                _IdColor20,
+                _IdColor21,
+                _IdColor22,
+                _IdColor23,
+                _IdColor24,
+                _IdColor25,
+                _IdColor26,
+                _IdColor27,
+                _IdColor28,
+                _IdColor29,
+                _IdColor30,
+                _IdColor31,
+                _IdColor32
+            };
+
+            float2 t = uv * _IdMap_TexelSize.zw - 0.5;
+            float2 f = frac(t);
+            int2 p = int2(floor(t));
+
+            uint i00 = SDReadRegionId(p);
+            uint i10 = SDReadRegionId(p + int2(1, 0));
+            uint i01 = SDReadRegionId(p + int2(0, 1));
+            uint i11 = SDReadRegionId(p + int2(1, 1));
+
+            half3 c00 = SD_ID_TINT(colors, i00);
+            half3 c10 = SD_ID_TINT(colors, i10);
+            half3 c01 = SD_ID_TINT(colors, i01);
+            half3 c11 = SD_ID_TINT(colors, i11);
+            return lerp(lerp(c00, c10, (half)f.x), lerp(c01, c11, (half)f.x), (half)f.y);
+        }
+
+        // ID 맵과 피부색 설정으로 "기본 텍스처에 곱할 색"을 계산합니다.
         // baseAlpha: 기본 텍스처의 알파. 알파 잘라내기를 끈 재질에서는 알파가 0인 곳을 피부로 봅니다.
         half3 SDRegionTint(float2 uv, half baseAlpha)
         {
             if (_WholeSkin > 0.5h) return _SkinColor.rgb;
 
-            half4 m = SAMPLE_TEXTURE2D(_MaskMap, sampler_MaskMap, uv);
-            half3 colR = lerp(_RegionColorR.rgb, _SkinColor.rgb, _SkinLinkR);
-            half3 colG = lerp(_RegionColorG.rgb, _SkinColor.rgb, _SkinLinkG);
-            half3 colB = lerp(_RegionColorB.rgb, _SkinColor.rgb, _SkinLinkB);
-            half3 colA = lerp(_RegionColorA.rgb, _SkinColor.rgb, _SkinLinkA);
-
-            half covered = saturate(m.r + m.g + m.b + m.a);
-            half3 tint = (1.0h - covered) + m.r * colR + m.g * colG + m.b * colB + m.a * colA;
-
             half skinFromAlpha = (_AlphaClip > 0.5h) ? 0.0h : (1.0h - baseAlpha);
-            return lerp(tint, _SkinColor.rgb, skinFromAlpha);
+            return lerp(SDIdTint(uv), _SkinColor.rgb, skinFromAlpha);
         }
 
         // [112번 투명 - 디더 반투명] _DitherFade(1 = 평소, 0 = 완전히 안 보임)만큼의 픽셀만 남기고 나머지를 4x4 점 무늬로 버립니다.
@@ -308,8 +421,10 @@ Shader "MobArchive/Toon_Character_SD"
                 half castShadow = lerp(1.0h, mainLight.shadowAttenuation, _ReceiveShadowAmount * (1.0h - portraitAmount));
                 half lit = ramp * castShadow;
 
-                half3 shade = lerp(_ShadowColor.rgb, lightHue, lit);
-                half3 color = albedo.rgb * shade * _Brightness;
+                // [레벨 조명] 그림자 색과 전체 밝기에 레벨 값을 곱합니다(기본 0 = 변화 없음).
+                half3 levelShadow = _ShadowColor.rgb * saturate(1.0h - _MobLvCharShadowSub.rgb);
+                half3 shade = lerp(levelShadow, lightHue, lit);
+                half3 color = albedo.rgb * shade * _Brightness * saturate(1.0h - _MobLvCharDarken);
 
                 // 가장자리 빛(림라이트): 윤곽 쪽을 살짝 밝혀 배경에서 캐릭터가 또렷하게 떠 보이게 합니다.
                 if (_RimStrength > 0.0h)
@@ -559,4 +674,7 @@ Shader "MobArchive/Toon_Character_SD"
     }
 
     FallBack "Hidden/Universal Render Pipeline/FallbackError"
+
+    // 인스펙터: 고른 색 영역 방식의 칸만 보여줍니다(Assets/Editor/ToonCharacterSDShaderGUI.cs). 값/동작에는 영향 없음.
+    CustomEditor "ToonCharacterSDShaderGUI"
 }

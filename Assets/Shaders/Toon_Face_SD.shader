@@ -105,6 +105,11 @@ Shader "MobArchive/Toon_Face_SD"
                 half _DitherFade;
             CBUFFER_END
 
+            // [레벨 조명 - LevelLighting.cs] 레벨마다 그림자 색/전체 밝기를 바꾸는 전역 값입니다(재질 값 아님). 값이 0이면(기본, 1레벨/n.5레벨/
+            // 테스트 씬) 아무 변화가 없도록 "빼는 양"으로 받습니다: 그림자 색 x (1 - ShadowSub), 최종 색 x (1 - Darken).
+            half4 _MobLvCharShadowSub;
+            half _MobLvCharDarken;
+
             // [실시간 초상화 조명 - Toon_Character_SD와 같은 전역 값, 평소엔 0]
             float _SDPortraitLightAmount;
             float4 _SDPortraitLightDir;
@@ -210,8 +215,10 @@ Shader "MobArchive/Toon_Face_SD"
                 half castShadow = lerp(1.0h, mainLight.shadowAttenuation, _ReceiveShadowAmount * (1.0h - portraitAmount));
                 half lit = ramp * castShadow;
 
-                half3 shade = lerp(_ShadowColor.rgb, lightHue, lit);
-                half3 color = albedo * shade * _Brightness;
+                // [레벨 조명] 그림자 색과 전체 밝기에 레벨 값을 곱합니다(기본 0 = 변화 없음).
+                half3 levelShadow = _ShadowColor.rgb * saturate(1.0h - _MobLvCharShadowSub.rgb);
+                half3 shade = lerp(levelShadow, lightHue, lit);
+                half3 color = albedo * shade * _Brightness * saturate(1.0h - _MobLvCharDarken);
 
                 color = MixFog(color, input.fogFactor);
                 return half4(color, alpha);

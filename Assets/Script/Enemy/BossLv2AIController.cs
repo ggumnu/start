@@ -17,6 +17,9 @@ using UnityEngine.AI;
 // 벽 돌진: 발동 모션이 끝나면 첫 돌진 충전 이펙트(Wall Dash Charge Vfx)와 함께 보호막이 깨질 때까지 돌진 반복 - 조준(첫 1초, 이후 0.3초) 뒤 벽/장애물(NavMesh 경계)에 닿을 때까지
 // 직진, 조준/돌진 중 몸이 1레벨 보스처럼 물들어 발광, 돌진 중 주황 잔상 + 돌진 피해(IDashDamageSource - 접촉 트리거가 읽음). 목표를 놓치면(112번 투명 등) 멈췄다가 다시 보이면 처음부터
 // (충전 이펙트 + 첫 조준). 기획은 Docs/설계노트.md [2레벨 보스].
+// [첫 돌진 방향 고정 - 형빈 확정] 첫 돌진(충전 이펙트와 함께 하는 1초 조준)은 충전을 시작하는 순간의 목표 지점으로 방향을 고정하고, 충전 동안
+// 그 지점을 향해 몸만 돌립니다(1레벨 보스 연속 돌진의 첫 돌진과 같음 - 방 중앙에서 넓은 보호막으로 시작해 피하기 어려웠음). 이후 돌진(0.3초 조준)은
+// 지금처럼 조준하는 동안 플레이어를 따라갑니다.
 public class BossLv2AIController : BossAIController, IEnemyColorOverride, IDashDamageSource, ICancellableAttack
 {
     [Header("2레벨 보스 - 후퇴 샷건")]
@@ -143,6 +146,7 @@ public class BossLv2AIController : BossAIController, IEnemyColorOverride, IDashD
     private float wallDashTimer;
     private Vector3 wallDashDirection;
     private Vector3 wallDashAimPoint;
+    private bool wallDashAimLocked;   // 첫 돌진 조준 중: 충전 시작 때 정한 목표 지점을 그대로 씀(따라가지 않음)
     private float wallDashElapsed;
     private float wallDashStuckTimer;
     private float wallDashNextAfterimage;
@@ -402,6 +406,8 @@ public class BossLv2AIController : BossAIController, IEnemyColorOverride, IDashD
         attackResumeTime = Time.time + summonAttackDelay;
         if (rangedAttack != null) rangedAttack.CancelBurst();
 
+        GameAudio.Play(SfxId.BossSummonWave); // [사운드] 소환 신호 물결
+
         // 물결은 연출이라 오류가 나도 소환은 그대로 진행합니다.
         if (summonWave != null)
         {
@@ -550,6 +556,7 @@ public class BossLv2AIController : BossAIController, IEnemyColorOverride, IDashD
     // ---------- 보호막 파괴 -> 그로기 ----------
     private void HandleShieldBroken()
     {
+        GameAudio.Play(SfxId.BossGroggy);
         groggy = true;
         groggyEndTime = Time.time + groggyDuration;
         rechargeAt = Time.time + rechargeDelay;
@@ -592,7 +599,8 @@ public class BossLv2AIController : BossAIController, IEnemyColorOverride, IDashD
                     wallDashPhase = WallDashPhase.Idle;
                     return;
                 }
-                wallDashAimPoint = ComputeWallDashAimPoint();
+                // [첫 돌진 방향 고정] 첫 돌진은 충전 시작 때 정한 지점 그대로, 이후 돌진은 조준하는 동안 계속 따라갑니다.
+                if (!wallDashAimLocked) wallDashAimPoint = ComputeWallDashAimPoint();
                 RotateTowards(wallDashAimPoint, wallDashTurnSpeed);
                 wallDashTimer -= Time.deltaTime; // [90번] 보스는 물결의 공격 금지를 받지 않음
                 if (wallDashTimer <= 0f) StartWallDash();
@@ -615,6 +623,10 @@ public class BossLv2AIController : BossAIController, IEnemyColorOverride, IDashD
 
         wallDashPhase = WallDashPhase.Aiming;
         wallDashTimer = wallDashFirstAimTime;
+
+        // [첫 돌진 방향 고정] 충전을 시작하는 이 순간의 목표 지점으로 첫 돌진 방향을 정해 둡니다.
+        wallDashAimPoint = ComputeWallDashAimPoint();
+        wallDashAimLocked = true;
     }
 
     // 1레벨 보스 연속 돌진과 같은 조준: 목표까지 NavMesh 경로의 첫 꺾이는 지점(벽이 가로막으면 돌아가는 방향), 못 구하면 목표 직선.
@@ -708,6 +720,7 @@ public class BossLv2AIController : BossAIController, IEnemyColorOverride, IDashD
         }
         wallDashPhase = WallDashPhase.Aiming;
         wallDashTimer = wallDashAimTime;
+        wallDashAimLocked = false; // 이후 돌진은 조준하는 동안 플레이어를 따라감
     }
 
     private void StopWallDash()

@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81076d5f3cbbcbb45bfb475bd6a99d10, type: 3}
+  m_Name: NightLightAutoRules
+  m_EditorClassIdentifier: Assembly-CSharp::NightLightAutoRules
+  rules:
+  - label: NL_Window
+    template: {fileID: 5225125601887779976, guid: 9e462bc546192234d953d8644191700d, type: 3}
+    sameShapeModels:
+    - {fileID: 919132149155446097, guid: 9a7b7c9632db7934ea00524948d82f34, type: 3}
+    - {fileID: 919132149155446097, guid: 449fd0cb280e55c4386807dcaced779a, type: 3}
+  - label: NL_Window_Long
+    template: {fileID: 7036422482238235121, guid: 2ab1978878b276746aba61c48214baed, type: 3}
+    sameShapeModels:
+    - {fileID: 919132149155446097, guid: e3850778f4a181f479b3be4fc2e8e0bf, type: 3}
+    - {fileID: 919132149155446097, guid: edb620e9f9023b445b3d9cf02819de95, type: 3}
+    - {fileID: 919132149155446097, guid: 19a311ad6b2b26f46bc908ccd44d436d, type: 3}
+  - label: NL_Window_Short
+    template: {fileID: 6809145007348340987, guid: 32a17fb13a08a8845ae93ecd7bea26a3, type: 3}
+    sameShapeModels:
+    - {fileID: 919132149155446097, guid: 15a8f87d3a45af24993c21e11512d494, type: 3}
+  - label: NL_Vending
+    template: {fileID: 1582822023362241618, guid: 85821a112e2f5584d8c3902a97e53d65, type: 3}
+    sameShapeModels: []
+  - label: NL_StreetLight
+    template: {fileID: 1166393540618252226, guid: 6029b5c877b22714ab99866a0177f1a1, type: 3}
+    sameShapeModels: []
+  - label: NL_Building_Big
+    template: {fileID: 5593579168051963311, guid: a6ccf2f4e352a544aa8a176dfebef8e4, type: 3}
+    sameShapeModels: []
+  - label: NL_Building_Short
+    template: {fileID: 7564452705315203876, guid: f03d239d93e01f6498955674526eaabe, type: 3}
+    sameShapeModels:
+    - {fileID: 919132149155446097, guid: b3fb31ab1034df548ab4182261f71b52, type: 3}

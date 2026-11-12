@@ -114,6 +114,10 @@ public class GrenadeHackEffect : IPassiveItemEffect, IRemovablePassiveEffect
     {
         if (hackTool == null || subscribedThrower == null || radius <= 0f) return;
 
+        // [사운드] 폭발음과 함께 해킹음도 냅니다(형빈 확정). 다른 방에서 터진 수류탄은 소리 없음(폭발음과 같은 규칙).
+        RoomInstance room = subscribedThrower.ExplodingRoom ?? RoomScope.RoomOf(position);
+        if (RoomScope.IsPlayerInRoom(room)) GameAudio.Play(SfxId.HackDeploy);
+
         hackTool.ApplyHackArea(position, radius, Mathf.Max(subscribedThrower.explosionHeight, 0.1f), 0f, null);
     }
 }

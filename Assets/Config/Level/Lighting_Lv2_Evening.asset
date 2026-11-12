@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03d50fd97dfb330488e97fe29b5ca79f, type: 3}
+  m_Name: Lighting_Lv2_Evening
+  m_EditorClassIdentifier: Assembly-CSharp::LevelLightingProfile
+  useColorTemperature: 1
+  colorTemperature: 5000
+  sunFilterColor: {r: 1, g: 1, b: 1, a: 1}
+  environmentShadowTint: {r: 0.24528301, g: 0.06594873, b: 0.1244273, a: 1}
+  environmentBrightness: 0.92
+  characterShadowTint: {r: 0.95, g: 0.85, b: 0.88, a: 1}
+  characterBrightness: 0.97
+  isNight: 0

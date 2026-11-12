@@ -138,6 +138,7 @@ public class BossArtilleryStrike : MonoBehaviour
         {
             Debug.LogError($"BossArtilleryStrike: 조준 표시 생성 중 오류가 발생해 표시 없이 진행합니다: {e}");
         }
+        GameAudio.Play(SfxId.EnemyAttackWarn); // [사운드] 포격 조준 예고
         return strike;
     }
 
@@ -175,6 +176,7 @@ public class BossArtilleryStrike : MonoBehaviour
     private void Explode()
     {
         exploded = true;
+        GameAudio.Play(SfxId.BossArtilleryExplode);
         try
         {
             DamagePlayer();

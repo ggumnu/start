@@ -115,10 +115,12 @@ public class CollapsibleHUDPanel
             if (p != null && p.IsBuilt && !p.collapsed) { anyExpanded = true; break; }
         }
 
+        bool anyBuilt = false;
         foreach (var p in registry)
         {
-            if (p != null && p.IsBuilt) p.collapsed = anyExpanded;
+            if (p != null && p.IsBuilt) { p.collapsed = anyExpanded; anyBuilt = true; }
         }
+        if (anyBuilt) { if (anyExpanded) UISound.Cancel(); else UISound.Confirm(); } // [사운드] Tab 접기/펼치기
     }
 
     // 지금 마우스가 화면에 있는 접기 버튼 중 하나 위에 있는지. HUDClickBlocker가 사용합니다.
@@ -175,6 +177,7 @@ public class CollapsibleHUDPanel
     public void Toggle()
     {
         collapsed = !collapsed;
+        if (collapsed) UISound.Cancel(); else UISound.Confirm(); // [사운드] 접기 = 취소음, 펼치기 = 진행음(Tab으로 여러 개가 한꺼번에 바뀌어도 한 번)
     }
 
     // 패널 스크립트의 OnDestroy에서 호출합니다(등록 해제 + 생성한 텍스처 정리).

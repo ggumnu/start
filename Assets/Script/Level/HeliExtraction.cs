@@ -153,13 +153,12 @@ public class HeliExtraction : MonoBehaviour
     private CameraFollow lockedFollow;
     private bool followWasEnabled;
     private CanvasGroup hudGroup;
-    private Transform gun;
-    private Vector3 gunLocalPos, gunLocalScale;
-    private Quaternion gunLocalRot;
-    private Transform chestBone;
+    private GameObject hiddenGun;   // 연출 동안 숨긴 총(되돌릴 때 원래 켜짐 상태로)
+    private bool hiddenGunWasActive;
     private Canvas overlayCanvas;
     private UnityEngine.UI.Image overlayImage;
     private float overlayAlpha;
+    private int rotorLoopHandle; // [사운드] 헬기 로터 반복 소리
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetStatics()
     {
@@ -182,6 +181,7 @@ public class HeliExtraction : MonoBehaviour
     void OnDisable()
     {
         ApplyVisualsVisible(false);
+        GameAudio.StopLoop(ref rotorLoopHandle);
     }
 
     void OnDestroy()
@@ -241,12 +241,11 @@ public class HeliExtraction : MonoBehaviour
         // [방 전환] 플레이어가 이 헬기의 방에 없으면 그림을 숨깁니다. 이번 프레임에 새로 생긴 먼지 물결/사다리도 여기서 함께 맞춥니다
         // (화면 그리기는 LateUpdate 뒤라 한 프레임도 보이지 않음).
         if (playing) ApplyVisualsVisible(IsPlayerInHeliRoom());
+        UpdateRotorSound();
 
         var s = HeliExtractionSettings.Get();
         // 사다리 띠는 카메라를 향해야 하므로 카메라가 움직인 뒤에 만듭니다.
         if (playing && ladderDropped) BuildLadderMesh(s);
-        // 등에 멘 총: 애니메이션이 끝난 뒤 가슴 뼈 기준 자리에 다시 놓습니다(Play 중 설정 값을 바꾸면 바로 보임).
-        if (extractPhase != ExtractPhase.None) PlaceGunOnBack(s);
     }
 
     // ------------------------------------------------------------------
@@ -743,7 +742,7 @@ public class HeliExtraction : MonoBehaviour
             lockedCam.transform.SetPositionAndRotation(home + lockedFollow.offset, rot);
         }
         SetHudAlpha(0f);
-        AttachGunToBack();
+        HideGun();
         SetAnimBool(s.hangBool, true);
         CrossFadeUpper(s.hangStateName, 0f);
         SetAnimFloat("Speed", 0f); SetAnimFloat("MoveX", 0f); SetAnimFloat("MoveZ", 0f);
@@ -830,7 +829,7 @@ public class HeliExtraction : MonoBehaviour
         controllerWasEnabled = false;
         SetAnimBool(s.hangBool, false);
         CrossFadeUpper("NonAimIdle", s.landBlend);
-        DetachGunFromBack();
+        RestoreGun();
         if (arrivalStay) ladderReadyTime = elapsed + 0.5f; // 다음 레벨용 사다리로 남음
         else { leaving = true; leaveTimer = 0f; departWait = -1f; }
         phaseTimer = 0f;
@@ -970,8 +969,8 @@ public class HeliExtraction : MonoBehaviour
         if (lockedFollow != null) lockedFollow.enabled = false;
         SetHudAlpha(0f);
 
-        // 총을 등에 멤(걸어가기 시작할 때 - 형빈 확정)
-        AttachGunToBack();
+        // 총 숨김(걸어가기 시작할 때 - 형빈 확정, 예전 "등에 메기" 대체)
+        HideGun();
 
         int n = points.Length;
         grabIndex = Mathf.Clamp(Mathf.RoundToInt((s.ladderTopHeight - s.grabHeight) / Mathf.Max(0.01f, restLength)), 1, n - 1);
@@ -1167,7 +1166,7 @@ public class HeliExtraction : MonoBehaviour
         moveDir = Vector3.zero;
         if (active == this) active = null;
 
-        DetachGunFromBack();
+        RestoreGun();
         SetAnimBool(s.hangBool, false);
         if (playerAnimator != null && playerAnimator.runtimeAnimatorController != null)
         {
@@ -1221,56 +1220,48 @@ public class HeliExtraction : MonoBehaviour
         if (!disabledBehaviours.Contains(b)) disabledBehaviours.Add(b);
     }
 
-    // ---- 총을 등에 멤 ----
-    private void AttachGunToBack()
+    // ---- 총 숨기기 (예전 "등에 메기" 대체 - 형빈 확정: 가방과 겹쳐서 연출 동안 총을 숨김) ----
+    private void HideGun()
     {
+        RestoreGun(); // 이미 숨긴 총이 있으면 먼저 되돌려 상태가 꼬이지 않게 합니다.
+        GameObject g = FindPlayerGun();
+        if (g == null) return;
+        hiddenGun = g;
+        hiddenGunWasActive = g.activeSelf;
+        if (g.activeSelf) g.SetActive(false);
+    }
+
+    private void RestoreGun()
+    {
+        if (hiddenGun != null && hiddenGunWasActive && !hiddenGun.activeSelf) hiddenGun.SetActive(true);
+        hiddenGun = null;
+        hiddenGunWasActive = false;
+    }
+
+    // 숨길 총: PlayerWeaponMode의 Gun Model 칸 → 설정의 이름 → 오른손 뼈 아래 첫 그림 있는 오브젝트 순서로 찾습니다.
+    private GameObject FindPlayerGun()
+    {
+        if (player != null)
+        {
+            var mode = player.GetComponent<PlayerWeaponMode>();
+            if (mode != null && mode.gunModel != null) return mode.gunModel;
+        }
+
+        if (playerAnimator == null || !playerAnimator.isHuman) return null;
+        Transform hand = playerAnimator.GetBoneTransform(HumanBodyBones.RightHand);
+        if (hand == null) return null;
+
         var s = HeliExtractionSettings.Get();
-        gun = null;
-        chestBone = null;
-        if (playerAnimator == null) return;
-        Transform hand = playerAnimator.isHuman ? playerAnimator.GetBoneTransform(HumanBodyBones.RightHand) : null;
-        if (hand != null)
+        Transform found = !string.IsNullOrEmpty(s.gunObjectName) ? FindChildByName(hand, s.gunObjectName) : null;
+        if (found == null)
         {
-            if (!string.IsNullOrEmpty(s.gunObjectName)) gun = FindChildByName(hand, s.gunObjectName);
-            if (gun == null)
+            foreach (Transform c in hand)
             {
-                foreach (Transform c in hand)
-                {
-                    if (c.GetComponentInChildren<Renderer>() != null) { gun = c; break; }
-                }
+                if (c.GetComponentInChildren<Renderer>() != null) { found = c; break; }
             }
-            chestBone = playerAnimator.GetBoneTransform(HumanBodyBones.UpperChest);
-            if (chestBone == null) chestBone = playerAnimator.GetBoneTransform(HumanBodyBones.Chest);
-            if (chestBone == null) chestBone = playerAnimator.GetBoneTransform(HumanBodyBones.Spine);
         }
-        if (gun == null || chestBone == null)
-        {
-            Debug.LogWarning("HeliExtraction: 손에 든 총이나 가슴 뼈를 찾지 못해 총을 등에 메지 않습니다(설정의 Gun Object Name 확인).");
-            gun = null;
-            return;
-        }
-        gunLocalPos = gun.localPosition;
-        gunLocalRot = gun.localRotation;
-        gunLocalScale = gun.localScale;
-    }
-
-    private void PlaceGunOnBack(HeliExtractionSettings s)
-    {
-        if (gun == null || chestBone == null || player == null) return;
-        Quaternion rootRot = player.transform.rotation;
-        gun.SetPositionAndRotation(chestBone.position + rootRot * s.gunBackOffset, rootRot * Quaternion.Euler(s.gunBackEuler));
-    }
-
-    private void DetachGunFromBack()
-    {
-        if (gun != null)
-        {
-            gun.localPosition = gunLocalPos;
-            gun.localRotation = gunLocalRot;
-            gun.localScale = gunLocalScale;
-        }
-        gun = null;
-        chestBone = null;
+        if (found == null) Debug.LogWarning("HeliExtraction: 숨길 총을 찾지 못했습니다(PlayerWeaponMode의 Gun Model 칸 확인).");
+        return found != null ? found.gameObject : null;
     }
 
     private static Transform FindChildByName(Transform root, string name)
@@ -1380,6 +1371,20 @@ public class HeliExtraction : MonoBehaviour
         for (int i = 0; i < dustPulses.Count; i++) SetVisualActive(dustPulses[i].go, visible);
     }
 
+    // [사운드] 그림자가 보이는 동안만 로터 소리를 냅니다(다른 방/로딩 화면 뒤에서 기다리는 동안/연출이 끝나면 끔).
+    private void UpdateRotorSound()
+    {
+        bool audible = playing && !arrivalWaitingForLoad && shadowGO != null && shadowGO.activeInHierarchy;
+        if (audible)
+        {
+            if (!GameAudio.IsLoopPlaying(rotorLoopHandle)) rotorLoopHandle = GameAudio.PlayLoop(SfxId.HeliRotor, false);
+        }
+        else if (rotorLoopHandle != 0)
+        {
+            GameAudio.StopLoop(ref rotorLoopHandle);
+        }
+    }
+
     private static void SetVisualActive(GameObject go, bool active)
     {
         if (go != null && go.activeSelf != active) go.SetActive(active);
@@ -1387,6 +1392,7 @@ public class HeliExtraction : MonoBehaviour
 
     private void Cleanup()
     {
+        GameAudio.StopLoop(ref rotorLoopHandle);
         playing = false;
         arrivalWaitingForLoad = false;
         arrivalHoldLadder = false;

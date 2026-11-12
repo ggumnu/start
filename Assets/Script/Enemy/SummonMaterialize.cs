@@ -19,6 +19,7 @@ public class SummonMaterialize : MonoBehaviour
         if (enemy == null) return null;
         var m = enemy.GetComponent<SummonMaterialize>();
         if (m == null) m = enemy.AddComponent<SummonMaterialize>();
+        GameAudio.Play(SfxId.SummonAppear); // [사운드] 여러 마리가 한꺼번에 나와도 한 번(겹침 방지 간격)
         m.Run(duration);
         return m;
     }

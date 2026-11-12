@@ -492,6 +492,10 @@ public class ShopNPC : MonoBehaviour
         int total = GetTotalPrice(listing, quantity);
         if (total > 0 && !playerResources.TrySpend(ShopConfig.ToResourceType(listing.currency), total)) return false;
 
+        // [사운드] 상점 구매는 구매음만 냅니다 - 같은 순간의 아이템 획득음은 막음(형빈 확정).
+        GameAudio.SuppressThisFrame(SfxId.ItemPickup);
+        GameAudio.Play(SfxId.ShopPurchase);
+
         if (listing.isBasic)
         {
             int amount = quantity * Mathf.Max(1, listing.amountPerPurchase);

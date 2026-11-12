@@ -156,7 +156,10 @@ public class PlayerHackTool : MonoBehaviour
         // HUD 접기 버튼 위에서 누른 클릭은 버튼 조작용이라 전개하지 않습니다(HUDClickBlocker).
         if (!isDeploying && Input.GetMouseButtonDown(0) && !HUDClickBlocker.BlocksLeftClick)
         {
-            TryDeploy();
+            if (!TryDeploy() && (resources == null || resources.GetAmount(BasicItemType.HackingTool) <= 0))
+            {
+                GameAudio.Play(SfxId.ActionFail); // [사운드] 해킹툴 0개
+            }
         }
     }
 
@@ -230,7 +233,7 @@ public class PlayerHackTool : MonoBehaviour
         var hacked = new List<EnemyHealth>();
         foreach (var enemy in CollectEnemiesInRange(center, radius, height))
         {
-            if (damage > 0f) enemy.TakeDamage(damage);
+            if (damage > 0f) enemy.TakeWeakDamage(damage); // 피해 숫자 항상 Weak(형빈 확정)
             if (hackToolShieldBonus) BossShield.ApplyHackToolBonus(enemy);
 
             // 이 피해로 죽은 적에게는 해킹을 걸지 않습니다.

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03d50fd97dfb330488e97fe29b5ca79f, type: 3}
+  m_Name: Lighting_Lv3_Night
+  m_EditorClassIdentifier: Assembly-CSharp::LevelLightingProfile
+  useColorTemperature: 1
+  colorTemperature: 11000
+  sunFilterColor: {r: 0.8, g: 0.88, b: 1, a: 1}
+  environmentShadowTint: {r: 0.4292453, g: 0.54982746, b: 1, a: 1}
+  environmentBrightness: 0.72
+  characterShadowTint: {r: 0.72, g: 0.76, b: 0.9, a: 1}
+  characterBrightness: 0.88
+  isNight: 1

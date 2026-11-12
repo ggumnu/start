@@ -10,7 +10,8 @@ public enum SDPartSlot
     Torso,          // 몸통 (옷) - 알바디의 Body_Torso를 대신함
     Hands,          // 손 (장갑) - 알바디의 Body_Hand_L / Body_Hand_R을 대신함
     Feet,           // 발 (신발) - 알바디의 Body_Foot_L / Body_Foot_R을 대신함
-    Back,           // 등 (날개, 가방 등)
+    Back,           // 몸통 후면 악세서리 (가방 등)
+    Front,          // 몸통 전면 악세서리 (가슴 뱃지, 장신구 등) - 값이 숫자로 저장되므로 새 슬롯은 항상 맨 끝에 추가
 }
 
 // SD 캐릭터 교체 파츠 하나의 정의입니다(ScriptableObject).

@@ -3,33 +3,71 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// 적이 피해를 받을 때 실제 피해량을 적 머리 오른쪽 위에 숫자로 띄우는 HUD입니다(EnemyHealth.OnAnyEnemyDamaged 구독 - 모든 피해가 지나는 통로).
-// "뿅" 나타났다가 떨어지며 사라지고, 같은 적의 이전 숫자는 아래로 밀림. 98번 섬멸은 숫자 대신 글자. 2레벨 보스 보호막이 받은 피해는
-// OnAnyEnemyShieldDamaged로 받아 보호막 색(기본 주황 글자 + 흰 테두리)으로 띄웁니다. 설계 배경은 Docs/설계노트.md [피해 숫자].
+// 적이 피해를 받을 때 실제 피해량을 숫자로 띄우는 HUD입니다(EnemyHealth.OnAnyEnemyDamaged 구독 - 모든 피해가 지나는 통로).
+// [포물선 연출 - 형빈 확정] 피격 즉시 적 몸통 가운데에서 "뿅" 나타나 오른쪽 위로 포물선을 그리며 튀어나가고, 꼭대기를 지나 내려가는 동안
+// 서서히 사라집니다(여러 번 맞으면 숫자마다 튀는 방향이 조금씩 달라 겹치지 않음). 98번 섬멸은 숫자 대신 글자(머리 위 고정, 예전 그대로).
+// [블루 아카이브식 스타일 - 형빈 확정] "현재 공격력"(PlayerStats.Damage)과 비교해 세 가지로 띄웁니다(기울인 글씨):
+//   보통   = 피해 == 공격력          : 빨간 폭발 배경 + 흰 숫자 / 검붉은 테두리
+//   Weak   = 피해 > 공격력, 지속 피해 : 빨간 폭발 배경 + 노란 숫자 / 어두운 주황 테두리 + 위에 주황 "Weak"
+//   Resist = 피해 < 공격력, 보호막 피해(2레벨 보스, OnAnyEnemyShieldDamaged) : 폭발 없이 하늘색 숫자 / 파란 테두리 + "Resist"
+// 지속 피해(EnemyHealth.IsDotDamageInProgress)와 "항상 Weak" 피해(IsForcedWeakDamageInProgress - 4번 폭발, 81번 연소, 수류탄, 해킹툴,
+// 118번 포격)는 공격력과 상관없이 Weak입니다(보호막에 들어간 피해는 보호막 규칙 = Resist).
+// 수류탄 등 총알이 아닌 피해도 같은 공격력 기준으로 나눕니다. 설계 배경은 Docs/설계노트.md [피해 숫자].
 public class DamagePopupDisplay : MonoBehaviour
 {
     [Header("글자 모양")]
-    [Tooltip("숫자의 글자색입니다.")]
-    public Color textColor = new Color(1f, 0.92f, 0.35f, 1f);
-
-    [Tooltip("숫자의 테두리 색입니다.")]
-    public Color outlineColor = new Color(0.1f, 0.05f, 0f, 1f);
-
-    [Tooltip("2레벨 보스 보호막이 받은 피해 숫자의 글자색입니다.")]
-    public Color shieldTextColor = new Color(1f, 0.55f, 0.1f, 1f);
-
-    [Tooltip("2레벨 보스 보호막이 받은 피해 숫자의 테두리 색입니다.")]
-    public Color shieldOutlineColor = Color.white;
-
-    [Tooltip("테두리 두께(캔버스 픽셀)입니다. 너무 키우면(약 5 이상) 테두리가 각져 보일 수 있습니다.")]
+    [Tooltip("숫자 테두리 두께(캔버스 픽셀)입니다. 너무 키우면(약 5 이상) 테두리가 각져 보일 수 있습니다.")]
     [Min(0f)] public float outlineThickness = 2f;
 
     [Tooltip("숫자 글자 크기입니다.")]
     public int fontSize = 40;
 
+    [Tooltip("켜면 숫자와 Weak/Resist 글자를 블루 아카이브처럼 기울여 씁니다(TMP 기울임꼴).")]
+    public bool italic = true;
+
+    [Header("보통 (피해 = 현재 공격력)")]
+    public Color normalTextColor = Color.white;
+    public Color normalOutlineColor = new Color(0.42f, 0.05f, 0.06f, 1f);
+
+    [Header("Weak (피해 > 현재 공격력, 지속 피해)")]
+    public Color weakTextColor = new Color(1f, 0.89f, 0.24f, 1f);
+    public Color weakOutlineColor = new Color(0.62f, 0.26f, 0.04f, 1f);
+    public string weakLabel = "Weak";
+    public Color weakLabelColor = new Color(1f, 0.6f, 0.12f, 1f);
+    public Color weakLabelOutlineColor = new Color(0.55f, 0.21f, 0.03f, 1f);
+
+    [Header("Resist (피해 < 현재 공격력, 보호막 피해)")]
+    public Color resistTextColor = new Color(0.6f, 0.88f, 1f, 1f);
+    public Color resistOutlineColor = new Color(0.12f, 0.32f, 0.78f, 1f);
+    public string resistLabel = "Resist";
+    public Color resistLabelColor = new Color(0.55f, 0.84f, 1f, 1f);
+    public Color resistLabelOutlineColor = new Color(0.12f, 0.32f, 0.78f, 1f);
+
+    [Header("Weak / Resist 글자")]
+    [Tooltip("Weak/Resist 글자 크기 = 숫자 글자 크기 x 이 값.")]
+    [Min(0.1f)] public float labelFontScale = 0.55f;
+    [Tooltip("Weak/Resist 글자 위치: 숫자 가운데 기준(캔버스 픽셀, X = 오른쪽, Y = 위).")]
+    public Vector2 labelOffset = new Vector2(-14f, 24f);
+    [Tooltip("Weak/Resist 글자 테두리 두께(캔버스 픽셀)입니다.")]
+    [Min(0f)] public float labelOutlineThickness = 1.5f;
+
+    [Header("폭발 배경 (보통 / Weak)")]
+    [Tooltip("숫자 뒤의 빨간 폭발 이미지입니다. 비우면 Resources/DamageBurst를 씁니다.")]
+    public Sprite burstSprite;
+    [Tooltip("폭발 이미지 크기 = 숫자 글자 크기 x 이 값(캔버스 픽셀).")]
+    [Min(0.1f)] public float burstSizeScale = 2.6f;
+    [Tooltip("폭발 이미지 위치: 숫자 가운데 기준(캔버스 픽셀).")]
+    public Vector2 burstOffset = new Vector2(0f, -2f);
+    [Tooltip("숫자마다 폭발 이미지를 무작위로 돌리는 최대 각도(도)입니다.")]
+    [Range(0f, 180f)] public float burstRandomRotation = 25f;
+
+    [Header("공격력 비교")]
+    [Tooltip("피해와 현재 공격력의 차이가 이 값 이하이면 같은 것으로 봅니다(소수점 오차 방지).")]
+    [Min(0f)] public float attackCompareTolerance = 0.01f;
+
     [Header("표시 시간과 연출")]
-    [Tooltip("숫자가 화면에 보이는 총 시간(초)입니다.")]
-    [Min(0.05f)] public float lifetime = 0.5f;
+    [Tooltip("숫자가 화면에 보이는 총 시간(초)입니다. 포물선 꼭대기를 지난 뒤 남은 시간 동안 서서히 사라집니다.")]
+    [Min(0.05f)] public float popupLifetime = 0.8f;
 
     [Tooltip("'뿅' 하고 커지며 나타나는 데 걸리는 시간(초)입니다.")]
     [Min(0.01f)] public float popDuration = 0.12f;
@@ -40,27 +78,23 @@ public class DamagePopupDisplay : MonoBehaviour
     [Tooltip("나타날 때 잠깐 커지는 최대 크기 배율입니다(1보다 크면 살짝 튀어나온 뒤 안착).")]
     [Min(0.01f)] public float popOvershoot = 1.3f;
 
-    [Tooltip("전체 시간 중 어느 시점(0~1)부터 아래로 내려가며 투명해지기 시작할지 정합니다.")]
-    [Range(0f, 0.95f)] public float fadeStartRatio = 0.4f;
+    [Header("포물선")]
+    [Tooltip("튀어나가는 처음 속도의 최솟값(캔버스 픽셀/초, X = 오른쪽, Y = 위). 숫자마다 최솟값~최댓값 사이에서 무작위로 고릅니다.")]
+    public Vector2 launchVelocityMin = new Vector2(110f, 380f);
+    [Tooltip("튀어나가는 처음 속도의 최댓값(캔버스 픽셀/초).")]
+    public Vector2 launchVelocityMax = new Vector2(210f, 470f);
+    [Tooltip("포물선을 아래로 당기는 힘(캔버스 픽셀/초²)입니다. 클수록 낮고 빠르게 꺾입니다(꼭대기 시간 = 위 속도 / 이 값).")]
+    [Min(1f)] public float launchGravity = 1400f;
+    [Tooltip("시작 위치: 적 몸통 가운데에서 화면 기준으로 이만큼 옮깁니다(캔버스 픽셀).")]
+    public Vector2 launchStartOffset = Vector2.zero;
 
-    [Tooltip("사라지는 동안 아래로 떨어지는 거리(캔버스 픽셀)입니다.")]
-    public float fallDistance = 35f;
-
-    [Header("위치")]
-    [Tooltip("적 머리 기준점에서 '화면 기준' 오른쪽 위로 얼마나 띄울지(캔버스 픽셀) 정합니다. " +
-             "X가 클수록 오른쪽, Y가 클수록 위입니다.")]
+    [Header("98번 섬멸 글자 위치")]
+    [Tooltip("섬멸 글자: 적 머리 기준점에서 화면 기준 오른쪽 위로 띄울 거리(캔버스 픽셀)입니다.")]
     public Vector2 screenOffset = new Vector2(45f, 25f);
-
-    [Tooltip("적의 자동 계산된 머리 높이(Collider/Renderer 최상단)에 더할 여유 높이(월드 단위)입니다.")]
+    [Tooltip("섬멸 글자: 적의 자동 계산된 머리 높이(Collider/Renderer 최상단)에 더할 여유 높이(월드 단위)입니다.")]
     public float headroom = 0.15f;
 
-    [Header("연속 피격")]
-    [Tooltip("같은 적이 보이는 시간 안에 또 맞을 때, 이전 숫자들을 아래로 밀어내는 거리(캔버스 픽셀)입니다. " +
-             "0이면 밀지 않고 같은 자리에 겹쳐서(최신 숫자가 위) 표시합니다.")]
-    [Min(0f)] public float stackPushDistance = 34f;
-
-    [Tooltip("이전 숫자가 밀려 내려가는 속도(캔버스 픽셀/초)입니다. 클수록 즉시 밀립니다.")]
-    [Min(1f)] public float stackPushSpeed = 900f;
+    [Header("개수")]
 
     [Tooltip("동시에 화면에 띄울 수 있는 숫자 최대 개수입니다. 넘으면 가장 오래된 숫자를 재사용합니다.")]
     [Min(1)] public int maxPopups = 60;
@@ -83,8 +117,9 @@ public class DamagePopupDisplay : MonoBehaviour
         public EnemyHealth enemy;      // 따라다닐 적(파괴되면 null)
         public float headHeight;       // 적 pivot 기준 머리 높이(월드 단위)
         public Vector3 lastEnemyPos;   // 적이 사라진 뒤 고정할 마지막 위치
-        public float pushCurrent;      // 이전 숫자 밀어내기로 이미 내려간 거리
-        public float pushTarget;       // 최종적으로 내려가야 할 거리
+        public float bodyHeight;       // 적 pivot 기준 몸통 가운데 높이(월드 단위) - 포물선 시작점
+        public Vector2 velocity;       // 포물선 처음 속도(캔버스 픽셀/초)
+        public float peakTime;         // 포물선 꼭대기에 닿는 시간(초) - 이후 서서히 사라짐
 
         // [98번] "섬멸" 글자(숫자 대신)인지와 그 모양입니다.
         public bool isLabel;
@@ -95,8 +130,17 @@ public class DamagePopupDisplay : MonoBehaviour
         public float labelFadeOutTime;
         public float labelFadeElapsed;   // 적이 사라진 뒤 흐른 시간(-1 = 아직 적이 남아 있음)
 
-        public bool isShield;            // [2레벨 보스] 보호막이 받은 피해(보호막 색으로 표시)
+        public bool isShield;            // [2레벨 보스] 보호막이 받은 피해(Resist로 표시)
+
+        public HitStyle style;
+        public RectTransform burstRect;
+        public Image burstImage;
+        public TextMeshProUGUI labelText;
     }
+
+    private enum HitStyle { Normal, Weak, Resist }
+
+    private PlayerStats playerStats;
 
     // [98번] 적이 사라지지 않는 예외 상황에서도 "섬멸" 글자가 남지 않도록 하는 최대 표시 시간(초)입니다.
     private const float LabelMaxLifetime = 5f;
@@ -160,7 +204,7 @@ public class DamagePopupDisplay : MonoBehaviour
                 continue;
             }
 
-            if (p.age >= lifetime)
+            if (p.age >= popupLifetime)
             {
                 Deactivate(p);
                 continue;
@@ -172,15 +216,32 @@ public class DamagePopupDisplay : MonoBehaviour
 
     private void HandleEnemyDamaged(EnemyHealth enemy, float amount)
     {
-        ShowPopup(enemy, amount, false);
+        ShowPopup(enemy, amount, false, EnemyHealth.IsDotDamageInProgress || EnemyHealth.IsForcedWeakDamageInProgress);
     }
 
     private void HandleShieldDamaged(EnemyHealth enemy, float amount)
     {
-        ShowPopup(enemy, amount, true);
+        ShowPopup(enemy, amount, true, false);
     }
 
-    private void ShowPopup(EnemyHealth enemy, float amount, bool isShield)
+    // 피해와 현재 공격력(PlayerStats.Damage)을 비교해 스타일을 정합니다. 플레이어를 못 찾으면 보통.
+    private HitStyle ResolveStyle(float amount, bool isShield, bool alwaysWeak)
+    {
+        if (isShield) return HitStyle.Resist;
+        if (alwaysWeak) return HitStyle.Weak;
+        if (playerStats == null)
+        {
+            var health = FindFirstObjectByType<PlayerHealth>();
+            if (health != null) playerStats = health.GetComponent<PlayerStats>();
+        }
+        if (playerStats == null) return HitStyle.Normal;
+        float attack = playerStats.Damage;
+        if (amount > attack + attackCompareTolerance) return HitStyle.Weak;
+        if (amount < attack - attackCompareTolerance) return HitStyle.Resist;
+        return HitStyle.Normal;
+    }
+
+    private void ShowPopup(EnemyHealth enemy, float amount, bool isShield, bool alwaysWeak)
     {
         if (enemy == null || amount <= 0f) return;
         if (AllyFaction.IsAlly(enemy.gameObject)) return; // [87번] 아군이 맞을 때는 피해 숫자를 띄우지 않습니다.
@@ -188,25 +249,16 @@ public class DamagePopupDisplay : MonoBehaviour
 
         int shown = Mathf.Max(1, Mathf.RoundToInt(amount));
 
-        // 같은 적의 이전 숫자들을 아래로 밀어냅니다(0이면 겹침 모드).
-        if (stackPushDistance > 0f)
-        {
-            for (int i = 0; i < popups.Count; i++)
-            {
-                Popup old = popups[i];
-                if (old.active && old.enemy == enemy) old.pushTarget += stackPushDistance;
-            }
-        }
-
         Popup p = AcquirePopup();
         p.active = true;
         p.age = 0f;
         p.enemy = enemy;
-        p.headHeight = MeasureHeadHeight(enemy);
+        MeasureHeights(enemy, out p.headHeight, out p.bodyHeight);
         p.lastEnemyPos = enemy.transform.position;
-        p.pushCurrent = 0f;
-        p.pushTarget = 0f;
+        p.velocity = new Vector2(Random.Range(launchVelocityMin.x, launchVelocityMax.x), Random.Range(launchVelocityMin.y, launchVelocityMax.y));
+        p.peakTime = Mathf.Max(0f, p.velocity.y) / Mathf.Max(1f, launchGravity);
         p.isShield = isShield;
+        p.style = ResolveStyle(amount, isShield, alwaysWeak);
 
         // [98번] 즉시 처치(섬멸)면 숫자 대신 설정의 글자를 띄웁니다.
         var execute = !isShield && enemy.WasExecuted ? enemy.ExecuteSettings : null;
@@ -225,6 +277,28 @@ public class DamagePopupDisplay : MonoBehaviour
         {
             p.text.text = shown.ToString();
         }
+
+        // 폭발 배경(보통/Weak)과 Weak/Resist 글자. 섬멸 글자에는 붙이지 않습니다.
+        bool showBurst = !p.isLabel && p.style != HitStyle.Resist && GetBurstSprite() != null;
+        p.burstImage.gameObject.SetActive(showBurst);
+        if (showBurst)
+        {
+            p.burstImage.sprite = GetBurstSprite();
+            float size = fontSize * burstSizeScale;
+            p.burstRect.sizeDelta = new Vector2(size, size);
+            p.burstRect.anchoredPosition = burstOffset;
+            p.burstRect.localRotation = Quaternion.Euler(0f, 0f, Random.Range(-burstRandomRotation, burstRandomRotation));
+        }
+        bool showLabel = !p.isLabel && p.style != HitStyle.Normal;
+        p.labelText.gameObject.SetActive(showLabel);
+        if (showLabel)
+        {
+            p.labelText.text = p.style == HitStyle.Weak ? weakLabel : resistLabel;
+            p.labelText.rectTransform.anchoredPosition = labelOffset;
+        }
+        FontStyles fs = italic ? FontStyles.Italic : FontStyles.Normal;
+        p.text.fontStyle = p.isLabel ? FontStyles.Normal : fs;
+        p.labelText.fontStyle = fs;
         p.go.SetActive(true);
         p.go.transform.SetAsLastSibling(); // 가장 최근 피해가 항상 맨 위에 그려짐
 
@@ -232,17 +306,18 @@ public class DamagePopupDisplay : MonoBehaviour
         if (mainCamera != null) UpdatePopup(p, 0f); // 첫 프레임 깜빡임 방지
     }
 
-    // 적 pivot(transform.position) 기준으로 Collider(없으면 Renderer) 최상단이 얼마나 위인지 잽니다.
-    private float MeasureHeadHeight(EnemyHealth enemy)
+    // 적 pivot(transform.position) 기준으로 Collider(없으면 Renderer) 최상단(머리)과 가운데(몸통)가 얼마나 위인지 잽니다.
+    private void MeasureHeights(EnemyHealth enemy, out float head, out float body)
     {
         float baseY = enemy.transform.position.y;
-        float top = float.NegativeInfinity;
+        float top = float.NegativeInfinity, bottom = float.PositiveInfinity;
 
         var colliders = enemy.GetComponentsInChildren<Collider>();
         for (int i = 0; i < colliders.Length; i++)
         {
             if (colliders[i] == null || colliders[i].isTrigger) continue;
             top = Mathf.Max(top, colliders[i].bounds.max.y);
+            bottom = Mathf.Min(bottom, colliders[i].bounds.min.y);
         }
 
         if (float.IsNegativeInfinity(top))
@@ -252,11 +327,13 @@ public class DamagePopupDisplay : MonoBehaviour
             {
                 if (renderers[i] == null) continue;
                 top = Mathf.Max(top, renderers[i].bounds.max.y);
+                bottom = Mathf.Min(bottom, renderers[i].bounds.min.y);
             }
         }
 
-        if (float.IsNegativeInfinity(top)) return 1f; // 재지 못하면 대략적인 기본 높이
-        return Mathf.Max(0f, top - baseY);
+        if (float.IsNegativeInfinity(top)) { head = 1f; body = 0.5f; return; } // 재지 못하면 대략적인 기본 높이
+        head = Mathf.Max(0f, top - baseY);
+        body = Mathf.Max(0f, (top + bottom) * 0.5f - baseY);
     }
 
     private void UpdatePopup(Popup p, float dt)
@@ -264,7 +341,9 @@ public class DamagePopupDisplay : MonoBehaviour
         // 적이 살아있는 동안만 위치를 갱신하고, 사라지면 마지막 위치에 고정합니다.
         if (p.enemy != null) p.lastEnemyPos = p.enemy.transform.position;
 
-        Vector3 world = p.lastEnemyPos + Vector3.up * (p.headHeight + headroom);
+        // 섬멸 글자는 머리 위 고정, 숫자는 몸통 가운데에서 포물선 시작.
+        Vector3 world = p.isLabel ? p.lastEnemyPos + Vector3.up * (p.headHeight + headroom)
+                                  : p.lastEnemyPos + Vector3.up * p.bodyHeight;
         Vector3 screen = mainCamera.WorldToScreenPoint(world);
 
         if (screen.z < 0f)
@@ -276,11 +355,6 @@ public class DamagePopupDisplay : MonoBehaviour
 
         RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screen, null, out Vector2 local);
 
-        // 이전 숫자 밀어내기: 목표 거리까지 일정 속도로 내려갑니다.
-        p.pushCurrent = Mathf.MoveTowards(p.pushCurrent, p.pushTarget, stackPushSpeed * dt);
-
-        float t = Mathf.Clamp01(p.age / lifetime);
-
         // 크기: 뿅(작게 -> 오버슈트 -> 1)
         float scale = 1f;
         if (p.age < popDuration)
@@ -290,9 +364,9 @@ public class DamagePopupDisplay : MonoBehaviour
             else scale = Mathf.Lerp(popOvershoot, 1f, (a - 0.6f) / 0.4f);
         }
 
-        // 투명도/낙하: fadeStartRatio 이후 ease-in(처음엔 천천히, 갈수록 빠르게)으로 진행
+        // 투명도: 포물선 꼭대기까지는 그대로, 꼭대기를 지나 내려가는 동안 남은 시간에 걸쳐 서서히 사라짐.
         float alpha = 1f;
-        float fall = 0f;
+        Vector2 arc = Vector2.zero;
         if (p.isLabel)
         {
             // [98번] "섬멸" 글자는 떨어지지 않고, 적이 사라진 뒤에만 옅어집니다.
@@ -301,24 +375,70 @@ public class DamagePopupDisplay : MonoBehaviour
                 alpha = p.labelFadeOutTime > 0f ? 1f - Mathf.Clamp01(p.labelFadeElapsed / p.labelFadeOutTime) : 0f;
             }
         }
-        else if (t > fadeStartRatio)
+        else
         {
-            float f = Mathf.Clamp01((t - fadeStartRatio) / Mathf.Max(0.0001f, 1f - fadeStartRatio));
-            float eased = f * f;
-            alpha = 1f - f;
-            fall = fallDistance * eased;
+            float a = p.age;
+            arc = new Vector2(p.velocity.x * a, p.velocity.y * a - 0.5f * launchGravity * a * a);
+            // 꼭대기가 표시 시간보다 늦으면 마지막 30% 동안 사라지게 합니다.
+            float fadeStart = Mathf.Min(p.peakTime, popupLifetime * 0.7f);
+            if (a > fadeStart) alpha = 1f - Mathf.Clamp01((a - fadeStart) / Mathf.Max(0.0001f, popupLifetime - fadeStart));
         }
 
-        p.rect.anchoredPosition = local + screenOffset + new Vector2(0f, -(fall + p.pushCurrent));
+        p.rect.anchoredPosition = p.isLabel ? local + screenOffset : local + launchStartOffset + arc;
         p.rect.localScale = new Vector3(scale, scale, 1f);
 
         p.text.fontSize = p.isLabel ? p.labelFontSize : fontSize;
-        Color c = p.isLabel ? p.labelTextColor : (p.isShield ? shieldTextColor : textColor); c.a *= alpha;
+        GetStyleColors(p.style, out Color styleText, out Color styleOutline, out Color styleLabel, out Color styleLabelOutline);
+        Color c = p.isLabel ? p.labelTextColor : styleText; c.a *= alpha;
         p.text.color = c;
         // [TMP] 외곽선은 Outline 컴포넌트 대신 TMP 자체 외곽선을 씁니다(두께는 예전처럼 픽셀 값 - HUDText.SetOutline이
         // TMP 비율로 바꿈). 예전 Outline(useGraphicAlpha)처럼 외곽선도 글자와 함께 투명해집니다.
-        Color oc = p.isLabel ? p.labelOutlineColor : (p.isShield ? shieldOutlineColor : outlineColor); oc.a *= alpha;
+        Color oc = p.isLabel ? p.labelOutlineColor : styleOutline; oc.a *= alpha;
         HUDText.SetOutline(p.text, p.isLabel ? p.labelOutlinePixels : outlineThickness, oc);
+
+        if (p.burstImage.gameObject.activeSelf)
+        {
+            p.burstImage.color = new Color(1f, 1f, 1f, alpha);
+        }
+        if (p.labelText.gameObject.activeSelf)
+        {
+            p.labelText.fontSize = fontSize * labelFontScale;
+            Color lc = styleLabel; lc.a *= alpha;
+            p.labelText.color = lc;
+            Color loc = styleLabelOutline; loc.a *= alpha;
+            HUDText.SetOutline(p.labelText, labelOutlineThickness, loc);
+        }
+    }
+
+    private void GetStyleColors(HitStyle style, out Color text, out Color outline, out Color label, out Color labelOutline)
+    {
+        switch (style)
+        {
+            case HitStyle.Weak:
+                text = weakTextColor; outline = weakOutlineColor; label = weakLabelColor; labelOutline = weakLabelOutlineColor;
+                break;
+            case HitStyle.Resist:
+                text = resistTextColor; outline = resistOutlineColor; label = resistLabelColor; labelOutline = resistLabelOutlineColor;
+                break;
+            default:
+                text = normalTextColor; outline = normalOutlineColor; label = normalTextColor; labelOutline = normalOutlineColor;
+                break;
+        }
+    }
+
+    private Sprite cachedBurstSprite;
+    private bool burstSpriteLoaded;
+
+    // 인스펙터 칸이 비어 있으면 Resources/DamageBurst를 한 번 읽어 씁니다(프리팹을 고치지 않아도 바로 동작하도록).
+    private Sprite GetBurstSprite()
+    {
+        if (burstSprite != null) return burstSprite;
+        if (!burstSpriteLoaded)
+        {
+            burstSpriteLoaded = true;
+            cachedBurstSprite = Resources.Load<Sprite>("DamageBurst");
+        }
+        return cachedBurstSprite;
     }
 
     private Popup AcquirePopup()
@@ -347,13 +467,37 @@ public class DamagePopupDisplay : MonoBehaviour
         rect.pivot = new Vector2(0.5f, 0.5f);
         rect.sizeDelta = new Vector2(240f, 80f);
 
+        // 자식 순서 = 그리는 순서: 폭발 배경(맨 뒤) -> 숫자 -> Weak/Resist 글자(맨 앞).
+        var burstGo = new GameObject("Burst");
+        burstGo.transform.SetParent(go.transform, false);
+        var burstRect = burstGo.AddComponent<RectTransform>();
+        burstRect.anchorMin = burstRect.anchorMax = new Vector2(0.5f, 0.5f);
+        burstRect.pivot = new Vector2(0.5f, 0.5f);
+        var burstImage = burstGo.AddComponent<Image>();
+        burstImage.raycastTarget = false;
+        burstImage.preserveAspect = true;
+
         // [TMP] 옛 방식 Text는 화면 배율에 따라 흐릿하게 보여서 TextMeshPro로 교체했습니다(HUDText 참고).
         // TMP SDF 글자라 확대 연출(localScale)을 해도 흐려지지 않습니다.
-        var text = HUDText.AddTo(go, TextAnchor.MiddleCenter);
+        var textGo = new GameObject("Number");
+        textGo.transform.SetParent(go.transform, false);
+        var textRect = textGo.AddComponent<RectTransform>();
+        textRect.anchorMin = textRect.anchorMax = new Vector2(0.5f, 0.5f);
+        textRect.pivot = new Vector2(0.5f, 0.5f);
+        textRect.sizeDelta = new Vector2(240f, 80f);
+        var text = HUDText.AddTo(textGo, TextAnchor.MiddleCenter);
+
+        var labelGo = new GameObject("Label");
+        labelGo.transform.SetParent(go.transform, false);
+        var labelRect = labelGo.AddComponent<RectTransform>();
+        labelRect.anchorMin = labelRect.anchorMax = new Vector2(0.5f, 0.5f);
+        labelRect.pivot = new Vector2(0.5f, 0.5f);
+        labelRect.sizeDelta = new Vector2(200f, 50f);
+        var label = HUDText.AddTo(labelGo, TextAnchor.MiddleCenter);
 
         go.SetActive(false);
 
-        var p = new Popup { go = go, rect = rect, text = text };
+        var p = new Popup { go = go, rect = rect, text = text, burstRect = burstRect, burstImage = burstImage, labelText = label };
         popups.Add(p);
         return p;
     }

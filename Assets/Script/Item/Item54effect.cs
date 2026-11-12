@@ -302,6 +302,7 @@ public class CreditPopupDisplay : MonoBehaviour
         public Sprite fallbackIcon;
         public Transform followTarget;
         public System.Action onStarted;
+        public SfxId sound = SfxId.ItemActivate;
         public int queuedFrame;
     }
 
@@ -329,15 +330,16 @@ public class CreditPopupDisplay : MonoBehaviour
     //   true면 같은 대상의 다른 연출과 줄을 섭니다(클래스 위 [머리 위 알림 줄 세우기] 참고).
     // - onStarted: 아이콘이 실제로 떠오르기 시작하는 순간 한 번 불립니다(줄을 서면 그만큼 늦게). 함께 나올 이펙트를 여기서 시작하세요.
     //   방 이동으로 건너뛴 연출은 불리지 않습니다.
+    // - sound: 아이콘이 떠오르는 순간 낼 소리입니다(기본 = 아이템 효과 발동음, 실패/감소 알림은 SfxId.ItemFail).
     public static void Show(GameObject target, Vector3 feetPosition, CreditPopupSettings settings, Sprite fallbackIcon, bool followTarget,
-                            System.Action onStarted = null)
+                            System.Action onStarted = null, SfxId sound = SfxId.ItemActivate)
     {
         EnsureInstance();
         Transform follow = (followTarget && target != null) ? target.transform : null;
 
         if (follow == null)
         {
-            instance.Spawn(target, feetPosition, settings, fallbackIcon, null);
+            instance.Spawn(target, feetPosition, settings, fallbackIcon, null, sound);
             InvokeStarted(onStarted);
             return;
         }
@@ -350,6 +352,7 @@ public class CreditPopupDisplay : MonoBehaviour
             fallbackIcon = fallbackIcon,
             followTarget = follow,
             onStarted = onStarted,
+            sound = sound,
             queuedFrame = Time.frameCount,
         });
         instance.TryStartQueued(); // 비어 있으면 바로 시작(기존과 같은 프레임)
@@ -415,7 +418,7 @@ public class CreditPopupDisplay : MonoBehaviour
 
             queue.RemoveAt(i);
             i--;
-            Spawn(q.target, q.feetPosition, q.settings, q.fallbackIcon, q.followTarget);
+            Spawn(q.target, q.feetPosition, q.settings, q.fallbackIcon, q.followTarget, q.sound);
             InvokeStarted(q.onStarted);
 
             // 방금 시작한 것이 아이콘 없이 건너뛰어졌을 수도 있으니, 같은 대상의 다음 것은 다음 확인 때 판단합니다.
@@ -474,7 +477,8 @@ public class CreditPopupDisplay : MonoBehaviour
         }
     }
 
-    private void Spawn(GameObject target, Vector3 deathPosition, CreditPopupSettings settings, Sprite fallbackIcon, Transform followTarget)
+    private void Spawn(GameObject target, Vector3 deathPosition, CreditPopupSettings settings, Sprite fallbackIcon, Transform followTarget,
+                       SfxId sound = SfxId.ItemActivate)
     {
         if (settings == null) settings = new CreditPopupSettings();
 
@@ -484,6 +488,9 @@ public class CreditPopupDisplay : MonoBehaviour
             Debug.LogWarning("CreditPopupDisplay: 띄울 아이콘이 없어 연출을 건너뜁니다. 해당 아이템의 Popup > Icon(또는 HUD의 해당 아이콘)을 넣어주세요.");
             return;
         }
+
+        // [사운드] 아이템 효과 발동음(실패 알림은 실패음) - 아이콘이 실제로 떠오르는 순간(줄을 서면 그 차례에) 납니다.
+        GameAudio.Play(sound);
 
         EnsureCanvas(settings.canvasSortingOrder);
 

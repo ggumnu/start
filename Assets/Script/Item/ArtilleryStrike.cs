@@ -502,7 +502,7 @@ public class ArtilleryStrike : MonoBehaviour
             if (enemyHealth.IsDead) continue;
             if (!damaged.Add(enemyHealth)) continue;
 
-            enemyHealth.TakeDamage(damage);
+            enemyHealth.TakeWeakDamage(damage); // 수류탄 폭발과 같은 규칙: 피해 숫자 항상 Weak
         }
     }
 
@@ -675,6 +675,7 @@ public class ArtilleryStrike : MonoBehaviour
     void BeginShell()
     {
         if (shell != null) return;
+        GameAudio.Play(SfxId.ArtilleryFall);
         try
         {
             if (owner.grenadePrefab != null)

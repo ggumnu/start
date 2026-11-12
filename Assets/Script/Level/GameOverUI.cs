@@ -27,9 +27,10 @@ using UnityEngine.UI;
 //
 // [모양/입력 - 다른 팝업과 같은 기준 (형빈 확정)]
 // - 1920x1080 기준 크기로 화면 해상도에 맞춰 커지고 줄어듭니다(다른 HUD/팝업과 같은 규칙).
-// - 창 바탕색/모서리, 버튼 색(평소/마우스 올림)/글자 색/모서리는 공용 스타일 에셋(PopupStyle)에서 읽습니다.
+// - 창/버튼은 공용 부품 UIPatternBox(흰 창 + 모서리 무늬, 평행사변형 버튼)로 그리고, 색/모양/글자 색은 PopupStyle에서 읽습니다.
+//   [예] = 긍정(노랑), [아니오] = 일반(하늘색).
 // - 입력은 다른 팝업과 같이 EventSystem 없이 마우스 좌표를 직접 비교하고, 키(예: F/Enter, 아니오: Esc)도 받습니다.
-//   창이 뜬 그 프레임의 입력은 무시합니다.
+//   클릭은 버튼 위에서 눌렀다가 뗀 순간입니다. 창이 뜬 그 프레임의 입력은 무시합니다.
 //
 // [씬 불러오기 - 주의]
 // 에디터에서 Play 중일 때는 씬이 Build Profiles의 씬 목록에 없어도 불러올 수 있도록 처리해
@@ -58,12 +59,10 @@ public class GameOverUI : MonoBehaviour
     [Tooltip("[아니오]를 누르면 불러올 시작 화면 씬 이름입니다.")]
     public string titleSceneName = "Title";
 
-    [Header("창 모양 (1920x1080 기준 px - 바탕색/모서리/버튼 색은 PopupStyle)")]
+    [Header("창 모양 (1920x1080 기준 px - 바탕색/모서리/글자 색/버튼 색은 PopupStyle)")]
     public Vector2 panelSize = new Vector2(480f, 270f);
     public int titleFontSize = 36;
-    public Color titleColor = Color.white;
     public int messageFontSize = 24;
-    public Color messageColor = Color.white;
 
     [Header("버튼")]
     public Vector2 buttonSize = new Vector2(140f, 46f);
@@ -81,14 +80,14 @@ public class GameOverUI : MonoBehaviour
     private CanvasScaler scaler;
     private GameObject panelRoot;
     private RectTransform panelRect;
-    private Image panelImage;
+    private UIPatternBox panelBox;
     private TextMeshProUGUI titleTextComponent;
     private TextMeshProUGUI messageTextComponent;
     private RectTransform yesRect;
-    private Image yesImage;
+    private UIPatternBox yesBox;
     private TextMeshProUGUI yesLabelComponent;
     private RectTransform noRect;
-    private Image noImage;
+    private UIPatternBox noBox;
     private TextMeshProUGUI noLabelComponent;
 
     private bool isGameOver;
@@ -113,17 +112,19 @@ public class GameOverUI : MonoBehaviour
         if (pausedByThis) Time.timeScale = 1f;
     }
 
+    private int lastHoveredButton = -1; // [사운드] 호버음용 - 마지막으로 마우스가 올라간 버튼 번호
+
     void Update()
     {
         if (panelRoot == null || !panelRoot.activeSelf) return;
 
         ApplyLayout();
 
-        var style = PopupStyle.Get();
         bool overYes = IsPointerOver(yesRect);
         bool overNo = IsPointerOver(noRect);
-        yesImage.color = style.GetButtonColor(overYes, true);
-        noImage.color = style.GetButtonColor(overNo, true);
+        bool clickYes = yesBox.TickButton(overYes, true);
+        bool clickNo = noBox.TickButton(overNo, true);
+        UISound.TrackHover(ref lastHoveredButton, UISound.HoveredId(0, overYes, overNo), Time.frameCount == shownFrame);
 
         // 창이 뜬 그 프레임의 입력은 무시합니다.
         if (Time.frameCount == shownFrame || restarting) return;
@@ -139,11 +140,8 @@ public class GameOverUI : MonoBehaviour
             return;
         }
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (overYes) OnYesClicked();
-            else if (overNo) OnNoClicked();
-        }
+        if (clickYes) OnYesClicked();
+        else if (clickNo) OnNoClicked();
     }
 
     private void HandlePlayerDied(PlayerHealth player)
@@ -163,9 +161,9 @@ public class GameOverUI : MonoBehaviour
         if (showDelay > 0f) yield return new WaitForSecondsRealtime(showDelay);
         panelRoot.SetActive(true);
         shownFrame = Time.frameCount;
-        var style = PopupStyle.Get();
-        yesImage.color = style.GetButtonColor(false, true); // 첫 프레임부터 버튼 색이 맞게
-        noImage.color = style.GetButtonColor(false, true);
+        GameAudio.Play(SfxId.GameOverShow);
+        yesBox.ResetPress();
+        noBox.ResetPress();
         ApplyLayout();
     }
 
@@ -190,6 +188,7 @@ public class GameOverUI : MonoBehaviour
     private void OnYesClicked()
     {
         if (restarting) return;
+        UISound.Confirm();
         restarting = true;
 
         Time.timeScale = 1f;
@@ -201,6 +200,7 @@ public class GameOverUI : MonoBehaviour
     private void OnNoClicked()
     {
         if (restarting) return;
+        UISound.Cancel();
 
         // 시작 화면 씬을 못 찾으면 게임 오버 창을 그대로 둡니다(정지 상태 유지).
         if (!LoadingScreen.CanLoadScene(titleSceneName))
@@ -256,14 +256,13 @@ public class GameOverUI : MonoBehaviour
         panelRect = panelRoot.AddComponent<RectTransform>();
         panelRect.anchorMin = panelRect.anchorMax = new Vector2(0.5f, 0.5f);
         panelRect.pivot = new Vector2(0.5f, 0.5f);
-        panelImage = panelRoot.AddComponent<Image>();
-        panelImage.raycastTarget = false;
+        panelBox = UIPatternBox.AddTo(panelRoot);
 
         titleTextComponent = CreateText(panelRect, "Title");
         messageTextComponent = CreateText(panelRect, "Message");
 
-        CreateButton(panelRect, "YesButton", out yesRect, out yesImage, out yesLabelComponent);
-        CreateButton(panelRect, "NoButton", out noRect, out noImage, out noLabelComponent);
+        CreateButton(panelRect, "YesButton", out yesRect, out yesBox, out yesLabelComponent);
+        CreateButton(panelRect, "NoButton", out noRect, out noBox, out noLabelComponent);
     }
 
     private static TextMeshProUGUI CreateText(Transform parent, string name)
@@ -278,15 +277,14 @@ public class GameOverUI : MonoBehaviour
         return text;
     }
 
-    private static void CreateButton(Transform parent, string name, out RectTransform rect, out Image image, out TextMeshProUGUI label)
+    private static void CreateButton(Transform parent, string name, out RectTransform rect, out UIPatternBox box, out TextMeshProUGUI label)
     {
         var go = new GameObject(name);
         go.transform.SetParent(parent, false);
         rect = go.AddComponent<RectTransform>();
         rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0f);
         rect.pivot = new Vector2(0.5f, 0f);
-        image = go.AddComponent<Image>();
-        image.raycastTarget = false;
+        box = UIPatternBox.AddTo(go);
 
         var labelGO = new GameObject("Label");
         labelGO.transform.SetParent(go.transform, false);
@@ -314,7 +312,7 @@ public class GameOverUI : MonoBehaviour
         Vector2 size = new Vector2(Mathf.Max(100f, panelSize.x), Mathf.Max(80f, panelSize.y));
         panelRect.sizeDelta = size;
         panelRect.anchoredPosition = Vector2.zero;
-        UIRoundedBox.Apply(panelImage, style.darkPanelColor, style.darkPanelCornerRadius, size);
+        panelBox.SetupPanel(style);
 
         float pad = 20f;
         float titleHeight = titleFontSize + 14f;
@@ -323,7 +321,7 @@ public class GameOverUI : MonoBehaviour
         titleRect.anchoredPosition = new Vector2(0f, -pad - 4f);
         titleTextComponent.text = titleText;
         titleTextComponent.fontSize = titleFontSize;
-        titleTextComponent.color = titleColor;
+        titleTextComponent.color = style.panelTextColor;
 
         float buttonsTop = buttonBottomMargin + buttonSize.y;
         float messageTop = pad + 4f + titleHeight + 4f;
@@ -332,20 +330,20 @@ public class GameOverUI : MonoBehaviour
         messageRect.anchoredPosition = new Vector2(0f, -messageTop);
         messageTextComponent.text = messageText;
         messageTextComponent.fontSize = messageFontSize;
-        messageTextComponent.color = messageColor;
+        messageTextComponent.color = style.panelTextColor;
 
         float half = (buttonSize.x + buttonSpacing) * 0.5f;
-        LayoutButton(yesRect, yesImage, yesLabelComponent, yesLabel, new Vector2(-half, buttonBottomMargin), style);
-        LayoutButton(noRect, noImage, noLabelComponent, noLabel, new Vector2(half, buttonBottomMargin), style);
+        LayoutButton(yesRect, yesBox, yesLabelComponent, yesLabel, UIButtonKind.Positive, new Vector2(-half, buttonBottomMargin), style);
+        LayoutButton(noRect, noBox, noLabelComponent, noLabel, UIButtonKind.Normal, new Vector2(half, buttonBottomMargin), style);
     }
 
-    private void LayoutButton(RectTransform rect, Image image, TextMeshProUGUI label, string text, Vector2 pos, PopupStyle style)
+    private void LayoutButton(RectTransform rect, UIPatternBox box, TextMeshProUGUI label, string text, UIButtonKind kind, Vector2 pos, PopupStyle style)
     {
         rect.sizeDelta = buttonSize;
         rect.anchoredPosition = pos;
-        UIRoundedBox.Apply(image, image.color, style.darkPanelButtonCornerRadius, buttonSize); // 색은 Update에서 호버에 따라 정함
+        box.SetupButton(style, kind); // 색은 Update의 TickButton이 호버에 따라 정함
         label.text = text;
         label.fontSize = buttonFontSize;
-        label.color = style.GetButtonTextColor(true);
+        label.color = box.GetLabelColor(true);
     }
 }

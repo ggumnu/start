@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e086bf011daf0144d8b29874f6e7fc29, type: 3}
+  m_Name: TravelBoostSettings
+  m_EditorClassIdentifier: Assembly-CSharp::TravelBoostSettings
+  enableBoost: 1
+  combatFreeDelay: 1
+  rampDuration: 2
+  bonusRatio: 1
+  boostedSpeedCap: 5
+  runAnimStartRatio: 1
+  runAnimReferenceSpeed: 1
+  runAnimSpeedMin: 0.8
+  runAnimSpeedMax: 2
+  runAnimStopGraceTime: 0.1
+  runMeshYaw: 0
+  runMeshYawBlendTime: 0.15
+  runDustPrefab: {fileID: 1311305939156459322, guid: cb5b3a45f65af7e44b6e2ea336eac9bb, type: 3}
+  runDustInterval: 0.07
+  runDustIntervalJitter: 0.3
+  runDustSideJitter: 0.03
+  runDustPhase: 0
+  runDustBackOffset: 0.05
+  runDustHeight: 0.03
+  runDustUpward: 0.6
+  runDustScale: 4
+  runDustLifetime: 1.2

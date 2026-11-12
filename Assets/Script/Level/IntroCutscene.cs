@@ -402,10 +402,13 @@ public class IntroCutscene : MonoBehaviour
         CrossFadeUpper(s, s.reloadStateName, s.reloadBlendIn);
         SetBool(s.reloadBool, true);
         HoldFace(SDFaceExpression.Reload);
+        GameAudio.Play(SfxId.ReloadStart); // [사운드] 컷씬 장전은 PlayerShooting을 거치지 않아 직접 냄
     }
 
     private void BeginPickup(IntroCutsceneSettings s)
     {
+        GameAudio.Play(SfxId.ReloadComplete);
+        GameAudio.Play(SfxId.IntroPose);
         phase = Phase.Pickup;
         timer = 0f;
         returnStarted = false;

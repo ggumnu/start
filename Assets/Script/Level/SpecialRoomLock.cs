@@ -127,6 +127,8 @@ public class SpecialRoomLock : MonoBehaviour
 
         if (gameObject.activeInHierarchy)
         {
+            GameAudio.Play(SfxId.SpecialRoomUnlock); // [사운드] 보이는 잠금이 풀릴 때만(꺼진 방에서 풀리면 소리 없음)
+
             // 콜라이더는 DissolveAndVanish가 곧바로 끄므로(끈 콜라이더는 경계 상자가 비어 있음) 그 전에 이펙트 위치를 계산합니다.
             var lockSettings = entrySettings != null ? entrySettings.GetLockSettings(Condition) : null;
             if (lockSettings != null && lockSettings.unlockVfxPrefab != null)

@@ -29,12 +29,13 @@ using UnityEngine.UI;
 // - 플레이어가 죽으면 교체 없이 창만 닫습니다(조작 해제는 PlayerDeathHandler 몫이라 되돌리지 않음).
 //
 // [아이템 이름 색]
-// "장착 중"/"새 아이템" 뒤의 이름은 등급(Tier0~3)별 색으로 칠합니다. 색은 씬의 PlayerItemInfoDisplay(아이템
-// 설명칸)의 등급별 이름 색을 그대로 가져와 설명칸과 항상 같게 맞추고, 그 컴포넌트가 없으면 아래 기본값
-// (Tier0 흰색 / Tier1 파랑 / Tier2 노랑 / Tier3 보라)을 씁니다. 두 줄 사이에는 빈 줄을 하나 둡니다.
+// "장착 중"/"새 아이템" 옆의 이름은 등급(Tier0~3)별 색으로 칠하고, 흰 창에서도 잘 보이도록 이름 뒤에 남색 평행사변형 판
+// (PopupStyle의 아이템 이름 판)을 깝니다. 색은 씬의 PlayerItemInfoDisplay(아이템 설명칸)의 등급별 이름 색을 그대로 가져와
+// 설명칸과 항상 같게 맞추고, 그 컴포넌트가 없으면 아래 기본값(Tier0 흰색 / Tier1 파랑 / Tier2 노랑 / Tier3 보라)을 씁니다.
 //
-// [색/모서리 - 공용 팝업 스타일]
-// 창 바탕색/모서리, 버튼 색(평소/마우스 올림)/글자 색/모서리는 공용 스타일 에셋(PopupStyle)에서 읽습니다 - 모든 팝업이 같은 값을 씁니다.
+// [색/모양 - 공용 팝업 스타일]
+// 창/버튼은 공용 부품 UIPatternBox(흰 창 + 모서리 무늬, 평행사변형 버튼)로 그리고, 색/모양/글자 색은 PopupStyle에서 읽습니다.
+// [예] = 긍정(노랑), [아니오] = 일반(하늘색). 클릭은 버튼 위에서 눌렀다가 뗀 순간입니다.
 //
 // [설정]
 // 씬에 따로 붙일 필요가 없습니다 - 처음 필요할 때 스스로 만들어집니다. 문구/색/크기/키를 바꾸고 싶으면 씬의 빈
@@ -61,19 +62,36 @@ public class SlotReplaceConfirmUI : MonoBehaviour
     public Color fallbackTier2Color = new Color(1f, 0.85f, 0.25f, 1f);
     public Color fallbackTier3Color = new Color(0.75f, 0.5f, 1f, 1f);
 
-    [Header("창 모양 (1920x1080 기준 px - 바탕색/모서리는 PopupStyle)")]
-    public Vector2 panelSize = new Vector2(480f, 260f);
+    [Header("창 모양 (1920x1080 기준 px - 바탕/모서리/글자 색은 PopupStyle)")]
+    public Vector2 panelSize = new Vector2(520f, 350f);
     public int messageFontSize = 26;
-    public Color messageColor = Color.white;
+    [Tooltip("창 위쪽 끝에서 \"아이템 슬롯을 교체하시겠습니까?\" 문구까지의 거리입니다.")]
+    public float messageTopMargin = 60f;
+    [Tooltip("문구와 \"장착 중\"/\"새 아이템\" 두 줄 묶음 사이의 최소 간격입니다(두 줄은 문구 아래 ~ 버튼 위 공간의 가운데).")]
+    public float messageToDetailGap = 40f;
+    [Tooltip("\"장착 중\"/\"새 아이템\" 줄의 글자 크기입니다(이름 판 포함).")]
     public int detailFontSize = 19;
-    public Color detailColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+    [Tooltip("\"장착 중\" 줄과 \"새 아이템\" 줄 사이 간격입니다.")]
+    public float detailRowSpacing = 20f;
+    [Tooltip("\"장착 중\" 글자와 이름 판 사이 간격입니다.")]
+    public float detailLabelGap = 12f;
+
+    [Header("줄별 위치 조정 (기본 위치에 더함 - px, +x 오른쪽, +y 위)")]
+    [Tooltip("\"아이템 슬롯을 교체하시겠습니까?\" 문구")]
+    public Vector2 messageOffset = Vector2.zero;
+    [Tooltip("\"장착 중 [이름 판]\" 줄")]
+    public Vector2 equippedRowOffset = Vector2.zero;
+    [Tooltip("\"새 아이템 [이름 판]\" 줄")]
+    public Vector2 incomingRowOffset = Vector2.zero;
+    [Tooltip("[예]/[아니오] 버튼 두 개")]
+    public Vector2 buttonsOffset = Vector2.zero;
 
     [Header("버튼 (색/글자 색/모서리는 PopupStyle)")]
     public Vector2 buttonSize = new Vector2(140f, 46f);
     [Tooltip("두 버튼 사이 간격입니다.")]
     public float buttonSpacing = 30f;
     [Tooltip("창 아래쪽 끝에서 버튼까지의 거리입니다.")]
-    public float buttonBottomMargin = 24f;
+    public float buttonBottomMargin = 50f;
     public int buttonFontSize = 22;
 
     [Header("정렬 (일반적으로 건드릴 필요 없음)")]
@@ -121,9 +139,6 @@ public class SlotReplaceConfirmUI : MonoBehaviour
     // 인스턴스
     // ------------------------------------------------------------------
 
-    private const int RoundedTexSize = 96;
-    private const int RoundedTexRadius = 32;
-
     private bool isOpen;
     private int openedFrame = -1;
     private int closedFrame = -1;
@@ -137,17 +152,26 @@ public class SlotReplaceConfirmUI : MonoBehaviour
     private Canvas canvas;
     private CanvasScaler scaler;
     private RectTransform panelRect;
-    private Image panelImage;
+    private UIPatternBox panelBox;
     private TextMeshProUGUI messageText;
-    private TextMeshProUGUI detailText;
+    private DetailRow equippedRow;
+    private DetailRow incomingRow;
     private RectTransform yesRect;
-    private Image yesImage;
+    private UIPatternBox yesBox;
     private TextMeshProUGUI yesText;
     private RectTransform noRect;
-    private Image noImage;
+    private UIPatternBox noBox;
     private TextMeshProUGUI noText;
-    private Sprite roundedSprite;
-    private Texture2D roundedTexture;
+
+    // "장착 중 [이름 판]" 한 줄
+    private class DetailRow
+    {
+        public RectTransform root;
+        public TextMeshProUGUI label;
+        public UINamePlate plate;
+        public string itemName = "-";
+        public Color nameColor = Color.white;
+    }
 
     void Awake()
     {
@@ -169,8 +193,6 @@ public class SlotReplaceConfirmUI : MonoBehaviour
         UnwatchDamage();
         if (isOpen) RestorePlayerControls();
         if (instance == this) instance = null;
-        if (roundedSprite != null) Destroy(roundedSprite);
-        if (roundedTexture != null) Destroy(roundedTexture);
     }
 
     private bool Open(ItemDefinition equipped, ItemDefinition incoming, Action onConfirm)
@@ -185,9 +207,10 @@ public class SlotReplaceConfirmUI : MonoBehaviour
         pendingConfirm = onConfirm;
 
         messageText.text = message;
-        // 두 줄 사이에 빈 줄 하나, 이름은 등급 색(리치 텍스트)
-        detailText.richText = true;
-        detailText.text = $"{equippedLabel}: {ColoredName(equipped)}\n\n{incomingLabel}: {ColoredName(incoming)}";
+        SetRow(equippedRow, equippedLabel, equipped);
+        SetRow(incomingRow, incomingLabel, incoming);
+        yesBox.ResetPress();
+        noBox.ResetPress();
 
         DisablePlayerControls(health);
         WatchDamage(health);
@@ -247,6 +270,8 @@ public class SlotReplaceConfirmUI : MonoBehaviour
         watchedHealth = null;
     }
 
+    private int lastHoveredButton = -1; // [사운드] 호버음용 - 마지막으로 마우스가 올라간 버튼 번호
+
     void Update()
     {
         if (!isOpen) return;
@@ -255,21 +280,18 @@ public class SlotReplaceConfirmUI : MonoBehaviour
 
         bool overYes = IsPointerOver(yesRect);
         bool overNo = IsPointerOver(noRect);
-        var style = PopupStyle.Get();
-        yesImage.color = style.GetButtonColor(overYes, true);
-        noImage.color = style.GetButtonColor(overNo, true);
+        bool clickYes = yesBox.TickButton(overYes, true);
+        bool clickNo = noBox.TickButton(overNo, true);
+        UISound.TrackHover(ref lastHoveredButton, UISound.HoveredId(0, overYes, overNo), Time.frameCount == openedFrame);
 
         // 창을 연 그 프레임의 입력(상자를 연 F, 같은 프레임의 클릭)은 무시합니다.
         if (Time.frameCount == openedFrame) return;
 
-        if (Input.GetKeyDown(confirmKey)) { Close(true); return; }
-        if (Input.GetKeyDown(cancelKey)) { Close(false); return; }
+        if (Input.GetKeyDown(confirmKey)) { UISound.Confirm(); Close(true); return; }
+        if (Input.GetKeyDown(cancelKey)) { UISound.Cancel(); Close(false); return; }
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (overYes) Close(true);
-            else if (overNo) Close(false);
-        }
+        if (clickYes) { UISound.Confirm(); Close(true); }
+        else if (clickNo) { UISound.Cancel(); Close(false); }
     }
 
     private static string ItemName(ItemDefinition item)
@@ -278,12 +300,12 @@ public class SlotReplaceConfirmUI : MonoBehaviour
         return string.IsNullOrEmpty(item.displayName) ? item.name : item.displayName;
     }
 
-    // 등급 색을 입힌 아이템 이름(리치 텍스트)
-    private string ColoredName(ItemDefinition item)
+    // 한 줄의 글자를 채웁니다(이름은 등급 색 - 없으면 "-" 흰색).
+    private void SetRow(DetailRow row, string label, ItemDefinition item)
     {
-        if (item == null) return "-";
-        string hex = ColorUtility.ToHtmlStringRGBA(GetTierColor(item.rarity));
-        return $"<color=#{hex}>{ItemName(item)}</color>";
+        row.label.text = label;
+        row.itemName = ItemName(item);
+        row.nameColor = item != null ? GetTierColor(item.rarity) : Color.white;
     }
 
     // 씬의 PlayerItemInfoDisplay(아이템 설명칸)와 같은 등급 색을 씁니다. 없으면 이 컴포넌트의 기본값.
@@ -399,14 +421,37 @@ public class SlotReplaceConfirmUI : MonoBehaviour
         panelRect = panelGO.AddComponent<RectTransform>();
         panelRect.anchorMin = panelRect.anchorMax = new Vector2(0.5f, 0.5f);
         panelRect.pivot = new Vector2(0.5f, 0.5f);
-        panelImage = panelGO.AddComponent<Image>();
-        panelImage.raycastTarget = false;
+        panelBox = UIPatternBox.AddTo(panelGO);
 
         messageText = CreateText(panelRect, "Message", TextAnchor.MiddleCenter);
-        detailText = CreateText(panelRect, "Detail", TextAnchor.MiddleCenter);
+        equippedRow = CreateRow(panelRect, "EquippedRow");
+        incomingRow = CreateRow(panelRect, "IncomingRow");
 
-        CreateButton(panelRect, "YesButton", out yesRect, out yesImage, out yesText);
-        CreateButton(panelRect, "NoButton", out noRect, out noImage, out noText);
+        CreateButton(panelRect, "YesButton", out yesRect, out yesBox, out yesText);
+        CreateButton(panelRect, "NoButton", out noRect, out noBox, out noText);
+    }
+
+    private static DetailRow CreateRow(Transform parent, string name)
+    {
+        var row = new DetailRow();
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        row.root = go.AddComponent<RectTransform>();
+        row.root.anchorMin = row.root.anchorMax = new Vector2(0.5f, 1f);
+        row.root.pivot = new Vector2(0.5f, 0.5f);
+
+        var labelGO = new GameObject("Label");
+        labelGO.transform.SetParent(row.root, false);
+        var labelRect = labelGO.AddComponent<RectTransform>();
+        labelRect.anchorMin = labelRect.anchorMax = new Vector2(0f, 0.5f);
+        labelRect.pivot = new Vector2(0f, 0.5f);
+        row.label = HUDText.AddTo(labelGO, TextAnchor.MiddleLeft);
+        row.label.raycastTarget = false;
+
+        row.plate = UINamePlate.Create(row.root, "NamePlate");
+        row.plate.rect.anchorMin = row.plate.rect.anchorMax = new Vector2(0f, 0.5f);
+        row.plate.rect.pivot = new Vector2(0f, 0.5f);
+        return row;
     }
 
     private static TextMeshProUGUI CreateText(Transform parent, string name, TextAnchor anchor)
@@ -421,15 +466,14 @@ public class SlotReplaceConfirmUI : MonoBehaviour
         return HUDText.AddTo(go, anchor, true);
     }
 
-    private static void CreateButton(Transform parent, string name, out RectTransform rect, out Image image, out TextMeshProUGUI label)
+    private static void CreateButton(Transform parent, string name, out RectTransform rect, out UIPatternBox box, out TextMeshProUGUI label)
     {
         var go = new GameObject(name);
         go.transform.SetParent(parent, false);
         rect = go.AddComponent<RectTransform>();
         rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0f);
         rect.pivot = new Vector2(0.5f, 0f);
-        image = go.AddComponent<Image>();
-        image.raycastTarget = false;
+        box = UIPatternBox.AddTo(go);
 
         var labelGO = new GameObject("Label");
         labelGO.transform.SetParent(go.transform, false);
@@ -455,83 +499,61 @@ public class SlotReplaceConfirmUI : MonoBehaviour
         panelRect.sizeDelta = size;
         panelRect.anchoredPosition = Vector2.zero;
         var style = PopupStyle.Get();
-        ApplyRounded(panelImage, style.darkPanelColor, style.darkPanelCornerRadius, size);
+        panelBox.SetupPanel(style);
 
         float pad = 20f;
         var msgRect = messageText.rectTransform;
         msgRect.sizeDelta = new Vector2(size.x - pad * 2f, messageFontSize + 12f);
-        msgRect.anchoredPosition = new Vector2(0f, -pad - 4f);
+        msgRect.anchoredPosition = new Vector2(0f, -messageTopMargin) + messageOffset;
         messageText.fontSize = messageFontSize;
-        messageText.color = messageColor;
+        messageText.color = style.panelTextColor;
 
-        var detailRect = detailText.rectTransform;
+        // "장착 중"/"새 아이템" 두 줄: 문구 아래 ~ 버튼 위 공간의 가운데에 위아래로
         float buttonsTop = buttonBottomMargin + buttonSize.y;
-        float detailTop = pad + 4f + messageFontSize + 12f + 8f;
-        detailRect.sizeDelta = new Vector2(size.x - pad * 2f, Mathf.Max(10f, size.y - detailTop - buttonsTop - 8f));
-        detailRect.anchoredPosition = new Vector2(0f, -detailTop);
-        detailText.fontSize = detailFontSize;
-        detailText.color = detailColor;
+        float detailTop = messageTopMargin + messageFontSize + 12f + messageToDetailGap;
+        float detailHeight = Mathf.Max(10f, size.y - detailTop - buttonsTop - messageToDetailGap);
+        float centerY = -detailTop - detailHeight * 0.5f;
+        float plateHeight = UINamePlate.Height(detailFontSize, style);
+        float rowStep = (plateHeight + detailRowSpacing) * 0.5f;
+        LayoutRow(equippedRow, centerY + rowStep, size.x - pad * 2f, plateHeight, style);
+        LayoutRow(incomingRow, centerY - rowStep, size.x - pad * 2f, plateHeight, style);
+        equippedRow.root.anchoredPosition += equippedRowOffset;
+        incomingRow.root.anchoredPosition += incomingRowOffset;
 
         float half = (buttonSize.x + buttonSpacing) * 0.5f;
-        LayoutButton(yesRect, yesImage, yesText, yesLabel, new Vector2(-half, buttonBottomMargin));
-        LayoutButton(noRect, noImage, noText, noLabel, new Vector2(half, buttonBottomMargin));
+        LayoutButton(yesRect, yesBox, yesText, yesLabel, UIButtonKind.Positive, new Vector2(-half, buttonBottomMargin) + buttonsOffset);
+        LayoutButton(noRect, noBox, noText, noLabel, UIButtonKind.Normal, new Vector2(half, buttonBottomMargin) + buttonsOffset);
     }
 
-    private void LayoutButton(RectTransform rect, Image image, TextMeshProUGUI label, string text, Vector2 pos)
+    // [라벨][간격][이름 판] 한 줄을 가로 가운데 정렬합니다. 이름이 길면 판이 줄 폭을 넘지 않게 자르고 글자를 줄입니다.
+    private void LayoutRow(DetailRow row, float y, float maxWidth, float plateHeight, PopupStyle style)
+    {
+        row.label.fontSize = detailFontSize;
+        row.label.color = style.panelTextColor;
+
+        float labelWidth = row.label.GetPreferredValues(row.label.text).x;
+        float maxPlate = Mathf.Max(40f, maxWidth - labelWidth - detailLabelGap);
+        float plateWidth = row.plate.Fit(row.itemName, row.nameColor, detailFontSize, maxPlate, style);
+        float rowWidth = labelWidth + detailLabelGap + plateWidth;
+
+        row.root.sizeDelta = new Vector2(rowWidth, plateHeight);
+        row.root.anchoredPosition = new Vector2(0f, y);
+
+        var labelRect = row.label.rectTransform;
+        labelRect.sizeDelta = new Vector2(labelWidth + 2f, plateHeight);
+        labelRect.anchoredPosition = Vector2.zero;
+
+        row.plate.rect.anchoredPosition = new Vector2(labelWidth + detailLabelGap, 0f);
+    }
+
+    private void LayoutButton(RectTransform rect, UIPatternBox box, TextMeshProUGUI label, string text, UIButtonKind kind, Vector2 pos)
     {
         rect.sizeDelta = buttonSize;
         rect.anchoredPosition = pos;
         var style = PopupStyle.Get();
-        ApplyRounded(image, image.color, style.darkPanelButtonCornerRadius, buttonSize); // 색은 Update에서 호버에 따라 정함
+        box.SetupButton(style, kind); // 색은 Update의 TickButton이 호버에 따라 정함
         label.text = text;
         label.fontSize = buttonFontSize;
-        label.color = style.GetButtonTextColor(true);
-    }
-
-    // 실행 중에 만든 흰색 둥근 사각형을 9-Slice로 늘려 씁니다(스탯 툴팁/미니맵 구역과 같은 방식).
-    private void ApplyRounded(Image image, Color color, float cornerRadius, Vector2 size)
-    {
-        image.color = color;
-        float radius = Mathf.Min(cornerRadius, Mathf.Min(size.x, size.y) * 0.5f);
-        if (radius < 0.5f)
-        {
-            image.sprite = null;
-            image.type = Image.Type.Simple;
-            return;
-        }
-        EnsureRoundedSprite();
-        image.sprite = roundedSprite;
-        image.type = Image.Type.Sliced;
-        image.pixelsPerUnitMultiplier = RoundedTexRadius / radius;
-    }
-
-    private void EnsureRoundedSprite()
-    {
-        if (roundedSprite != null) return;
-
-        int size = RoundedTexSize;
-        float r = RoundedTexRadius;
-        roundedTexture = new Texture2D(size, size, TextureFormat.RGBA32, false);
-        roundedTexture.wrapMode = TextureWrapMode.Clamp;
-        roundedTexture.filterMode = FilterMode.Bilinear;
-
-        var pixels = new Color32[size * size];
-        for (int y = 0; y < size; y++)
-        {
-            for (int x = 0; x < size; x++)
-            {
-                float cx = Mathf.Clamp(x + 0.5f, r, size - r);
-                float cy = Mathf.Clamp(y + 0.5f, r, size - r);
-                float dx = x + 0.5f - cx;
-                float dy = y + 0.5f - cy;
-                float alpha = Mathf.Clamp01(r - Mathf.Sqrt(dx * dx + dy * dy) + 0.5f);
-                pixels[y * size + x] = new Color32(255, 255, 255, (byte)Mathf.RoundToInt(alpha * 255f));
-            }
-        }
-        roundedTexture.SetPixels32(pixels);
-        roundedTexture.Apply();
-
-        roundedSprite = Sprite.Create(roundedTexture, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f),
-                                      100f, 0, SpriteMeshType.FullRect, new Vector4(r, r, r, r));
+        label.color = box.GetLabelColor(true);
     }
 }

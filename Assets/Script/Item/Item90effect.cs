@@ -7,7 +7,7 @@ using UnityEngine;
 // 아이템 에셋: Item Id = 90, Category = Active, Active Cost = 2, Active Effect = RoomWaveClearEffect, Wave Material = RoomWave 재질.
 // 기획/설계 배경은 Docs/설계노트.md [90번 물결].
 [System.Serializable]
-public class RoomWaveClearEffect : IDelayedActiveItemEffect
+public class RoomWaveClearEffect : IDelayedActiveItemEffect, IHasOwnUseSound
 {
     [Header("물결 진행")]
     [Tooltip("물결이 플레이어 위치에서 방의 가장 먼 모서리까지 퍼지는 데 걸리는 시간(초)입니다. 이 시간 동안 적은 새 공격을 시작하지 못합니다.")]
@@ -113,6 +113,7 @@ public class RoomWaveClearEffect : IDelayedActiveItemEffect
         // 물결이 다 퍼질 때까지 적의 새 공격을 막습니다(형빈 확정).
         EnemyAttackLock.Lock(LockSourceId, expandDuration + extraLockTime);
 
+        GameAudio.Play(SfxId.RoomWave);
         RoomWavePulse.Spawn(this, center, maxRadius, room, enemies);
     }
 

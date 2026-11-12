@@ -143,13 +143,9 @@ public class HeliExtractionSettings : ScriptableObject
     [Tooltip("검은 막 정렬 순서(게임 오버 창 100보다 위, 로딩 화면 1000보다 아래)입니다.")]
     public int overlaySortingOrder = 998;
 
-    [Header("퇴각 - 총을 등에 메기")]
-    [Tooltip("손에 든 총 오브젝트 이름입니다(오른손 뼈 아래). 못 찾으면 오른손 뼈 아래 첫 번째 그림 있는 오브젝트를 씁니다.")]
+    [Header("퇴각/도착 - 총 숨기기")]
+    [Tooltip("연출 동안 숨길 총은 플레이어의 PlayerWeaponMode > Gun Model 칸을 먼저 씁니다. 그 칸이 비어 있을 때만 이 이름의 오브젝트(오른손 뼈 아래)를 찾고, 그것도 없으면 오른손 뼈 아래 첫 번째 그림 있는 오브젝트를 씁니다.")]
     public string gunObjectName = "Reisa_gun_Fixed";
-    [Tooltip("등에 멘 총 위치: 가슴 뼈 기준, 캐릭터 방향으로 X = 오른쪽, Y = 위, Z = 앞(음수 = 등 뒤) (m). Play 중에 바꾸면 바로 보입니다.")]
-    public Vector3 gunBackOffset = new Vector3(0f, 0f, -0.12f);
-    [Tooltip("등에 멘 총 회전(캐릭터 방향 기준 오일러 각)입니다. 기본값 = 총구가 오른쪽 어깨 위로 비스듬히. Play 중에 바꾸면 바로 보입니다.")]
-    public Vector3 gunBackEuler = new Vector3(49.6f, -89.8f, 179.5f);
 
     [Header("도착 - 다음 레벨에서 사다리 타고 내려오기")]
     [Tooltip("도착 연출을 시작할 때 사다리가 원래 위치보다 이만큼(m) 위에 있습니다(매달린 플레이어가 화면 위에서 내려오도록 충분히 높게).")]

@@ -16,7 +16,7 @@
 // [아이템 에셋 설정]
 // ItemDefinition: Item Id = 112, Category = Active, Active Cost = 4, Active Effect = InvisibilityActiveEffect.
 [System.Serializable]
-public class InvisibilityActiveEffect : IActiveItemUseRules
+public class InvisibilityActiveEffect : IActiveItemUseRules, IHasOwnUseSound
 {
     [Tooltip("투명 상태가 유지되는 시간(초)입니다.")]
     [Min(0.1f)] public float duration = 5f;
@@ -39,6 +39,7 @@ public class InvisibilityActiveEffect : IActiveItemUseRules
 
     public void Activate(ActiveEffectContext context)
     {
+        GameAudio.Play(SfxId.Active112); // [사운드] 전용 사용음(공용 발동음 대신)
         if (context == null || context.PlayerObject == null) return;
         PlayerInvisibility.Begin(context.PlayerObject, duration, visibleFraction);
     }

@@ -42,7 +42,7 @@ MonoBehaviour:
   statModifiers:
   - statType: 1
     modifierType: 0
-    value: -0.3
+    value: -0.2
   specialEffects:
   - rid: 1931315703794892869
   specialEffectDescription: "\n\uBCF4\uC720\uD558\uACE0 \uC788\uB294 \uD328\uC2DC\uBE0C

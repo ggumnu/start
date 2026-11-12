@@ -135,7 +135,7 @@ public class ItemCodexUI : MonoBehaviour
     private readonly List<IconView> iconViews = new List<IconView>();
 
     private RectTransform buttonRect;
-    private Image buttonImage;
+    private UIPatternBox buttonBox;
     private TextMeshProUGUI buttonText;
     private CanvasGroup buttonGroup;
 
@@ -210,7 +210,7 @@ public class ItemCodexUI : MonoBehaviour
 
         overlayAlpha = contentAlpha = buttonAlpha = 0f;
         contentOffset = buttonOffset = -s.riseDistance;
-        buttonImage.color = PopupStyle.Get().GetButtonColor(false, true); // 떠오르는 동안은 평소 색
+        SetButtonIdle(); // 떠오르는 동안은 평소 색
 
         tooltip.Hide();
         canvasGO.SetActive(true);
@@ -254,15 +254,24 @@ public class ItemCodexUI : MonoBehaviour
     // 입력 대기
     // ------------------------------------------------------------------
 
+    private int lastHoveredButton = -1; // [사운드] 호버음용 - 마지막으로 마우스가 올라간 버튼 번호
+
     private void UpdateReady(ItemCodexSettings s)
     {
         bool overButton = IsPointerOver(buttonRect);
-        buttonImage.color = PopupStyle.Get().GetButtonColor(overButton, true);
+        bool clickButton = buttonBox.TickButton(overButton, true); // 클릭은 떼는 순간(누르는 동안 작아짐)
+        UISound.TrackHover(ref lastHoveredButton, UISound.HoveredId(0, overButton), Time.frameCount == modeFrame);
 
         if (Time.frameCount == modeFrame) return;
 
         if (Input.GetKeyDown(s.closeKey)) { BeginClose(); return; }
-        if (Input.GetMouseButtonDown(0) && overButton) BeginClose();
+        if (clickButton) BeginClose();
+    }
+
+    private void SetButtonIdle()
+    {
+        buttonBox.ResetPress();
+        buttonBox.color = PopupStyle.Get().GetKindColor(UIButtonKind.Normal, false, true);
     }
 
     private void UpdateScroll(ItemCodexSettings s)
@@ -279,6 +288,7 @@ public class ItemCodexUI : MonoBehaviour
 
     private void BeginClose()
     {
+        UISound.Cancel(); // [사운드] 닫기 버튼/Esc 모두 여기로 옴
         mode = Mode.Closing;
         modeFrame = Time.frameCount;
         closeStartTime = Time.unscaledTime;
@@ -288,7 +298,7 @@ public class ItemCodexUI : MonoBehaviour
         closeFromContentOffset = contentOffset;
         closeFromButtonOffset = buttonOffset;
 
-        buttonImage.color = PopupStyle.Get().GetButtonColor(false, true); // 사라지는 동안 호버 표시 없음
+        SetButtonIdle(); // 사라지는 동안 호버 표시 없음
         tooltip.Hide();
     }
 
@@ -533,8 +543,7 @@ public class ItemCodexUI : MonoBehaviour
         buttonRect = buttonGO.AddComponent<RectTransform>();
         buttonRect.anchorMin = buttonRect.anchorMax = new Vector2(0.5f, 0.5f);
         buttonRect.pivot = new Vector2(0.5f, 0.5f);
-        buttonImage = buttonGO.AddComponent<Image>();
-        buttonImage.raycastTarget = false;
+        buttonBox = UIPatternBox.AddTo(buttonGO);
         buttonGroup = buttonGO.AddComponent<CanvasGroup>();
         buttonGroup.blocksRaycasts = false;
         buttonGroup.interactable = false;
@@ -603,7 +612,7 @@ public class ItemCodexUI : MonoBehaviour
         titleRect.anchoredPosition = new Vector2(0f, s.titleOffsetY + contentOffset);
         titleText.text = s.title;
         titleText.fontSize = s.titleFontSize;
-        titleText.color = s.titleColor;
+        titleText.color = style.panelTextColor;
         titleGroup.alpha = contentAlpha;
 
         // 아이템 패널
@@ -613,10 +622,10 @@ public class ItemCodexUI : MonoBehaviour
         // [돌아가기]
         buttonRect.sizeDelta = s.buttonSize;
         buttonRect.anchoredPosition = new Vector2(0f, s.buttonOffsetY + buttonOffset);
-        UIRoundedBox.Apply(buttonImage, buttonImage.color, s.buttonCornerRadius, s.buttonSize); // 색은 호버에 따라(UpdateReady)
+        buttonBox.SetupButton(style, UIButtonKind.Normal); // 색은 호버에 따라(UpdateReady의 TickButton)
         buttonText.text = s.backLabel;
         buttonText.fontSize = s.buttonFontSize;
-        buttonText.color = style.GetButtonTextColor(true);
+        buttonText.color = buttonBox.GetLabelColor(true);
         buttonGroup.alpha = buttonAlpha;
     }
 

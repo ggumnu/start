@@ -189,7 +189,8 @@ public class CreditBonusTrinketEffect : ITrinketEffect
             }
 
             CreditPopupSettings settings = HeadAlertRoomRules.Sanitize(success ? successPopup : failurePopup, success);
-            CreditPopupDisplay.Show(player, player.transform.position, settings, itemIcon, followTarget: true, onStarted: onStarted);
+            CreditPopupDisplay.Show(player, player.transform.position, settings, itemIcon, followTarget: true, onStarted: onStarted,
+                                    sound: success ? SfxId.ItemActivate : SfxId.ItemFail);
         }
         catch (Exception e)
         {

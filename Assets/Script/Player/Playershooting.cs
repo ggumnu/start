@@ -195,7 +195,7 @@ public class PlayerShooting : MonoBehaviour
         // 장전 애니메이션: 재생 속도를 이번 장전 시간에 맞춘 뒤 장전 상태로 들어갑니다.
         SetAnimatorFloat(reloadSpeedAnimatorParam, ComputeReloadAnimSpeed(currentReloadDuration));
         SetAnimatorBool(isReloadingAnimatorParam, true);
-        // TODO: 장전 사운드 재생 등을 여기에 연결하세요.
+        // 장전 시작음은 SoundEventHooks가 아래 OnReloadStarted로 냅니다.
 
         OnReloadStarted?.Invoke();
     }
@@ -261,7 +261,7 @@ public class PlayerShooting : MonoBehaviour
         isReloading = false;
         currentAmmo = stats.MagazineSize;
         SetAnimatorBool(isReloadingAnimatorParam, false);
-        // TODO: 장전 완료 사운드 등을 여기에 연결하세요.
+        GameAudio.Play(SfxId.ReloadComplete);
     }
 
     // [105번 연동 - 적 처치 시 즉시 장전] 장전 시간/장전 모션 없이 탄창을 즉시 가득 채웁니다. "장전"으로 취급합니다.
@@ -287,6 +287,7 @@ public class PlayerShooting : MonoBehaviour
         }
 
         currentAmmo = Mathf.Max(currentAmmo, stats.MagazineSize);
+        GameAudio.Play(SfxId.ReloadComplete); // [사운드] 105번 즉시 장전도 장전 완료음
         return true;
     }
 
@@ -300,6 +301,7 @@ public class PlayerShooting : MonoBehaviour
 
         if (currentAmmo <= 0)
         {
+            GameAudio.Play(SfxId.GunEmpty); // [사운드] 빈 탄창 클릭(바로 이어서 장전 시작음)
             StartReload(); // 탄약이 없는데 클릭하면 자동 장전 시작
             return false;
         }

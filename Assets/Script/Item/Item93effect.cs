@@ -39,7 +39,7 @@ using UnityEngine;
 // [아이템 에셋 설정]
 // ItemDefinition: Item Id = 93, Category = Active, Active Cost = 5, Active Effect = ReplayLastFoodEffect.
 [Serializable]
-public class ReplayLastFoodEffect : IDelayedActiveItemEffect
+public class ReplayLastFoodEffect : IDelayedActiveItemEffect, IHasOwnUseSound
 {
     // 지금 대기 중인 재현 상태입니다(인스펙터 설정이 아니라 런타임 상태 - 직렬화되지 않습니다).
     // pendingEffect가 null이 아니면 "지연형 재현이 진행 중"이라는 뜻입니다.
@@ -66,6 +66,7 @@ public class ReplayLastFoodEffect : IDelayedActiveItemEffect
 
     public void Activate(ActiveEffectContext context)
     {
+        GameAudio.Play(SfxId.Active93); // [사운드] 전용 사용음(공용 발동음 대신)
         PlayerFoodItem foodItem = GetFoodItem(context);
         if (foodItem == null) return;
 

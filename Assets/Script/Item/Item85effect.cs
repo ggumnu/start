@@ -37,7 +37,7 @@ using UnityEngine;
 // [아이템 에셋 설정]
 // ItemDefinition: Item Id = 85, Category = Active, Active Cost = 10, Active Effect = ReplayLastDisposableEffect.
 [Serializable]
-public class ReplayLastDisposableEffect : IDelayedActiveItemEffect
+public class ReplayLastDisposableEffect : IDelayedActiveItemEffect, IHasOwnUseSound
 {
     // 지금 대기 중인 재현 상태입니다(인스펙터 설정이 아니라 런타임 상태 - 직렬화되지 않습니다).
     // pendingEffect가 null이 아니면 "지연형 재현이 진행 중"이라는 뜻입니다.
@@ -70,6 +70,7 @@ public class ReplayLastDisposableEffect : IDelayedActiveItemEffect
 
     public void Activate(ActiveEffectContext context)
     {
+        GameAudio.Play(SfxId.Active85); // [사운드] 전용 사용음(공용 발동음 대신)
         PlayerDisposableItem slot = GetDisposableSlot(context);
         if (slot == null) return;
 

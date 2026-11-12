@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 // [슬롯 아이템 버리기 창 (형빈 확정)]
-// Ctrl(왼쪽/오른쪽)을 꾹 누르면(기본 0.8초, 차오르는 표시 없음) 화면 전체가 반투명 검정으로 덮이고, 반투명 흰 창에 지금 가진
+// Ctrl(왼쪽/오른쪽)을 꾹 누르면(기본 0.8초, 차오르는 표시 없음) 화면 전체가 반투명 검정으로 덮이고, 흰 창에 지금 가진
 // 장신구/일회용/음식 칸이 보입니다. 원하는 아이템을 골라 [버리기]를 누르면 그 아이템이 지금 방 바닥에 좌대로 놓입니다.
 // 실제 판정/자리 찾기/버리기는 SlotItemDropper가 하고, 이 스크립트는 화면과 입력만 맡습니다. 조절 값은 SlotDropSettings 에셋.
 //
@@ -21,9 +21,9 @@ using UnityEngine.UI;
 // - [버리기]는 하나 이상 골랐을 때만 눌립니다. [취소하기] 또는 Esc = 아무 일 없이 닫힘.
 //
 // [버리기를 누르면]
-// 1. 고른 것 중 "교체 시 확인"(confirmBeforeReplace, 예: 20번) 아이템이 있으면 검은 확인 창("정말 버리시겠습니까?" + 그 아이템
-//    이름)이 하나 더 뜹니다. [취소하기]/Esc = 첫 창으로 돌아감(고른 상태 그대로). [버리기] = 다음 단계로.
-// 2. 지금 방에 고른 개수만큼 놓을 자리가 있는지 확인합니다. 모자라면 창을 닫고 검은 창 "현재 방에서 버릴 수 없습니다"를
+// 1. 고른 것 중 "교체 시 확인"(confirmBeforeReplace, 예: 20번) 아이템이 있으면 작은 확인 창("정말 버리시겠습니까?" + 그 아이템
+//    이름 판)이 하나 더 뜹니다. [취소하기]/Esc = 첫 창으로 돌아감(고른 상태 그대로). [버리기] = 다음 단계로.
+// 2. 지금 방에 고른 개수만큼 놓을 자리가 있는지 확인합니다. 모자라면 창을 닫고 작은 창 "현재 방에서 버릴 수 없습니다"를
 //    띄웁니다([확인]/Enter/Esc로 닫힘). 이때는 아무것도 버려지지 않습니다.
 // 3. 자리가 있으면 창을 모두 닫고 고른 아이템을 슬롯에서 빼서 각 자리에 좌대로 놓습니다.
 //
@@ -32,8 +32,10 @@ using UnityEngine.UI;
 // 좌대/상인의 F(InteractionTargetSelector)도 막습니다(닫힌 그 프레임 포함). 피해를 입으면 아무것도 버리지 않고 모든 창이 닫히고,
 // 죽으면 창만 닫습니다.
 //
-// [색/모서리]
-// 검은 창 바탕색/모서리와 모든 버튼 색(평소/마우스 올림/못 누름)/글자 색은 공용 스타일 에셋(PopupStyle)에서 읽습니다.
+// [색/모양]
+// 창/버튼은 공용 부품 UIPatternBox(흰 창 + 모서리 무늬, 평행사변형 버튼 - 떼는 순간 클릭)로 그리고, 색/모양/글자 색은 PopupStyle에서
+// 읽습니다. 첫 창 [버리기]/[취소하기] = 하늘색, 확인 창 [버리기] = 노랑 / [취소하기] = 하늘색, 버릴 수 없음 창 [확인] = 노랑.
+// 아이템 이름은 등급 색 + 이름 판(UINamePlate). 아이템 칸 선택은 예전처럼 누르는 순간입니다.
 //
 // [설정]
 // 씬에 붙일 필요가 없습니다 - 게임이 시작되면 스스로 만들어집니다(씬이 바뀌어도 유지).
@@ -89,8 +91,6 @@ public class SlotItemDropUI : MonoBehaviour
 
     private const int CategoryCount = SlotItemDropper.SlotKindCount;
     private const int SlotsPerCategory = 2; // 슬롯 HUD와 같은 6칸(종류마다 2칸 - 장신구는 55번, 일회용은 61번, 음식은 79번으로 2칸까지)
-    private const int RoundedTexSize = 96;
-    private const int RoundedTexRadius = 32;
 
     private Mode mode = Mode.Closed;
     private int openedFrame = -1;    // 창(또는 다음 창)이 열린 프레임 - 그 프레임의 입력은 무시
@@ -119,9 +119,9 @@ public class SlotItemDropUI : MonoBehaviour
     private class ButtonView
     {
         public RectTransform rect;
-        public Image outline;
-        public Image image;
+        public UIPatternBox box;
         public TextMeshProUGUI label;
+        public UIButtonKind kind = UIButtonKind.Normal;
     }
 
     private GameObject canvasGO;
@@ -129,10 +129,10 @@ public class SlotItemDropUI : MonoBehaviour
     private CanvasScaler scaler;
 
     private GameObject dimGO;
+    private GameObject confirmDimGO; // 확인 창이 뜰 때 첫 창을 한 번 더 어둡게 덮는 막(흰 창 위 흰 창이 묻히지 않도록)
     private GameObject mainRoot;
     private RectTransform mainRect;
-    private Image windowOutline;
-    private Image windowImage;
+    private UIPatternBox windowBox;
     private TextMeshProUGUI titleText;
     private RectTransform slotPanelRect;
     private Image slotPanelImage;
@@ -142,14 +142,13 @@ public class SlotItemDropUI : MonoBehaviour
 
     private GameObject darkRoot;
     private RectTransform darkRect;
-    private Image darkImage;
+    private UIPatternBox darkBox;
     private TextMeshProUGUI darkMessage;
-    private TextMeshProUGUI darkDetail;
+    private RectTransform darkNamesRect;                                  // 확인 창의 아이템 이름 판들을 담는 곳
+    private readonly List<UINamePlate> darkNamePlates = new List<UINamePlate>();
+    private readonly List<ItemDefinition> darkNameItems = new List<ItemDefinition>();
     private ButtonView darkLeftButton;  // 확인 창: [버리기] / 버릴 수 없음 창: [확인]
     private ButtonView darkRightButton; // 확인 창: [취소하기] / 버릴 수 없음 창: 숨김
-
-    private Sprite roundedSprite;
-    private Texture2D roundedTexture;
 
     // 슬롯 HUD 값(창이 열릴 때 읽어둠)
     private PlayerSlotItemDisplay slotHud;
@@ -175,8 +174,6 @@ public class SlotItemDropUI : MonoBehaviour
         UnwatchDamage();
         if (mode != Mode.Closed) RestorePlayerControls();
         instance = null;
-        if (roundedSprite != null) Destroy(roundedSprite);
-        if (roundedTexture != null) Destroy(roundedTexture);
     }
 
     void Update()
@@ -278,6 +275,7 @@ public class SlotItemDropUI : MonoBehaviour
         dimGO.SetActive(newMode != Mode.Message);
         mainRoot.SetActive(newMode == Mode.Main || newMode == Mode.Confirm);
         darkRoot.SetActive(newMode == Mode.Confirm || newMode == Mode.Message);
+        confirmDimGO.SetActive(newMode == Mode.Confirm);
 
         if (newMode == Mode.Confirm || newMode == Mode.Message) FillDarkPopup(newMode);
         ApplyLayout();
@@ -337,6 +335,8 @@ public class SlotItemDropUI : MonoBehaviour
     // 첫 창
     // ------------------------------------------------------------------
 
+    private int lastHoveredButton = -1; // [사운드] 호버음용 - 마지막으로 마우스가 올라간 버튼 번호
+
     private void UpdateMain()
     {
         RefreshSlotItems();
@@ -345,23 +345,27 @@ public class SlotItemDropUI : MonoBehaviour
         bool overDrop = canDrop && IsPointerOver(dropButton.rect);
         bool overCancel = IsPointerOver(cancelButton.rect);
 
-        SetMainButtonVisual(dropButton, canDrop, overDrop);
-        SetMainButtonVisual(cancelButton, true, overCancel);
+        bool clickDrop = dropButton.box.TickButton(overDrop, canDrop);
+        bool clickCancel = cancelButton.box.TickButton(overCancel, true);
+        dropButton.label.color = dropButton.box.GetLabelColor(canDrop);
+        cancelButton.label.color = cancelButton.box.GetLabelColor(true);
+        UISound.TrackHover(ref lastHoveredButton, UISound.HoveredId(0, overDrop, overCancel), Time.frameCount == openedFrame);
 
         if (Time.frameCount == openedFrame) return;
 
-        if (Input.GetKeyDown(KeyCode.Escape)) { CloseAll(); return; }
+        if (Input.GetKeyDown(KeyCode.Escape)) { UISound.Cancel(); CloseAll(); return; }
 
+        if (clickDrop) { UISound.Confirm(); OnDropPressed(); return; }
+        if (clickCancel) { UISound.Cancel(); CloseAll(); return; }
+
+        // 아이템 칸 선택/해제는 누르는 순간
         if (!Input.GetMouseButtonDown(0)) return;
-
         int hovered = GetHoveredSlotIndex();
         if (hovered >= 0)
         {
             selected[hovered] = !selected[hovered];
-            return;
+            UISound.Confirm();
         }
-        if (overDrop) { OnDropPressed(); return; }
-        if (overCancel) { CloseAll(); return; }
     }
 
     // 칸마다 지금 장착 중인 아이템을 다시 읽습니다. 창이 떠 있는 동안 아이템이 사라졌으면(지연 소모가 끝나는 등) 선택도 풉니다.
@@ -462,68 +466,68 @@ public class SlotItemDropUI : MonoBehaviour
 
     private void UpdateConfirm()
     {
-        var style = PopupStyle.Get();
         bool overLeft = IsPointerOver(darkLeftButton.rect);
         bool overRight = IsPointerOver(darkRightButton.rect);
-        darkLeftButton.image.color = style.GetButtonColor(overLeft, true);
-        darkRightButton.image.color = style.GetButtonColor(overRight, true);
+        bool clickLeft = darkLeftButton.box.TickButton(overLeft, true);
+        bool clickRight = darkRightButton.box.TickButton(overRight, true);
 
-        // 뒤에 보이는 첫 창의 버튼은 호버 표시 없이 평소 색으로
-        SetMainButtonVisual(dropButton, AnySelected(), false);
-        SetMainButtonVisual(cancelButton, true, false);
+        // 뒤에 보이는 첫 창의 버튼은 호버/누름 표시 없이 평소 색으로
+        SetIdle(dropButton, AnySelected());
+        SetIdle(cancelButton, true);
+        UISound.TrackHover(ref lastHoveredButton, UISound.HoveredId(10, overLeft, overRight), Time.frameCount == openedFrame);
 
         if (Time.frameCount == openedFrame) return;
 
         // Esc / [취소하기] = 첫 창으로(고른 상태 그대로)
-        if (Input.GetKeyDown(KeyCode.Escape)) { SetMode(Mode.Main); return; }
+        if (Input.GetKeyDown(KeyCode.Escape)) { UISound.Cancel(); SetMode(Mode.Main); return; }
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (overLeft) ExecuteDrop();
-            else if (overRight) SetMode(Mode.Main);
-        }
+        if (clickLeft) { UISound.Confirm(); ExecuteDrop(); }
+        else if (clickRight) { UISound.Cancel(); SetMode(Mode.Main); }
     }
 
     private void UpdateMessage()
     {
         bool overOk = IsPointerOver(darkLeftButton.rect);
-        darkLeftButton.image.color = PopupStyle.Get().GetButtonColor(overOk, true);
+        bool clickOk = darkLeftButton.box.TickButton(overOk, true);
+        UISound.TrackHover(ref lastHoveredButton, UISound.HoveredId(20, overOk), Time.frameCount == openedFrame);
 
         if (Time.frameCount == openedFrame) return;
 
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Escape))
         {
+            UISound.Confirm();
             CloseAll();
             return;
         }
-        if (Input.GetMouseButtonDown(0) && overOk) CloseAll();
+        if (clickOk) { UISound.Confirm(); CloseAll(); }
     }
 
     private void FillDarkPopup(Mode popupMode)
     {
         var s = SlotDropSettings.Get();
-        darkDetail.richText = true;
+        darkLeftButton.box.ResetPress();
+        darkRightButton.box.ResetPress();
+        darkNameItems.Clear();
 
         if (popupMode == Mode.Confirm)
         {
             darkMessage.text = s.confirmMessage;
-            var names = new List<string>();
             foreach (var item in SelectedItems())
             {
-                if (SlotReplaceConfirmUI.NeedsConfirm(item)) names.Add(ColoredName(item));
+                if (SlotReplaceConfirmUI.NeedsConfirm(item)) darkNameItems.Add(item);
             }
-            darkDetail.text = string.Join("\n", names);
-            darkDetail.gameObject.SetActive(true);
+            darkNamesRect.gameObject.SetActive(true);
             darkLeftButton.label.text = s.dropLabel;
+            darkLeftButton.kind = UIButtonKind.Positive; // 재확인창의 실행 버튼
             darkRightButton.label.text = s.cancelLabel;
             darkRightButton.rect.gameObject.SetActive(true);
         }
         else
         {
             darkMessage.text = s.noSpaceMessage;
-            darkDetail.text = "";
-            darkDetail.gameObject.SetActive(false);
+            darkNamesRect.gameObject.SetActive(false);
             darkLeftButton.label.text = s.okLabel;
+            darkLeftButton.kind = UIButtonKind.Positive; // 알림 창 [확인]
             darkRightButton.rect.gameObject.SetActive(false);
         }
     }
@@ -534,8 +538,8 @@ public class SlotItemDropUI : MonoBehaviour
         return string.IsNullOrEmpty(item.displayName) ? item.name : item.displayName;
     }
 
-    // 등급 색을 입힌 아이템 이름 - 아이템 설명칸(PlayerItemInfoDisplay)의 등급별 이름 색을 그대로 씁니다(없으면 흰색).
-    private static string ColoredName(ItemDefinition item)
+    // 아이템 이름 색 - 아이템 설명칸(PlayerItemInfoDisplay)의 등급별 이름 색을 그대로 씁니다(없으면 흰색).
+    private static Color TierColor(ItemDefinition item)
     {
         Color color = Color.white;
         var info = Object.FindFirstObjectByType<PlayerItemInfoDisplay>();
@@ -553,7 +557,7 @@ public class SlotItemDropUI : MonoBehaviour
                 }
             }
         }
-        return $"<color=#{ColorUtility.ToHtmlStringRGBA(color)}>{ItemName(item)}</color>";
+        return color;
     }
 
     private static bool IsPointerOver(RectTransform rect)
@@ -652,8 +656,14 @@ public class SlotItemDropUI : MonoBehaviour
         mainRect.anchorMin = mainRect.anchorMax = new Vector2(0.5f, 0.5f);
         mainRect.pivot = new Vector2(0.5f, 0.5f);
 
-        windowOutline = CreateImage(mainRect, "Outline", new Vector2(0.5f, 0.5f));
-        windowImage = CreateImage(mainRect, "Window", new Vector2(0.5f, 0.5f));
+        var windowGO = new GameObject("Window");
+        windowGO.transform.SetParent(mainRect, false);
+        var windowRect = windowGO.AddComponent<RectTransform>();
+        windowRect.anchorMin = Vector2.zero;
+        windowRect.anchorMax = Vector2.one;
+        windowRect.offsetMin = Vector2.zero;
+        windowRect.offsetMax = Vector2.zero;
+        windowBox = UIPatternBox.AddTo(windowGO);
 
         var titleGO = new GameObject("Title");
         titleGO.transform.SetParent(mainRect, false);
@@ -673,34 +683,37 @@ public class SlotItemDropUI : MonoBehaviour
 
         for (int i = 0; i < slotViews.Length; i++) slotViews[i] = BuildSlot(slotPanelRect, i);
 
-        dropButton = CreateButton(mainRect, "DropButton", true);
-        cancelButton = CreateButton(mainRect, "CancelButton", true);
+        dropButton = CreateButton(mainRect, "DropButton");
+        cancelButton = CreateButton(mainRect, "CancelButton");
 
-        // 검은 창
+        // 확인 창이 떠 있는 동안 첫 창 위를 덮는 막(첫 창과 작은 창 사이)
+        confirmDimGO = new GameObject("ConfirmDim");
+        confirmDimGO.transform.SetParent(canvasGO.transform, false);
+        var confirmDimRect = confirmDimGO.AddComponent<RectTransform>();
+        confirmDimRect.anchorMin = Vector2.zero;
+        confirmDimRect.anchorMax = Vector2.one;
+        confirmDimRect.offsetMin = Vector2.zero;
+        confirmDimRect.offsetMax = Vector2.zero;
+        var confirmDimImage = confirmDimGO.AddComponent<Image>();
+        confirmDimImage.raycastTarget = false;
+        confirmDimGO.SetActive(false);
+
+        // 작은 흰 창(확인 / 버릴 수 없음)
         darkRoot = new GameObject("DarkPopup");
         darkRoot.transform.SetParent(canvasGO.transform, false);
         darkRect = darkRoot.AddComponent<RectTransform>();
         darkRect.anchorMin = darkRect.anchorMax = new Vector2(0.5f, 0.5f);
         darkRect.pivot = new Vector2(0.5f, 0.5f);
-        darkImage = darkRoot.AddComponent<Image>();
-        darkImage.raycastTarget = false;
+        darkBox = UIPatternBox.AddTo(darkRoot);
 
         darkMessage = CreateTopText(darkRect, "Message");
-        darkDetail = CreateTopText(darkRect, "Detail");
-        darkLeftButton = CreateButton(darkRect, "LeftButton", false);
-        darkRightButton = CreateButton(darkRect, "RightButton", false);
-    }
-
-    private static Image CreateImage(Transform parent, string name, Vector2 anchor)
-    {
-        var go = new GameObject(name);
-        go.transform.SetParent(parent, false);
-        var rect = go.AddComponent<RectTransform>();
-        rect.anchorMin = rect.anchorMax = anchor;
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        var image = go.AddComponent<Image>();
-        image.raycastTarget = false;
-        return image;
+        var namesGO = new GameObject("ItemNames");
+        namesGO.transform.SetParent(darkRect, false);
+        darkNamesRect = namesGO.AddComponent<RectTransform>();
+        darkNamesRect.anchorMin = darkNamesRect.anchorMax = new Vector2(0.5f, 1f);
+        darkNamesRect.pivot = new Vector2(0.5f, 1f);
+        darkLeftButton = CreateButton(darkRect, "LeftButton");
+        darkRightButton = CreateButton(darkRect, "RightButton");
     }
 
     private static TextMeshProUGUI CreateTopText(Transform parent, string name)
@@ -740,8 +753,8 @@ public class SlotItemDropUI : MonoBehaviour
         return slot;
     }
 
-    // 버튼: 테두리(뒤) + 버튼 면 + 글자. 테두리는 첫 창 버튼만 씁니다.
-    private static ButtonView CreateButton(Transform parent, string name, bool withOutline)
+    // 버튼: 평행사변형 면(UIPatternBox) + 글자
+    private static ButtonView CreateButton(Transform parent, string name)
     {
         var view = new ButtonView();
 
@@ -750,27 +763,7 @@ public class SlotItemDropUI : MonoBehaviour
         view.rect = go.AddComponent<RectTransform>();
         view.rect.anchorMin = view.rect.anchorMax = new Vector2(0.5f, 0f);
         view.rect.pivot = new Vector2(0.5f, 0f);
-
-        if (withOutline)
-        {
-            var outlineGO = new GameObject("Outline");
-            outlineGO.transform.SetParent(go.transform, false);
-            var outlineRect = outlineGO.AddComponent<RectTransform>();
-            outlineRect.anchorMin = outlineRect.anchorMax = new Vector2(0.5f, 0.5f);
-            outlineRect.pivot = new Vector2(0.5f, 0.5f);
-            view.outline = outlineGO.AddComponent<Image>();
-            view.outline.raycastTarget = false;
-        }
-
-        var faceGO = new GameObject("Face");
-        faceGO.transform.SetParent(go.transform, false);
-        var faceRect = faceGO.AddComponent<RectTransform>();
-        faceRect.anchorMin = Vector2.zero;
-        faceRect.anchorMax = Vector2.one;
-        faceRect.offsetMin = Vector2.zero;
-        faceRect.offsetMax = Vector2.zero;
-        view.image = faceGO.AddComponent<Image>();
-        view.image.raycastTarget = false;
+        view.box = UIPatternBox.AddTo(go);
 
         var labelGO = new GameObject("Label");
         labelGO.transform.SetParent(go.transform, false);
@@ -800,6 +793,7 @@ public class SlotItemDropUI : MonoBehaviour
         }
 
         dimGO.GetComponent<Image>().color = s.dimColor;
+        confirmDimGO.GetComponent<Image>().color = s.dimColor;
 
         if (mainRoot.activeSelf) LayoutMain(s);
         if (darkRoot.activeSelf) LayoutDark(s);
@@ -810,34 +804,21 @@ public class SlotItemDropUI : MonoBehaviour
         Vector2 size = new Vector2(Mathf.Max(200f, s.windowSize.x), Mathf.Max(150f, s.windowSize.y));
         mainRect.sizeDelta = size;
         mainRect.anchoredPosition = Vector2.zero;
-
-        float t = s.windowOutlineThickness;
-        windowOutline.rectTransform.sizeDelta = size + new Vector2(t * 2f, t * 2f);
-        windowOutline.rectTransform.anchoredPosition = Vector2.zero;
-        windowOutline.enabled = t > 0f;
-        ApplyRounded(windowOutline, s.windowOutlineColor, s.windowCornerRadius + t, size + new Vector2(t * 2f, t * 2f));
-
-        windowImage.rectTransform.sizeDelta = size;
-        windowImage.rectTransform.anchoredPosition = Vector2.zero;
-        ApplyRounded(windowImage, s.windowColor, s.windowCornerRadius, size);
+        var style = PopupStyle.Get();
+        windowBox.SetupPanel(style);
 
         var titleRect = titleText.rectTransform;
         titleRect.sizeDelta = new Vector2(size.x - 40f, s.titleFontSize + 16f);
         titleRect.anchoredPosition = new Vector2(0f, -s.titleTopMargin);
         titleText.text = s.title;
         titleText.fontSize = s.titleFontSize;
-        titleText.color = s.titleColor;
+        titleText.color = style.panelTextColor;
 
         LayoutSlotPanel(s);
 
         float half = (s.mainButtonSize.x + s.mainButtonSpacing) * 0.5f;
-        Color textColor = PopupStyle.Get().buttonTextColor;
-        LayoutButton(dropButton, s.dropLabel, new Vector2(-half, s.mainButtonBottomMargin), s.mainButtonSize,
-                     s.mainButtonCornerRadius, s.mainButtonOutlineThickness, s.mainButtonOutlineColor,
-                     s.mainButtonFontSize, textColor);
-        LayoutButton(cancelButton, s.cancelLabel, new Vector2(half, s.mainButtonBottomMargin), s.mainButtonSize,
-                     s.mainButtonCornerRadius, s.mainButtonOutlineThickness, s.mainButtonOutlineColor,
-                     s.mainButtonFontSize, textColor);
+        LayoutButton(dropButton, s.dropLabel, new Vector2(-half, s.mainButtonBottomMargin), s.mainButtonSize, s.mainButtonFontSize, style);
+        LayoutButton(cancelButton, s.cancelLabel, new Vector2(half, s.mainButtonBottomMargin), s.mainButtonSize, s.mainButtonFontSize, style);
     }
 
     // 슬롯 HUD(PlayerSlotItemDisplay)의 배경/칸 틀/배치 값을 그대로 가져옵니다. 씬에 없으면 그 스크립트의 기본값과 같은 값.
@@ -962,14 +943,14 @@ public class SlotItemDropUI : MonoBehaviour
         darkRect.sizeDelta = size;
         darkRect.anchoredPosition = Vector2.zero;
         var style = PopupStyle.Get();
-        ApplyRounded(darkImage, style.darkPanelColor, style.darkPanelCornerRadius, size);
+        darkBox.SetupPanel(style);
 
         float pad = 20f;
         float buttonsTop = s.darkButtonBottomMargin + s.darkButtonSize.y;
 
         var msgRect = darkMessage.rectTransform;
         darkMessage.fontSize = s.darkMessageFontSize;
-        darkMessage.color = s.darkMessageColor;
+        darkMessage.color = style.panelTextColor;
 
         if (mode == Mode.Confirm)
         {
@@ -977,11 +958,10 @@ public class SlotItemDropUI : MonoBehaviour
             msgRect.anchoredPosition = new Vector2(0f, -pad - 4f);
 
             float detailTop = pad + 4f + s.darkMessageFontSize + 12f + 8f;
-            var detailRect = darkDetail.rectTransform;
-            detailRect.sizeDelta = new Vector2(size.x - pad * 2f, Mathf.Max(10f, size.y - detailTop - buttonsTop - 8f));
-            detailRect.anchoredPosition = new Vector2(0f, -detailTop);
-            darkDetail.fontSize = s.darkDetailFontSize;
-            darkDetail.color = s.darkMessageColor;
+            float detailHeight = Mathf.Max(10f, size.y - detailTop - buttonsTop - 8f);
+            darkNamesRect.sizeDelta = new Vector2(size.x - pad * 2f, detailHeight);
+            darkNamesRect.anchoredPosition = new Vector2(0f, -detailTop);
+            LayoutNamePlates(size.x - pad * 2f, detailHeight, s.darkDetailFontSize, style);
 
             float half = (s.darkButtonSize.x + s.darkButtonSpacing) * 0.5f;
             LayoutDarkButton(darkLeftButton, new Vector2(-half, s.darkButtonBottomMargin), s, style);
@@ -996,90 +976,53 @@ public class SlotItemDropUI : MonoBehaviour
         }
     }
 
+    // 확인 창의 아이템 이름 판들을 이름 영역 가운데에 위아래로 쌓습니다(필요한 만큼 판을 만들어 둠).
+    private void LayoutNamePlates(float maxWidth, float areaHeight, int fontSize, PopupStyle style)
+    {
+        while (darkNamePlates.Count < darkNameItems.Count)
+            darkNamePlates.Add(UINamePlate.Create(darkNamesRect, "NamePlate" + darkNamePlates.Count));
+
+        float plateHeight = UINamePlate.Height(fontSize, style);
+        const float gap = 8f;
+        float total = darkNameItems.Count * plateHeight + Mathf.Max(0, darkNameItems.Count - 1) * gap;
+        float top = -(areaHeight - total) * 0.5f;
+        for (int i = 0; i < darkNamePlates.Count; i++)
+        {
+            var plate = darkNamePlates[i];
+            bool used = i < darkNameItems.Count;
+            if (plate.rect.gameObject.activeSelf != used) plate.rect.gameObject.SetActive(used);
+            if (!used) continue;
+
+            plate.rect.anchorMin = plate.rect.anchorMax = new Vector2(0.5f, 1f);
+            plate.rect.pivot = new Vector2(0.5f, 1f);
+            plate.Fit(ItemName(darkNameItems[i]), TierColor(darkNameItems[i]), fontSize, maxWidth, style);
+            plate.rect.anchoredPosition = new Vector2(0f, top - i * (plateHeight + gap));
+        }
+    }
+
     private void LayoutDarkButton(ButtonView button, Vector2 pos, SlotDropSettings s, PopupStyle style)
     {
         button.rect.sizeDelta = s.darkButtonSize;
         button.rect.anchoredPosition = pos;
-        ApplyRounded(button.image, button.image.color, style.darkPanelButtonCornerRadius, s.darkButtonSize); // 색은 Update에서 호버에 따라
+        button.box.SetupButton(style, button.kind); // 색은 Update의 TickButton이 호버에 따라 정함
         button.label.fontSize = s.darkButtonFontSize;
-        button.label.color = style.GetButtonTextColor(true);
+        button.label.color = button.box.GetLabelColor(true);
     }
 
-    private void LayoutButton(ButtonView button, string text, Vector2 pos, Vector2 size, float cornerRadius,
-                              float outlineThickness, Color outlineColor, int fontSize, Color textColor)
+    private void LayoutButton(ButtonView button, string text, Vector2 pos, Vector2 size, int fontSize, PopupStyle style)
     {
         button.rect.sizeDelta = size;
         button.rect.anchoredPosition = pos;
-        ApplyRounded(button.image, button.image.color, cornerRadius, size); // 색은 Update에서 호버/활성에 따라
-
-        if (button.outline != null)
-        {
-            Vector2 outlineSize = size + new Vector2(outlineThickness * 2f, outlineThickness * 2f);
-            button.outline.rectTransform.sizeDelta = outlineSize;
-            button.outline.rectTransform.anchoredPosition = Vector2.zero;
-            button.outline.enabled = outlineThickness > 0f;
-            Color c = outlineColor;
-            c.a *= button.image.color.a; // 비활성(반투명) 버튼이면 테두리도 같이 흐리게
-            ApplyRounded(button.outline, c, cornerRadius + outlineThickness, outlineSize);
-        }
-
+        button.box.SetupButton(style, button.kind); // 색/글자 색은 Update의 TickButton이 호버/누를 수 있는지에 따라 정함
         button.label.text = text;
         button.label.fontSize = fontSize;
-        Color tc = textColor;
-        tc.a *= button.image.color.a;
-        button.label.color = tc;
     }
 
-    // 첫 창 버튼 색: PopupStyle의 평소/마우스 올림 색, 못 누르면 반투명
-    private static void SetMainButtonVisual(ButtonView button, bool enabled, bool hovered)
+    // 입력을 받지 않는 버튼: 호버/누름 표시 없이 평소 색(못 누르면 반투명)
+    private static void SetIdle(ButtonView button, bool enabled)
     {
-        button.image.color = PopupStyle.Get().GetButtonColor(hovered, enabled);
-    }
-
-    // 실행 중에 만든 흰색 둥근 사각형을 9-Slice로 늘려 씁니다(SlotReplaceConfirmUI와 같은 방식).
-    private void ApplyRounded(Image image, Color color, float cornerRadius, Vector2 size)
-    {
-        image.color = color;
-        float radius = Mathf.Min(cornerRadius, Mathf.Min(size.x, size.y) * 0.5f);
-        if (radius < 0.5f)
-        {
-            image.sprite = null;
-            image.type = Image.Type.Simple;
-            return;
-        }
-        EnsureRoundedSprite();
-        image.sprite = roundedSprite;
-        image.type = Image.Type.Sliced;
-        image.pixelsPerUnitMultiplier = RoundedTexRadius / radius;
-    }
-
-    private void EnsureRoundedSprite()
-    {
-        if (roundedSprite != null) return;
-
-        int size = RoundedTexSize;
-        float r = RoundedTexRadius;
-        roundedTexture = new Texture2D(size, size, TextureFormat.RGBA32, false);
-        roundedTexture.wrapMode = TextureWrapMode.Clamp;
-        roundedTexture.filterMode = FilterMode.Bilinear;
-
-        var pixels = new Color32[size * size];
-        for (int y = 0; y < size; y++)
-        {
-            for (int x = 0; x < size; x++)
-            {
-                float cx = Mathf.Clamp(x + 0.5f, r, size - r);
-                float cy = Mathf.Clamp(y + 0.5f, r, size - r);
-                float dx = x + 0.5f - cx;
-                float dy = y + 0.5f - cy;
-                float alpha = Mathf.Clamp01(r - Mathf.Sqrt(dx * dx + dy * dy) + 0.5f);
-                pixels[y * size + x] = new Color32(255, 255, 255, (byte)Mathf.RoundToInt(alpha * 255f));
-            }
-        }
-        roundedTexture.SetPixels32(pixels);
-        roundedTexture.Apply();
-
-        roundedSprite = Sprite.Create(roundedTexture, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f),
-                                      100f, 0, SpriteMeshType.FullRect, new Vector4(r, r, r, r));
+        button.box.ResetPress();
+        button.box.color = PopupStyle.Get().GetKindColor(button.kind, false, enabled);
+        button.label.color = button.box.GetLabelColor(enabled);
     }
 }

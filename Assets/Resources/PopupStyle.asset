@@ -12,6 +12,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75da34ce96d936e42a1011bb242ba215, type: 3}
   m_Name: PopupStyle
   m_EditorClassIdentifier: Assembly-CSharp::PopupStyle
+  boxShader: {fileID: 4800000, guid: a1af78b28972d4f449a03e928a7ca83d, type: 3}
+  panelTextColor: {r: 0.17254902, g: 0.27058825, b: 0.3882353, a: 1}
+  panelColor: {r: 1, g: 1, b: 1, a: 1}
+  panelCornerRadius: 16
+  panelPattern: 1
+  panelPatternTriangleSide: 70
+  panelPatternSpread: 0.37
+  panelPatternMaxAlpha: 0.75
+  panelPatternTint: {r: 0.78431374, g: 0.89411765, b: 0.972549, a: 1}
+  panelPatternGlowColor: {r: 0.5882353, g: 0.8039216, b: 0.98039216, a: 1}
+  panelPatternGlowAmount: 0.35
+  panelPatternGlowSpeed: 0.15
+  panelPatternGlowSharpness: 6
+  panelShadowColor: {r: 0.105882354, g: 0.16470589, b: 0.2509804, a: 1}
+  panelShadowOffset: {x: 0, y: -4}
+  panelShadowBlur: 10
+  panelShadowAlpha: 0.3
+  buttonSlantAngle: 12
+  buttonCornerRadiusNew: 7
+  buttonPattern: 1
+  buttonPatternTriangleSide: 24
+  buttonPatternSpread: 0.3
+  buttonPatternMaxAlpha: 0.7
+  buttonPatternTint: {r: 1, g: 1, b: 1, a: 1}
+  buttonShadowColor: {r: 0.105882354, g: 0.16470589, b: 0.2509804, a: 1}
+  buttonShadowOffset: {x: 0, y: -4}
+  buttonShadowBlur: 8
+  buttonShadowAlpha: 0.3
+  buttonPressScale: 0.94
+  buttonPressDuration: 0.06
+  namePlateColor: {r: 0.17254902, g: 0.27058825, b: 0.3882353, a: 1}
+  namePlateCornerRadius: 6
+  namePlatePaddingX: 18
+  namePlateExtraHeight: 14
+  positiveColor: {r: 1, g: 0.8784314, b: 0.2901961, a: 1}
+  positiveHoverColor: {r: 0.9098039, g: 0.78039217, b: 0.20784314, a: 1}
+  positiveTextColor: {r: 0.36078432, g: 0.17254902, b: 0.0627451, a: 1}
+  normalColor: {r: 0.56078434, g: 0.8862745, b: 0.99215686, a: 1}
+  normalHoverColor: {r: 0.39607844, g: 0.6784314, b: 0.78039217, a: 1}
+  quitColor: {r: 0.8352941, g: 0.8745098, b: 0.90588236, a: 1}
+  quitHoverColor: {r: 0.7019608, g: 0.7529412, b: 0.79607844, a: 1}
   darkPanelColor: {r: 0, g: 0, b: 0, a: 0.9882353}
   darkPanelCornerRadius: 16
   darkPanelButtonCornerRadius: 10
@@ -19,3 +60,6 @@ MonoBehaviour:
   buttonHoverColor: {r: 0.39607844, g: 0.6784314, b: 0.78039217, a: 1}
   buttonTextColor: {r: 0.20392157, g: 0.2, b: 0.39607844, a: 1}
   disabledButtonAlpha: 0.35
+  dangerButtonColor: {r: 0.8980392, g: 0.28235295, b: 0.3019608, a: 1}
+  dangerButtonHoverColor: {r: 0.72156864, g: 0.21960784, b: 0.23529412, a: 1}
+  dangerButtonTextColor: {r: 1, g: 1, b: 1, a: 1}

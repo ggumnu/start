@@ -85,7 +85,7 @@ public class PlayerActiveItem : MonoBehaviour
         if (PlayerItemPickupPresenter.BlocksActions) return;
         if (Input.GetKeyDown(useKey))
         {
-            TryUse();
+            if (!TryUse()) GameAudio.Play(SfxId.ActionFail); // [사운드] 코스트 부족/지금 못 씀
         }
     }
 
@@ -121,6 +121,8 @@ public class PlayerActiveItem : MonoBehaviour
             return false;
         }
 
+        // [사운드] 전용 소리가 있는 액티브(IHasOwnUseSound - 74/90번 등)는 공용 발동음 없이 전용 소리만 냅니다.
+        if (!(effect is IHasOwnUseSound)) GameAudio.Play(SfxId.ItemActivate);
         effect?.Activate(effectContext);
         return true;
     }

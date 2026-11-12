@@ -130,6 +130,7 @@ public class HoldRestart : MonoBehaviour
 
     private void BeginRestart(HoldRestartSettings s)
     {
+        GameAudio.Play(SfxId.HoldRestart);
         restarting = true;
         waitForRelease = true;
         ApplyOverlay(s, 1f);

@@ -18,6 +18,9 @@ using UnityEngine.UI;
 //
 // [상점 카드]
 // 상점 창(ShopUI)이 열려 있으면 플레이어 아이템 카드 호버도 같은 설명칸을 커서 위에 띄웁니다(ShopUI.TryGetHoveredItem).
+// 상점 창이 보이는 동안에는 인벤토리 아이콘 호버 설명칸도 상점 창 위에 그려서 상점 물건과 비교할 수 있게 합니다. 단, 상점 창에
+// 가려진 자리(커서가 상점 창 위)는 아이콘 호버로 치지 않고, 구매/갱신 팝업이 떠서 화면이 어둡게 덮인 동안에는 아무 설명칸도
+// 띄우지 않습니다(앞의 팝업 말고는 반응하지 않음).
 //
 // [위치 - 종류에 따라 두 가지 방식]
 // - 패시브 / 장신구 / 일회용 / 음식: 커서 위쪽에 중앙 정렬로 뜨되, 패널 크기(가변 높이 포함)를
@@ -99,6 +102,14 @@ public class ItemTooltipDisplay : MonoBehaviour
             return;
         }
 
+        // [상점 팝업] 구매/갱신 팝업이 떠서 화면 전체가 어둡게 덮인 동안에는 아무 설명칸도 띄우지 않습니다.
+        if (ShopUI.IsDimmed)
+        {
+            canvas.sortingOrder = canvasSortingOrder;
+            view.Hide();
+            return;
+        }
+
         // [상점 카드 호버] 상점 창(ShopUI)의 플레이어 아이템 카드 위면 커서 위에 설명칸을 띄웁니다. 상점 창 Canvas가 이 툴팁보다
         // 정렬 순서가 높아서, 이때만 상점 창 바로 위로 올립니다(슬롯 교체 확인창/게임 오버 창보다는 아래).
         if (ShopUI.TryGetHoveredItem(out ItemDefinition shopItem))
@@ -136,7 +147,15 @@ public class ItemTooltipDisplay : MonoBehaviour
             return;
         }
 
-        canvas.sortingOrder = canvasSortingOrder;
+        // [상점 창이 보이는 동안] 인벤토리 아이콘 설명칸도 상점 창 위에 그립니다(아이템 비교용). 상점 창에 가려진 자리에
+        // 커서가 있으면 그 뒤의 아이콘은 호버로 치지 않습니다.
+        bool shopVisible = ShopUI.IsVisible;
+        canvas.sortingOrder = shopVisible ? Mathf.Max(canvasSortingOrder, ShopUI.SortingOrder + 1) : canvasSortingOrder;
+        if (shopVisible && ShopUI.IsPointerOverWindow)
+        {
+            view.Hide();
+            return;
+        }
 
         if (playerCostDisplay != null &&
             playerCostDisplay.TryGetHoveredActiveItem(out ItemDefinition activeItem, out _))
