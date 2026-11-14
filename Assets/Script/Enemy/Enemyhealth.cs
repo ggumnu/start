@@ -203,7 +203,8 @@ public class EnemyHealth : MonoBehaviour
         finally { IsDotDamageInProgress = previous; }
     }
 
-    // [피해 숫자] "항상 Weak"로 보여야 하는 피해(4번 폭발, 81번 연소, 수류탄, 해킹툴, 118번 포격)인지 - 읽는 방식은 위와 같습니다.
+    // [피해 숫자] "항상 Weak"로 보여야 하는 아이템 효과 부가 피해인지(4/29/68/81/87/94/118번, 수류탄, 해킹툴 - 목록은 DamagePopupDisplay 상단)
+    // - 읽는 방식은 위와 같습니다.
     public static bool IsForcedWeakDamageInProgress { get; private set; }
 
     // "항상 Weak" 피해 전용 입구입니다. 처리 자체는 TakeDamage와 완전히 같고, 그동안만 IsForcedWeakDamageInProgress가 켜집니다.

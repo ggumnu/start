@@ -2,52 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// 적 몸통(공격 방식 컴포넌트가 있는 부모)과는 별개의 자식 오브젝트/콜라이더로 붙는
-// "플레이어 접촉 피해 판정" 전용 트리거입니다. 근접 적/원거리 적 등 공격 방식과 무관하게
-// "몸에 닿으면 데미지"가 필요한 모든 적 프리팹에 공용으로 재사용됩니다.
-//
-// [왜 콜라이더를 두 개로 나누는가]
-// 적끼리는 서로 밀어내고 벽에도 끼지 않아야 하지만, 플레이어는 적을 그냥 통과할 수
-// 있어야 합니다(구석에 몰려 일방적으로 맞는 상황 방지). 대신 통과하는 동안 플레이어
-// 체력이 깎여야 하므로, "막는 몸통 콜라이더"(Enemy 물리 레이어, Player와 물리 충돌은
-// 꺼둠)와 "피해만 주는 트리거 콜라이더"(Player와 트리거 감지는 계속 필요하므로 별도
-// 오브젝트/레이어)를 분리했습니다.
-//
-// [피해 빈도 조절]
-// 이 트리거는 자체적으로 피해 빈도를 제한하지 않습니다 - 닿아있는 동안(OnTriggerStay
-// 포함) 계속 TakeDamage를 호출하며, 실제 피해 간격은 전적으로 PlayerHealth의
-// invincibilityDuration(무적 시간)이 담당합니다.
-//
-// [변경 이력 참고]
-// 예전 버전은 "돌진 중에만 무장(Arm)되고 돌진 1회당 딱 1타만" 방식이었는데, 그러면
-// 평소(추적/대기 중)에 몸이 닿아도 데미지가 안 들어가는 의도치 않은 결과가 있었습니다.
-// 항상 접촉 시 데미지가 들어가도록 단순화했고, 다단히트 방지는 오직 플레이어의 무적
-// 시간만으로 처리합니다.
-//
-// [v1.19 변경 - 돌진 중 데미지 증가 지원]
-// EnemyMeleeAttack이 있는 적(근접 적)의 경우, "지금 돌진(Dashing) 중인지"를 물어볼 수
-// 있는 참조를 함께 받아둡니다. 접촉 판정 시점에 그 참조가 있고 실제로 돌진 중이면
-// EnemyStats.attackPower 대신 돌진 전용 데미지 값을 사용해 더 센 데미지를 줍니다. 이
-// 참조가 없는 경우(원거리 적처럼 돌진 개념이 아예 없는 프리팹)에는 지금까지와 동일하게
-// 항상 attackPower만 사용합니다.
-//
-// [변경 - IDashDamageSource 인터페이스로 일반화]
-// 처음엔 이 트리거가 EnemyMeleeAttack이라는 구체 클래스를 직접 참조해서 IsDashing/
-// dashDamage를 읽었습니다. 그런데 연속 돌진(EnemyChainDashAttack)처럼 "돌진"이라는 같은
-// 개념을 가진 다른 컴포넌트가 추가되면서, 이 트리거가 그 새 클래스는 아예 인식하지 못하는
-// 문제가 생겼습니다(C#은 멤버 이름이 같다고 같은 타입으로 취급하지 않습니다). 그래서 구체
-// 클래스 대신 IDashDamageSource라는 작은 인터페이스만 참조하도록 바꿨습니다 - 이제
-// EnemyMeleeAttack이든 EnemyChainDashAttack이든, 앞으로 추가될 어떤 돌진형 공격
-// 컴포넌트든 이 인터페이스만 구현하면 자동으로 돌진 중 추가 데미지가 적용됩니다. 기존
-// EnemyMeleeAttack의 동작(값/타이밍)은 100% 그대로 유지됩니다 - 참조하는 타입만
-// 구체 클래스에서 인터페이스로 바뀐 것뿐입니다.
+// 적의 접촉 피해 판정 전용 자식 트리거입니다(몸에 닿으면 피해 - 근접/원거리 등 공격 방식과 무관하게 모든 적 프리팹 공용).
+// 막는 몸통 콜라이더와 따로 둬서 플레이어가 적을 통과할 수 있게 함(구석에 몰려 일방적으로 맞는 상황 방지).
+// 피해 간격은 이 트리거가 제한하지 않음 - 플레이어 무적 시간이 담당. 돌진 중이면 IDashDamageSource의 돌진 피해를 씀.
+// 설계 경위(콜라이더 분리, 항상 접촉 피해로 단순화, 인터페이스 일반화)는 Docs/설계노트.md [적 접촉 판정].
 public class EnemyMeleeContactTrigger : MonoBehaviour
 {
-    // [VFX 연동] 근접(돌진 포함) 공격이 플레이어에게 실제로 맞았을 때를 게임 전체에 알리는
-    // 정적 이벤트입니다(충돌 지점, 공격자->플레이어 방향). EnemyHealth.OnAnyEnemyDied와
-    // 같은 패턴입니다. OnTriggerStay로 매 프레임 반복 판정되는 구조라, 무적 시간 중이라
-    // 실제로 피해가 무시될 때는 이 이벤트도 발생하지 않습니다(HandleContact 참고) - 그렇지
-    // 않으면 붙어있는 동안 이펙트가 매 프레임 반복 재생됩니다.
+    // [VFX 연동] 근접(돌진 포함) 공격이 플레이어에게 실제로 맞았을 때만 알림(충돌 지점, 공격자->플레이어 방향).
+    // OnTriggerStay로 매 프레임 판정하므로, 무적 중이라 피해가 무시될 때는 울리지 않게 함 - 아니면 이펙트가 매 프레임 반복됨.
     public static event Action<Vector3, Vector3> OnAnyMeleeHitPlayer;
 
     private EnemyStats stats;
@@ -65,10 +27,8 @@ public class EnemyMeleeContactTrigger : MonoBehaviour
     private Collider ownTrigger;
     private EnemyHealth ownHealth;
 
-    // dashSource는 선택 사항입니다 - 이 적이 돌진형 공격(IDashDamageSource를 구현하는
-    // 컴포넌트, 예: EnemyMeleeAttack, EnemyChainDashAttack)을 갖고 있을 때만 넘겨주세요
-    // (각 공격 컴포넌트의 Initialize()가 자동으로 넘겨줍니다). 원거리 적처럼
-    // EnemyRangedAIController가 직접 초기화하는 경우에는 생략하면 됩니다.
+    // dashSource는 돌진형 공격(EnemyMeleeAttack/EnemyChainDashAttack 등)이 있을 때만 각 공격 컴포넌트의 Initialize()가 넘김.
+    // 원거리 적처럼 돌진이 없으면 생략.
     public void Initialize(EnemyStats ownerStats, IDashDamageSource dashDamageSource = null)
     {
         stats = ownerStats;
@@ -132,7 +92,9 @@ public class EnemyMeleeContactTrigger : MonoBehaviour
 
         bool isDashing = dashSource != null && dashSource.IsDashing;
         float damage = isDashing ? dashSource.DashDamage : (stats != null ? stats.attackPower : 1f);
-        opponent.TakeDamage(damage);
+        // 아군이 적에게 주는 피해는 피해 숫자 항상 Weak(아이템으로 생긴 피해 - 형빈 확정). 적이 아군에게 주는 피해는 그대로.
+        if (selfAlly) opponent.TakeWeakDamage(damage);
+        else opponent.TakeDamage(damage);
     }
 
     // 이 트리거가 상대의 몸통 콜라이더(트리거가 아닌 것)와 실제로 겹쳐 있는지입니다.

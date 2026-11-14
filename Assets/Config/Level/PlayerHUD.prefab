@@ -515,9 +515,6 @@ MonoBehaviour:
   - markerKey: Health
     icon: {fileID: 21300000, guid: 087222fd11188714882472c522db3f87, type: 3}
     fallbackColor: {r: 1, g: 0.3, b: 0.3, a: 1}
-  portalIcon: {fileID: 21300000, guid: 9bdfd4781eeceb4418aa25099b1f947b, type: 3}
-  portalFallbackColor: {r: 0.3, g: 0.8, b: 1, a: 1}
-  portalIconSize: 40
   panelMarginX: 35
   panelMarginY: 35
   zoneWidth: 380
@@ -908,13 +905,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossHealthBarDisplay
   hudManager: {fileID: 6508955265461468378}
   offsetX: 0
-  topMargin: 10
+  topMargin: 30
   defaultPortraitSprite: {fileID: 0}
   portraitSize: {x: 150, y: 150}
   portraitToBarSpacing: -40
   portraitOffset: {x: 0, y: 0}
   portraitPlaceholderColor: {r: 0.3, g: 0.55, b: 1, a: 0.9}
-  barSize: {x: 800, y: 30}
+  barSize: {x: 600, y: 30}
   barOffset: {x: 0, y: 0}
   barFillSprite: {fileID: 21300000, guid: 65d986e29d881784684aed77e618e169, type: 3}
   barFillPlaceholderColor: {r: 0.85, g: 0.15, b: 0.15, a: 1}
@@ -1050,6 +1047,17 @@ MonoBehaviour:
   launchVelocityMax: {x: 150, y: 360}
   launchGravity: 1400
   launchStartOffset: {x: 0, y: 0}
+  scaleByDamage: 1
+  smallDamageRatio: 0.5
+  smallDamageScale: 0.8
+  bigDamageRatio: 3
+  bigDamageScale: 1.6
+  spreadConsecutiveHits: 1
+  spreadWindow: 0.3
+  spreadAngleMin: 5
+  spreadAngleMax: 50
+  spreadSteps: 4
+  spreadAngleJitter: 3
   screenOffset: {x: 20, y: 5}
   headroom: 0.15
   maxPopups: 60

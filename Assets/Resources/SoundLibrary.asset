@@ -144,7 +144,8 @@ MonoBehaviour:
     minInterval: 0.03
   - name: "\uC0AC\uACA9"
     id: 30
-    clips: []
+    clips:
+    - {fileID: 8300000, guid: 496da5cb19489c147bc4323a8c2e24d9, type: 3}
     volume: 0.7
     pitchRange: {x: 0.9, y: 1.1}
     minInterval: 0.03
@@ -392,7 +393,7 @@ MonoBehaviour:
     id: 84
     clips:
     - {fileID: 8300000, guid: 43dde12eea4ce2346981460f503c5a0a, type: 3}
-    volume: 1
+    volume: 0.5
     pitchRange: {x: 1, y: 1}
     minInterval: 0.03
   - name: "\uC18C\uD658\uB41C \uC801 \uB098\uD0C0\uB0A8"

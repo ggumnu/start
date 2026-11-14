@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 // [게임 중단 화면 (형빈 확정)]
 // 게임 중 ESC를 누르면 그 즉시 게임 전체가 멈추고(Time.timeScale = 0), 화면이 검은 반투명 막으로 서서히 가려진 뒤
-// "게임을 중단하시겠습니까?" 문구와 버튼 두 줄(윗줄 [계속하기] [설정] [도감], 아랫줄 [재시작하기] [그만하기])이 차례로 떠오릅니다.
+// "게임을 중단하시겠습니까?" 문구와 버튼 두 줄(윗줄 [계속하기] [설정] [조작법], 아랫줄 [도감] [재시작하기] [그만하기])이 차례로 떠오릅니다.
 // 팝업 창 없이 막 위에 바로 그려집니다.
 //
 // [입력] (버튼은 다 떠오른 뒤에만 눌림 - 실수 방지)
@@ -14,6 +14,7 @@ using UnityEngine.UI;
 //   조작이 다시 흐릅니다(ESC를 누르고 대비할 시간). 버튼이 다 뜨기 전에 ESC를 눌러도 그 자리에서 바로 사라지기 시작합니다.
 // - [설정]: 시작 화면과 같은 설정 창(SettingsUI - BGM/효과음 볼륨)을 중단 화면 위에 띄웁니다. 설정 창에서 ESC/[닫기]를 누르면
 //   설정 창만 닫히고 중단 화면으로 돌아옵니다(도감과 같은 방식).
+// - [조작법]: 시작 화면과 같은 조작법 창(ControlsUI)을 중단 화면 위에 띄웁니다. 설정 창과 같은 방식(ESC/[닫기] = 조작법 창만 닫힘).
 // - [도감]: 시작 화면과 같은 아이템 도감(ItemCodexUI)을 중단 화면 위에 띄웁니다. 도감에서 ESC/[돌아가기]를 누르면 도감만 닫히고
 //   중단 화면으로 돌아옵니다(도감이 떠 있는 동안 중단 화면은 입력을 받지 않음 - ESC 한 번에 둘 다 닫히지 않도록).
 // - [재시작하기] / [그만하기]: 흰 확인창("...하시겠습니까?" [실행] [취소하기])이 뜹니다. 확인창이 떠 있는 동안 중단 화면의 문구와
@@ -48,7 +49,7 @@ using UnityEngine.UI;
 // 씬에 붙일 필요가 없습니다 - 게임이 시작되면 스스로 만들어집니다(씬이 바뀌어도 유지).
 public class PauseMenuUI : MonoBehaviour
 {
-    private enum Mode { Closed, Opening, Ready, Settings, Codex, Confirm, Closing, Quitting }
+    private enum Mode { Closed, Opening, Ready, Settings, Codex, Controls, Confirm, Closing, Quitting }
     private enum ConfirmAction { None, Restart, Quit }
 
     // ------------------------------------------------------------------
@@ -128,6 +129,7 @@ public class PauseMenuUI : MonoBehaviour
     private ButtonView resumeButton;
     private ButtonView settingsButton;
     private ButtonView codexButton;
+    private ButtonView controlsButton;
     private ButtonView restartButton;
     private ButtonView quitButton;
 
@@ -191,6 +193,10 @@ public class PauseMenuUI : MonoBehaviour
                 UpdateCodex();
                 break;
 
+            case Mode.Controls:
+                UpdateControls();
+                break;
+
             case Mode.Confirm:
                 UpdateConfirm(s);
                 break;
@@ -224,6 +230,9 @@ public class PauseMenuUI : MonoBehaviour
         if (HeliExtraction.BlocksInput) return false; // 헬기 퇴각 연출 중(ESC는 건너뛰기 키)
         if (ItemCodexUI.BlocksInput) return false;
         if (SettingsUI.BlocksInput) return false;
+        if (ControlsUI.BlocksInput) return false;
+        if (GameClearUI.BlocksInput) return false; // 게임 클리어 결과 화면(ESC는 연출 건너뛰기 키)
+        if (CutsceneStudio.IsActive) return false; // 촬영 스튜디오 씬
 
         var health = Object.FindFirstObjectByType<PlayerHealth>();
         return health != null && !health.IsDead;
@@ -300,14 +309,19 @@ public class PauseMenuUI : MonoBehaviour
         bool overResume = IsPointerOver(resumeButton.rect);
         bool overSettings = IsPointerOver(settingsButton.rect);
         bool overCodex = IsPointerOver(codexButton.rect);
+        bool overControls = IsPointerOver(controlsButton.rect);
         bool overRestart = IsPointerOver(restartButton.rect);
         bool overQuit = IsPointerOver(quitButton.rect);
         bool clickResume = resumeButton.box.TickButton(overResume, true);
         bool clickSettings = settingsButton.box.TickButton(overSettings, true);
         bool clickCodex = codexButton.box.TickButton(overCodex, true);
+        bool clickControls = controlsButton.box.TickButton(overControls, true);
         bool clickRestart = restartButton.box.TickButton(overRestart, true);
         bool clickQuit = quitButton.box.TickButton(overQuit, true);
-        UISound.TrackHover(ref lastHoveredButton, UISound.HoveredId(0, overResume, overSettings, overCodex, overRestart, overQuit), Time.frameCount == modeFrame);
+        // [사운드] HoveredId는 한 번에 5개까지라 여섯 번째([조작법])는 번호 5로 따로 봅니다.
+        int hoveredId = UISound.HoveredId(0, overResume, overSettings, overCodex, overRestart, overQuit);
+        if (hoveredId < 0) hoveredId = UISound.HoveredId(5, overControls);
+        UISound.TrackHover(ref lastHoveredButton, hoveredId, Time.frameCount == modeFrame);
 
         if (Time.frameCount == modeFrame) return;
 
@@ -316,6 +330,7 @@ public class PauseMenuUI : MonoBehaviour
         if (clickResume) { UISound.Confirm(); BeginClose(); }
         else if (clickSettings) { UISound.Confirm(); OpenSettings(); }
         else if (clickCodex) { UISound.Confirm(); OpenCodex(); }
+        else if (clickControls) { UISound.Confirm(); OpenControls(); }
         else if (clickRestart) { UISound.Danger(); OpenConfirm(ConfirmAction.Restart); }
         else if (clickQuit) { UISound.Danger(); OpenConfirm(ConfirmAction.Quit); }
     }
@@ -356,6 +371,25 @@ public class PauseMenuUI : MonoBehaviour
     private void UpdateCodex()
     {
         if (ItemCodexUI.BlocksInput) return;
+        SetMode(Mode.Ready);
+    }
+
+    // ------------------------------------------------------------------
+    // 조작법
+    // ------------------------------------------------------------------
+
+    private void OpenControls()
+    {
+        SetMainButtonsNormal();
+        // 설정 창과 같이: 중단 화면보다 위에, 막은 중단 화면의 검은 막을 그대로 씀
+        ControlsUI.Open(PauseMenuSettings.Get().canvasSortingOrder + 1, false);
+        SetMode(Mode.Controls);
+    }
+
+    // 조작법 창이 닫히면(그 프레임도 지나면) 중단 화면으로 돌아옵니다 - 조작법 창을 닫은 ESC로 중단 화면까지 닫히지 않도록.
+    private void UpdateControls()
+    {
+        if (ControlsUI.BlocksInput) return;
         SetMode(Mode.Ready);
     }
 
@@ -572,6 +606,7 @@ public class PauseMenuUI : MonoBehaviour
         SetNormal(resumeButton);
         SetNormal(settingsButton);
         SetNormal(codexButton);
+        SetNormal(controlsButton);
         SetNormal(restartButton);
         SetNormal(quitButton);
     }
@@ -620,7 +655,7 @@ public class PauseMenuUI : MonoBehaviour
         messageText = HUDText.AddTo(messageGO, TextAnchor.MiddleCenter, true);
         messageText.raycastTarget = false;
 
-        // 버튼 두 줄(윗줄 계속하기 / 설정 / 도감, 아랫줄 재시작하기 / 그만하기)
+        // 버튼 두 줄(윗줄 계속하기 / 설정 / 조작법, 아랫줄 도감 / 재시작하기 / 그만하기)
         var buttonsGO = new GameObject("Buttons");
         buttonsGO.transform.SetParent(canvasGO.transform, false);
         buttonsRect = buttonsGO.AddComponent<RectTransform>();
@@ -634,6 +669,7 @@ public class PauseMenuUI : MonoBehaviour
         resumeButton = CreateButton(buttonsRect, "ResumeButton");
         settingsButton = CreateButton(buttonsRect, "SettingsButton");
         codexButton = CreateButton(buttonsRect, "CodexButton");
+        controlsButton = CreateButton(buttonsRect, "ControlsButton");
         restartButton = CreateButton(buttonsRect, "RestartButton");
         quitButton = CreateButton(buttonsRect, "QuitButton");
         resumeButton.kind = UIButtonKind.Positive; // [계속하기] = 노랑(형빈 확정)
@@ -706,8 +742,8 @@ public class PauseMenuUI : MonoBehaviour
         dim.a *= dimAlpha;
         dimImage.color = dim;
 
-        // 확인창/설정 창이 떠 있는 동안에는 중단 화면의 문구/버튼을 숨깁니다(검은 막 위에 그 창만).
-        bool confirmShown = mode == Mode.Confirm || mode == Mode.Settings;
+        // 확인창/설정 창/조작법 창이 떠 있는 동안에는 중단 화면의 문구/버튼을 숨깁니다(검은 막 위에 그 창만).
+        bool confirmShown = mode == Mode.Confirm || mode == Mode.Settings || mode == Mode.Controls;
 
         messageRect.sizeDelta = new Vector2(1600f, s.messageFontSize * 2f + 20f);
         messageRect.anchoredPosition = new Vector2(0f, s.messageOffsetY + messageOffset);
@@ -719,14 +755,15 @@ public class PauseMenuUI : MonoBehaviour
         buttonsRect.anchoredPosition = new Vector2(0f, s.buttonsOffsetY + buttonsOffset);
         buttonsGroup.alpha = confirmShown ? 0f : buttonsAlpha;
 
-        // 두 줄(형빈 확정): 윗줄 [계속하기] [설정] [도감], 아랫줄 [재시작하기] [그만하기] - 각 줄 가운데 정렬
+        // 두 줄(형빈 확정): 윗줄 [계속하기] [설정] [조작법], 아랫줄 [도감] [재시작하기] [그만하기] - 각 줄 가운데 정렬
         float step = s.buttonSize.x + s.buttonSpacing;
         float lowerY = -(s.buttonSize.y + s.buttonRowSpacing);
         LayoutButton(resumeButton, s.resumeLabel, new Vector2(-step, 0f), s.buttonSize, s.buttonFontSize, style);
         LayoutButton(settingsButton, s.settingsLabel, new Vector2(0f, 0f), s.buttonSize, s.buttonFontSize, style);
-        LayoutButton(codexButton, s.codexLabel, new Vector2(step, 0f), s.buttonSize, s.buttonFontSize, style);
-        LayoutButton(restartButton, s.restartLabel, new Vector2(-0.5f * step, lowerY), s.buttonSize, s.buttonFontSize, style);
-        LayoutButton(quitButton, s.quitLabel, new Vector2(0.5f * step, lowerY), s.buttonSize, s.buttonFontSize, style);
+        LayoutButton(controlsButton, s.controlsLabel, new Vector2(step, 0f), s.buttonSize, s.buttonFontSize, style);
+        LayoutButton(codexButton, s.codexLabel, new Vector2(-step, lowerY), s.buttonSize, s.buttonFontSize, style);
+        LayoutButton(restartButton, s.restartLabel, new Vector2(0f, lowerY), s.buttonSize, s.buttonFontSize, style);
+        LayoutButton(quitButton, s.quitLabel, new Vector2(step, lowerY), s.buttonSize, s.buttonFontSize, style);
 
         if (confirmRoot.activeSelf) LayoutConfirm(s, style);
     }

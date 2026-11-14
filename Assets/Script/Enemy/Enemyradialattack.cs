@@ -381,6 +381,24 @@ public class EnemyRadialAttack : MonoBehaviour, IEnemyAttackBehavior, IEnemyColo
         phaseTimer = postAttackCooldown;
     }
 
+    // [촬영 스튜디오] 막 시작한 충전을 "이미 elapsed초 충전한 상태"로 바로 맞춥니다(앞 장면의 충전 모습에 이어 붙이기용).
+    // 남은 충전 시간, 충전 색, 충전 이펙트(파티클을 elapsed초만큼 미리 돌림)를 함께 맞춥니다. 게임 플레이 코드는 부르지 않습니다.
+    public void SkipChargeTime(float elapsed)
+    {
+        if (phase != AttackPhase.Charging || elapsed <= 0f) return;
+
+        elapsed = Mathf.Min(elapsed, chargeDuration);
+        phaseTimer = chargeDuration - elapsed;
+        UpdateChargeColor();
+
+        if (chargeVfxInstance == null) return;
+        foreach (var ps in chargeVfxInstance.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            ps.Simulate(elapsed, false, true);
+            ps.Play(false);
+        }
+    }
+
     private void TryFindPlayer()
     {
         var playerObj = GameObject.FindGameObjectWithTag("Player");

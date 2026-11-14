@@ -82,7 +82,7 @@ CharacterController:
   m_StepOffset: 0.01
   m_SkinWidth: 0.03
   m_MinMoveDistance: 0
-  m_Center: {x: 0, y: 0.3, z: 0}
+  m_Center: {x: 0, y: 0.33, z: 0}
 --- !u!114 &5773366357972697510
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -324,7 +324,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerResources
   startingGrenade: 2
   startingHackingTool: 2
-  startingCredit: 5
+  startingCredit: 10
   startingPyroxenes: 0
   startingCost: 0
   maxCost: 10
@@ -705,7 +705,7 @@ MonoBehaviour:
   startingGun: {fileID: 11400000, guid: ea742d0b7135859428cd15ee39043a93, type: 2}
   mountBone: {fileID: 4407867697846350035}
   testGuns:
-  - {fileID: 11400000, guid: 801c9594ec2932e43bbe3bf3d52657d7, type: 2}
+  - {fileID: 0}
   - {fileID: 11400000, guid: ea742d0b7135859428cd15ee39043a93, type: 2}
 --- !u!1 &7298611160004767096
 GameObject:

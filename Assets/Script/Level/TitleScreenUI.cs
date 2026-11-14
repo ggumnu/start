@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 // 게임 시작 화면입니다. 배경 스프라이트 한 장이 화면 전체를 채우고, 왼쪽 위에 게임 로고, 화면 가운데 살짝 아래에
-// [게임 시작] / [도감] / [설정] / [나가기] 버튼 네 개가 세로로 놓입니다.
+// [게임 시작] / [도감] / [조작법] / [설정] / [나가기] 버튼 다섯 개가 세로로 놓입니다.
 //
 // [시작 연출 - 게임을 실행한 뒤 처음 시작 화면이 열릴 때만]
 // 1. 화면 전체가 흰색이었다가 서서히 걷히며 시작 화면이 밝아집니다.
@@ -24,13 +24,14 @@ using UnityEngine.UI;
 // - 게임 시작: 로딩 화면(LoadingScreen)을 띄우고 gameSceneName 씬(LevelBuilder)을 불러옵니다. 그 씬의
 //   GameFlowManager가 평소처럼 레벨 1을 만듭니다.
 // - 도감: 아이템 도감 화면(ItemCodexUI)을 엽니다. 도감이 떠 있는 동안에는 이 화면의 버튼이 눌리지 않습니다.
-// - 설정: 지금은 아무 기능 없음(버튼 반응만). 나중에 OnSettingsClicked()에 내용을 넣으면 됩니다.
+// - 조작법: 조작법 창(ControlsUI)을 엽니다.
+// - 설정: 볼륨 설정 창(SettingsUI)을 엽니다.
 // - 나가기: 게임을 종료합니다. 에디터에서는 Play가 멈춥니다.
 //
 // [버튼 모양]
 // 다른 팝업과 같은 블루 아카이브 스타일 평행사변형 버튼(공용 부품 UIPatternBox - 색/모양/글자 색은 PopupStyle)입니다.
-// [게임 시작] = 긍정(노랑), [도감]/[설정] = 일반(하늘색), [나가기] = 그만두기(회색). 마우스를 올리면 색만 어두워지고,
-// 누르는 동안 작아지며, 버튼 위에서 뗀 순간 실행됩니다. 도감/설정 창이 떠 있는 동안에는 반응하지 않습니다.
+// [게임 시작] = 긍정(노랑), [도감]/[조작법]/[설정] = 일반(하늘색), [나가기] = 그만두기(회색). 마우스를 올리면 색만 어두워지고,
+// 누르는 동안 작아지며, 버튼 위에서 뗀 순간 실행됩니다. 도감/조작법/설정 창이 떠 있는 동안에는 반응하지 않습니다.
 public class TitleScreenUI : MonoBehaviour
 {
     [Serializable]
@@ -107,6 +108,7 @@ public class TitleScreenUI : MonoBehaviour
     [Header("버튼별 설정")]
     public ButtonSettings startButton = new ButtonSettings("게임 시작");
     public ButtonSettings codexButton = new ButtonSettings("도감");
+    public ButtonSettings controlsButton = new ButtonSettings("조작법");
     public ButtonSettings settingsButton = new ButtonSettings("설정");
     public ButtonSettings quitButton = new ButtonSettings("나가기");
 
@@ -137,6 +139,7 @@ public class TitleScreenUI : MonoBehaviour
     private AspectRatioFitter backgroundFitter;
     private ButtonView startView;
     private ButtonView codexView;
+    private ButtonView controlsView;
     private ButtonView settingsView;
     private ButtonView quitView;
 
@@ -199,10 +202,11 @@ public class TitleScreenUI : MonoBehaviour
         }
         ApplyIntroVisual();
 
-        // 도감/설정 창이 떠 있거나, 씬을 떠나는 중이거나, 시작 연출 중이면 호버/누름/클릭 없이 평소 색으로 둡니다.
-        bool blocked = leaving || introPlaying || skippedNow || ItemCodexUI.BlocksInput || SettingsUI.BlocksInput;
+        // 도감/조작법/설정 창이 떠 있거나, 씬을 떠나는 중이거나, 시작 연출 중이면 호버/누름/클릭 없이 평소 색으로 둡니다.
+        bool blocked = leaving || introPlaying || skippedNow || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput;
         TickButton(startView, blocked);
         TickButton(codexView, blocked);
+        TickButton(controlsView, blocked);
         TickButton(settingsView, blocked);
         TickButton(quitView, blocked);
     }
@@ -221,7 +225,7 @@ public class TitleScreenUI : MonoBehaviour
 
     private void OnStartClicked()
     {
-        if (leaving || ItemCodexUI.BlocksInput || SettingsUI.BlocksInput) return;
+        if (leaving || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput) return;
 
         if (!LoadingScreen.CanLoadScene(gameSceneName))
         {
@@ -241,22 +245,30 @@ public class TitleScreenUI : MonoBehaviour
     // 아이템 도감 화면을 엽니다(ItemCodexUI.cs).
     private void OnCodexClicked()
     {
-        if (leaving || ItemCodexUI.BlocksInput || SettingsUI.BlocksInput) return;
+        if (leaving || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput) return;
         UISound.Confirm();
         ItemCodexUI.Open();
+    }
+
+    // 조작법 창(ControlsUI)을 엽니다.
+    private void OnControlsClicked()
+    {
+        if (leaving || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput) return;
+        UISound.Confirm();
+        ControlsUI.Open();
     }
 
     // 볼륨 설정 창(SettingsUI)을 엽니다.
     public void OnSettingsClicked()
     {
-        if (ItemCodexUI.BlocksInput || SettingsUI.BlocksInput) return;
+        if (ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput) return;
         UISound.Confirm();
         SettingsUI.Open();
     }
 
     private void OnQuitClicked()
     {
-        if (leaving || ItemCodexUI.BlocksInput || SettingsUI.BlocksInput) return;
+        if (leaving || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput) return;
         UISound.Cancel();
         leaving = true;
 
@@ -360,6 +372,7 @@ public class TitleScreenUI : MonoBehaviour
 
         startView = CreateButton(groupGO.transform, "StartButton", UIButtonKind.Positive, OnStartClicked);
         codexView = CreateButton(groupGO.transform, "CodexButton", UIButtonKind.Normal, OnCodexClicked);
+        controlsView = CreateButton(groupGO.transform, "ControlsButton", UIButtonKind.Normal, OnControlsClicked);
         settingsView = CreateButton(groupGO.transform, "SettingsButton", UIButtonKind.Normal, OnSettingsClicked);
         quitView = CreateButton(groupGO.transform, "QuitButton", UIButtonKind.Quit, OnQuitClicked);
 
@@ -392,7 +405,7 @@ public class TitleScreenUI : MonoBehaviour
         view.box.raycastTarget = true;
         view.group = go.AddComponent<CanvasGroup>();
         // [사운드] 마우스를 올리면 호버음(도감이 떠 있거나 씬을 떠나는 중이거나 시작 연출 중이면 소리 없음)
-        go.AddComponent<UIButtonHoverSound>().isBlocked = () => leaving || introPlaying || ItemCodexUI.BlocksInput || SettingsUI.BlocksInput;
+        go.AddComponent<UIButtonHoverSound>().isBlocked = () => leaving || introPlaying || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput;
 
         var textGO = new GameObject("Label");
         textGO.transform.SetParent(go.transform, false);
@@ -427,13 +440,14 @@ public class TitleScreenUI : MonoBehaviour
                 backgroundFitter.aspectRatio = aspect;
         }
 
-        // 네 버튼을 위에서부터 [게임 시작] → [도감] → [설정] → [나가기] 순서로, 묶음 중심을 기준으로 배치합니다
-        // (묶음 중심 = [도감]과 [설정] 사이).
+        // 다섯 버튼을 위에서부터 [게임 시작] → [도감] → [조작법] → [설정] → [나가기] 순서로, 묶음 중심을 기준으로 배치합니다
+        // (묶음 중심 = 가운데 [조작법]).
         float step = buttonSize.y + buttonSpacing;
-        ApplyButton(startView, startButton, buttonsCenterOffset + new Vector2(0f, step * 1.5f));
-        ApplyButton(codexView, codexButton, buttonsCenterOffset + new Vector2(0f, step * 0.5f));
-        ApplyButton(settingsView, settingsButton, buttonsCenterOffset - new Vector2(0f, step * 0.5f));
-        ApplyButton(quitView, quitButton, buttonsCenterOffset - new Vector2(0f, step * 1.5f));
+        ApplyButton(startView, startButton, buttonsCenterOffset + new Vector2(0f, step * 2f));
+        ApplyButton(codexView, codexButton, buttonsCenterOffset + new Vector2(0f, step * 1f));
+        ApplyButton(controlsView, controlsButton, buttonsCenterOffset);
+        ApplyButton(settingsView, settingsButton, buttonsCenterOffset - new Vector2(0f, step * 1f));
+        ApplyButton(quitView, quitButton, buttonsCenterOffset - new Vector2(0f, step * 2f));
 
         ApplyLogo();
     }
@@ -482,7 +496,7 @@ public class TitleScreenUI : MonoBehaviour
     private float IntroLength()
     {
         float logoEnd = logoAppearStart + logoAppearDuration + logoRestoreDuration;
-        float buttonsEnd = buttonsAppearStart + buttonStagger * 3f + buttonAppearDuration;
+        float buttonsEnd = buttonsAppearStart + buttonStagger * 4f + buttonAppearDuration;
         return Mathf.Max(screenFadeDuration, Mathf.Max(logoEnd, buttonsEnd));
     }
 
@@ -534,8 +548,9 @@ public class TitleScreenUI : MonoBehaviour
         // 버튼: 위에서부터 차례로, 왼쪽에서 밀려 들어오며 나타남
         IntroButton(startView, 0, t);
         IntroButton(codexView, 1, t);
-        IntroButton(settingsView, 2, t);
-        IntroButton(quitView, 3, t);
+        IntroButton(controlsView, 2, t);
+        IntroButton(settingsView, 3, t);
+        IntroButton(quitView, 4, t);
     }
 
     private void IntroButton(ButtonView view, int order, float t)

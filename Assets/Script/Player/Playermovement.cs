@@ -129,6 +129,8 @@ public class PlayerMovement : MonoBehaviour
         if (IntroCutscene.OverridesMovement) inputDir = IntroCutscene.ScriptedMoveDirection;
         // [헬기 퇴각] 퇴각 연출(HeliExtraction) 중 사다리 앞으로 걸어가는 동안에도 같은 방식으로 정해진 방향으로 걷습니다.
         else if (HeliExtraction.OverridesMovement) inputDir = HeliExtraction.ScriptedMoveDirection;
+        // [촬영 스튜디오] 촬영 씬(CutsceneStudio)에서는 키 입력 대신 대본이 정한 방향으로만 걷습니다.
+        else if (CutsceneStudio.OverridesMovement) inputDir = CutsceneStudio.ScriptedMoveDirection;
 
         moveInput = inputDir;
 
@@ -138,10 +140,16 @@ public class PlayerMovement : MonoBehaviour
         // [비전투 가속] 돌진/넉백 중엔 가속 상태를 그대로 두고(액티브 사용은 가속 유지 - 형빈 확정), 로딩/컷씬/헬기 연출 중엔
         // 조작이 아닌 이동이라 가속을 끕니다(시작방 컷씬에서 걸어오다 빨라지지 않도록).
         bool boostFreeze = dashing || ForcedPush.BlocksPlayerInput || PlayerDash.BlocksPlayerInput;
-        bool boostHardReset = LoadingScreen.BlocksPlayerInput || IntroCutscene.OverridesMovement || HeliExtraction.OverridesMovement;
+        bool boostHardReset = LoadingScreen.BlocksPlayerInput || IntroCutscene.OverridesMovement || HeliExtraction.OverridesMovement
+                              || CutsceneStudio.OverridesMovement;
+        // [촬영 스튜디오] 대본의 '뛰기' 동안에는 가속 조건을 건너뛰고 바로 최대 가속으로 둡니다(뛰기 모션/총 숨김/흙먼지가 게임 그대로 나오게).
         float moveSpeed = travelBoost != null
-            ? travelBoost.Tick(stats.MoveSpeed, moveInput.sqrMagnitude > 0.0001f, boostFreeze, boostHardReset)
+            ? (CutsceneStudio.ForceRun
+                ? travelBoost.TickForcedMax(stats.MoveSpeed)
+                : travelBoost.Tick(stats.MoveSpeed, moveInput.sqrMagnitude > 0.0001f, boostFreeze, boostHardReset))
             : stats.MoveSpeed;
+        // [촬영 스튜디오] 대본이 이동 시간을 정한 경우("뛰기 P1 > P3 3초") 그 시간에 도착하는 속도로 움직입니다. 게임 씬에서는 항상 0입니다.
+        if (CutsceneStudio.ScriptedSpeed > 0f) moveSpeed = CutsceneStudio.ScriptedSpeed;
         lastMoveSpeed = moveSpeed;
 
         // [74번 돌진] 돌진 중에는 이동 입력 대신 돌진 방향을 moveInput으로 둡니다 - 걷기 애니메이션과 비조준 시 바라보는 방향이

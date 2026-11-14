@@ -99,6 +99,13 @@ public class PlayerTravelBoost : MonoBehaviour
         return Finish(statSpeed, s);
     }
 
+    // [촬영 스튜디오] 대본의 '뛰기' 동안 PlayerMovement가 Tick 대신 부릅니다. 비전투 대기/오르는 시간을 건너뛰고 바로 최대 가속으로 둡니다.
+    public float TickForcedMax(float statSpeed)
+    {
+        BoostRatio = 1f;
+        return Finish(statSpeed, TravelBoostSettings.Get());
+    }
+
     private float Finish(float statSpeed, TravelBoostSettings s)
     {
         float speed = statSpeed;

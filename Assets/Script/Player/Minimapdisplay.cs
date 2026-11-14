@@ -32,8 +32,8 @@ using UnityEngine.UI;
 // (visited 값 자체는 바꾸지 않음 - 22번 아이템 등 다른 곳이 그대로 씀).
 // - 전투방(일반방/보스방)을 클리어하지 않고 벗어나면(일회용 아이템 탈출 등) 미방문으로 표시합니다 - 미방문 배경 +
 //   방 종류 아이콘(보스방이면 보스 아이콘). 클리어하면 그때부터 방문으로 표시됩니다.
-// - keepIconAfterVisitCategories에 든 카테고리(기본: 상점)는 방문한 뒤에도 방 종류 아이콘을 정중앙에 계속 보여줍니다
-//   (배경은 방문 표시). 그 방에 포탈이 있으면 포탈 아이콘이 우선이고, 남은 아이템 4격자는 그대로 함께 표시됩니다.
+// - keepIconAfterVisitCategories에 든 카테고리(기본: 상점/특수방)와 보스방은 방문한 뒤에도 방 종류 아이콘을 정중앙에 계속 보여줍니다
+//   (배경은 방문 표시, 남은 아이템 4격자도 함께 표시).
 //
 // [마커 스캔 방식 - 확장성]
 // "방문한 방에 무엇이 남아있는지"는 그 방의 Content 루트 밑을 스캔해서 IMinimapMarker를
@@ -55,8 +55,8 @@ using UnityEngine.UI;
 // [남아있는 아이템 표시 확장 - 상자 상태별 아이콘 + 포탈]
 // 방문한 방의 4격자에 뜨는 아이콘 키는 이제 다음과 같습니다: Item(아이템), Chest(아직 안 연 상자),
 // Health/Grenade/HackingTool/Credit/Pyroxenes/Cost(상자에 남은 기본 아이템 종류별). 상자는 IMinimapMultiMarker로
-// 자신의 상태(안 열림/열림 + 안 가져간 것)에 맞는 키들을 알려줍니다. 포탈(Portal 키)은 4격자가 아니라
-// 방 정중앙에 별도 아이콘으로 표시되며, 그 방에 다른 아이템이 남아있어도 4격자는 그대로 함께 보입니다.
+// 자신의 상태(안 열림/열림 + 안 가져간 것)에 맞는 키들을 알려줍니다. 포탈(Portal 키)은 미니맵에 표시하지 않습니다
+// (형빈 확정 - 보스 클리어 뒤 보스방은 포탈 아이콘 대신 항상 보스방 아이콘, 남은 아이템/상자 4격자는 다른 방처럼 표시).
 // 위 키들은 Marker Icons 리스트에 아직 없으면 자동으로 채워집니다(OnValidate) - 아이콘 스프라이트만
 // 각 항목에 끌어다 놓으면 됩니다.
 //
@@ -164,13 +164,6 @@ public class MinimapDisplay : MonoBehaviour
         new MarkerIconEntry { markerKey = "Pyroxenes", fallbackColor = new Color(0.6f, 0.6f, 1f) },
         new MarkerIconEntry { markerKey = "Cost", fallbackColor = new Color(0.4f, 1f, 0.5f) },
     };
-
-    [Header("포탈 - 방문한 방 정중앙에 표시 (그 방에 다른 아이템이 있어도 4격자와 별개로 항상 정중앙)")]
-    public Sprite portalIcon;
-    [Tooltip("포탈 아이콘 스프라이트를 아직 안 만들었을 때 대신 보여줄 사각형 색상입니다.")]
-    public Color portalFallbackColor = new Color(0.3f, 0.8f, 1f);
-    [Tooltip("정중앙 포탈 아이콘의 크기입니다. 4격자 아이콘과 겹쳐 보이면 이 값을 줄이거나 Quadrant Offset을 키워보세요.")]
-    public float portalIconSize = 14f;
 
     [Header("패널 위치 (화면 우측 상단 모서리 기준 여백, px)")]
     public float panelMarginX = 40f;
@@ -666,14 +659,16 @@ public class MinimapDisplay : MonoBehaviour
         }
         else if (isVisited)
         {
-            // 정중앙(포탈)과 4격자(남은 아이템)를 한 번의 스캔으로 함께 처리합니다.
             ApplyQuadrantMarkers(icon);
 
-            // 상점 등: 방문한 뒤에도 정중앙에 방 종류 아이콘을 유지합니다(포탈이 있으면 포탈 아이콘이 우선).
-            if (keepIconAfterVisitCategories != null && keepIconAfterVisitCategories.Contains(icon.room.category) &&
-                !icon.centerOverlayRect.gameObject.activeSelf)
+            // 상점/보스방 등: 방문한 뒤에도 정중앙에 방 종류 아이콘을 유지합니다. 나머지 방문한 방의 정중앙은 비움.
+            if (KeepsTypeIconAfterVisit(icon.room.category))
             {
                 SetCenterOverlay(icon, FindRoomTypeIcon(icon.room), Color.white, false);
+            }
+            else
+            {
+                icon.centerOverlayRect.gameObject.SetActive(false);
             }
         }
         else
@@ -730,8 +725,7 @@ public class MinimapDisplay : MonoBehaviour
     // 4개까지 찾아 상->좌->우->하 순서로 채웁니다.
     private void ApplyQuadrantMarkers(RoomIconRefs icon)
     {
-        CollectMarkerVisuals(icon.room, scratchMarkerSprites, scratchMarkerColors, out bool hasPortal);
-        ApplyPortalCenter(icon, hasPortal);
+        CollectMarkerVisuals(icon.room, scratchMarkerSprites, scratchMarkerColors);
 
         for (int i = 0; i < 4; i++)
         {
@@ -760,41 +754,21 @@ public class MinimapDisplay : MonoBehaviour
         }
     }
 
-    // 포탈이 있는 방이면 방 정중앙에 포탈 아이콘을 띄우고, 없으면 정중앙 오버레이를 숨깁니다
-    // (방문한 방의 정중앙은 포탈 전용 자리입니다 - 플레이어 마커는 현재 방에서만 쓰입니다).
-    private void ApplyPortalCenter(RoomIconRefs icon, bool hasPortal)
+    // 보스방은 항상, 그 밖에는 keepIconAfterVisitCategories(기본: 상점/특수방)에 든 방만 방문 후에도 방 종류 아이콘을 유지합니다.
+    private bool KeepsTypeIconAfterVisit(RoomCategory category)
     {
-        if (!hasPortal)
-        {
-            icon.centerOverlayRect.gameObject.SetActive(false);
-            return;
-        }
-
-        icon.centerOverlayRect.gameObject.SetActive(true);
-        icon.centerOverlayRect.sizeDelta = new Vector2(portalIconSize, portalIconSize);
-
-        if (portalIcon != null)
-        {
-            icon.centerOverlayImage.sprite = portalIcon;
-            icon.centerOverlayImage.color = Color.white;
-        }
-        else
-        {
-            icon.centerOverlayImage.sprite = null;
-            icon.centerOverlayImage.color = portalFallbackColor;
-        }
+        if (category == RoomCategory.Boss) return true; // 보스 클리어 뒤 포탈 아이콘 대신 보스방 아이콘(형빈 확정)
+        return keepIconAfterVisitCategories != null && keepIconAfterVisitCategories.Contains(category);
     }
 
     // room.id로 그 방의 RoomController -> ContentRoot를 찾아, 그 밑에 존재하는 IMinimapMarker /
     // IMinimapMultiMarker 구현체들을 스캔합니다. 같은 키가 여러 개 있어도 한 번만 세고,
     // markerIcons 리스트 순서(우선순위) 기준으로 최대 4개까지만 out 리스트에 채웁니다.
-    // 포탈 키는 4격자가 아니라 정중앙에 따로 표시하므로 hasPortal로만 알려주고 리스트에서는 뺍니다.
-    // 포탈이 있는 방은 4격자 아이콘을 아예 채우지 않습니다(포탈 아이콘만 단독 표시).
-    private void CollectMarkerVisuals(RoomInstance room, List<Sprite> outSprites, List<Color> outColors, out bool hasPortal)
+    // 포탈 키는 표시하지 않습니다(포탈이 있는 방도 남은 아이템은 다른 방처럼 표시).
+    private void CollectMarkerVisuals(RoomInstance room, List<Sprite> outSprites, List<Color> outColors)
     {
         outSprites.Clear();
         outColors.Clear();
-        hasPortal = false;
 
         var controller = levelBuilder.GetRoomController(room.id);
         if (controller == null || controller.ContentRoot == null) return;
@@ -817,11 +791,6 @@ public class MinimapDisplay : MonoBehaviour
                 }
             }
         }
-
-        hasPortal = scratchFoundKeys.Contains(MinimapKeys.Portal);
-
-        // 포탈이 있는 방은 다른 아이템/상자/재화가 남아있어도 포탈 아이콘 하나만 보여줍니다.
-        if (hasPortal) return;
 
         foreach (var entry in markerIcons)
         {

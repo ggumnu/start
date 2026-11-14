@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e31805a23a745014292e6240142cfd66, type: 3}
+  m_Name: GameClearUISettings
+  m_EditorClassIdentifier: Assembly-CSharp::GameClearUISettings
+  title: BATTLE COMPLETE
+  timeLabel: "\uC804\uD22C \uC2DC\uAC04"
+  killsLabel: "\uCC98\uCE58\uD55C \uC801"
+  roomsLabel: "\uD074\uB9AC\uC5B4\uD55C \uBC29"
+  restartLabel: "\uC7AC\uC2DC\uC791\uD558\uAE30"
+  quitLabel: "\uADF8\uB9CC\uD558\uAE30"
+  titleSceneName: Title
+  canvasSortingOrder: 110
+  dimColor: {r: 0, g: 0, b: 0, a: 0.55}
+  titleFontSize: 111
+  titleOffset: {x: -200, y: 40}
+  titleSlantAngle: 14
+  titleTopRimColor: {r: 1, g: 0.98039216, b: 0.627451, a: 1}
+  titleTopColor: {r: 1, g: 0.91764706, b: 0.3137255, a: 1}
+  titleMiddleColor: {r: 1, g: 0.8784314, b: 0.24313726, a: 1}
+  titleBottomColor: {r: 1, g: 0.8235294, b: 0.17254902, a: 1}
+  titleBottomRimColor: {r: 0.99215686, g: 0.9098039, b: 0.43137255, a: 1}
+  titleTopRimSize: 0.1
+  titleBottomRimSize: 0.1
+  titlePatternColor: {r: 1, g: 0.98039216, b: 0.74509805, a: 1}
+  titlePatternAlpha: 0.7
+  titlePatternSize: 0.34
+  titlePatternSpread: 0.3
+  titleShadowColor: {r: 0.106, g: 0.165, b: 0.251, a: 0.55}
+  titleShadowOffsetX: 0
+  titleShadowOffsetY: -0.6
+  titleShadowDilate: 0.25
+  titleShadowSoftness: 0.5
+  panelSize: {x: 640, y: 420}
+  labelFontSize: 28
+  firstRowY: 70
+  rowSpacing: 84
+  labelRight: 215
+  valueCenterX: 410
+  valueBadgeSize: {x: 300, y: 50}
+  valueBadgeColor: {r: 0.17254902, g: 0.27058825, b: 0.3882353, a: 1}
+  valueTextColor: {r: 1, g: 1, b: 1, a: 1}
+  valueFontSize: 28
+  buttonSize: {x: 200, y: 64}
+  buttonHalfDistance: 130
+  buttonBottomMargin: 30
+  buttonFontSize: 28
+  dimFadeDuration: 0.4
+  titleDelay: 0.1
+  titleAppearDuration: 0.45
+  titleSlideDistance: 160
+  titleFlashFadeDuration: 0.5
+  popupDelay: 0.4
+  popupAppearDuration: 0.35
+  popupRiseDistance: 40
+  rowsDelay: 0.1
+  rowInterval: 0.45
+  badgeAppearDuration: 0.25
+  badgeRiseDistance: 20
+  countDuration: 0.6

@@ -18,6 +18,13 @@ using UnityEngine;
 //        조작/HUD 복귀 -> 사다리가 다시 올라가고 헬기가 떠나며 사라짐. n.5 레벨처럼 시작방에 이미 다음 레벨용 헬기 포탈이 있으면 그 헬기로
 //        내려오고, 떠나지 않고 그대로 남아 다음 레벨용 사다리가 됩니다. Space/ESC/Enter로 건너뛰면 잠깐 검게 -> 바로 착지 상태.
 //
+// [게임 클리어 퇴각 - BeginGameClearExtraction (LevelPortal이 게임 클리어 레벨에서 부름)]
+//        3단계와 같이 걸어가 점프해 매달리지만, 화면을 검게 만들지 않고 다음 레벨로도 가지 않습니다. 사다리가 끌어올려지기 시작하는 순간
+//        결과 화면(GameClearUI - 반투명 검은 막 + 연출)을 띄우고, 사다리/헬기는 그 뒤에서 평소처럼 올라가 떠나며 그림자가 흐려집니다.
+//        사다리가 다 걷힌 뒤에는 플레이어를 그 자리(화면 밖 하늘)에 멈춰 둡니다(헬기를 따라 다른 방 칸으로 넘어가 그 방에 들어간 것으로
+//        처리되지 않도록). Space/Enter 건너뛰기는 없고, [예] 뒤 어느 때든 ESC = 결과 화면을 연출 없이 바로(뒤의 동작은 그대로 이어짐).
+//        플레이어/카메라/HUD를 되돌리지 않습니다(결과 화면에서 씬을 새로 불러옴).
+//
 // [그림]
 // - 그림자: 바닥 위에 깐 판 하나(HeliUnlit 재질)에 그림자 그림 3장을 번갈아 넣습니다. 기수는 날아온 진행 방향을 봅니다.
 // - 먼지: 90번 물결과 같은 RoomWave 셰이더 재질로, 그림자 중심에서 일정 간격으로 고리가 퍼집니다(방 밖은 잘림). 90번의 총알 제거 등
@@ -133,6 +140,9 @@ public class HeliExtraction : MonoBehaviour
     private static HeliExtraction active;
     // 퇴각을 마쳐 이전 레벨과 함께 지워질 헬기입니다. 도착 연출용 헬기를 찾을 때 건너뜁니다(TryStartArrival 참고).
     private bool usedForExtraction;
+    // 게임 클리어 퇴각(결과 화면으로 끝남)
+    private bool gameClearMode;
+    private bool gameClearShown;
     private ExtractPhase extractPhase = ExtractPhase.None;
     private System.Action onExtracted;
     private PlayerHealth player;
@@ -186,7 +196,8 @@ public class HeliExtraction : MonoBehaviour
 
     void OnDestroy()
     {
-        if (extractPhase != ExtractPhase.None) RestorePlayer(); // 연출 도중 사라지면 플레이어를 원래대로
+        // 연출 도중 사라지면 플레이어를 원래대로(게임 클리어 퇴각은 씬을 떠나며 사라지는 것이므로 되돌리지 않음)
+        if (extractPhase != ExtractPhase.None && !gameClearMode) RestorePlayer();
         Cleanup();
         if (active == this) active = null;
     }
@@ -983,6 +994,35 @@ public class HeliExtraction : MonoBehaviour
         extractPhase = ExtractPhase.Approach;
     }
 
+    // [게임 클리어 퇴각] 걸어가 매달리는 것까지는 퇴각 연출과 같고, 끌어올려지기 시작하면 결과 화면을 띄웁니다(클래스 주석 참고).
+    // 퇴각을 시작할 수 없는 상태면 결과 화면만 바로 띄웁니다.
+    public void BeginGameClearExtraction()
+    {
+        BeginExtraction(null);
+        if (extractPhase == ExtractPhase.None)
+        {
+            GameClearUI.Show(false);
+            return;
+        }
+        gameClearMode = true;
+        gameClearShown = false;
+        leaveFade = 1f;
+    }
+
+    private void ShowGameClear(bool skipToEnd)
+    {
+        gameClearShown = true;
+        GameClearUI.Show(skipToEnd);
+    }
+
+    // 헬기가 다 떠나 그림자가 사라지면 이 헬기의 움직임/소리를 멈춥니다(플레이어는 화면 밖에 멈춘 채, 결과 화면만 남음).
+    private void StopAfterGameClear()
+    {
+        playing = false;
+        ApplyVisualsVisible(false);
+        GameAudio.StopLoop(ref rotorLoopHandle);
+    }
+
     private void UpdateExtraction(HeliExtractionSettings s)
     {
         if (player == null)
@@ -994,8 +1034,13 @@ public class HeliExtraction : MonoBehaviour
         phaseTimer += dt;
         EnforceLock(extractPhase != ExtractPhase.Approach);
 
+        // [게임 클리어 퇴각] ESC = 결과 화면을 바로(완성된 모습으로). 결과 화면이 이미 떠 있으면 그 화면이 ESC를 받음.
+        if (gameClearMode)
+        {
+            if (!gameClearShown && Input.GetKeyDown(KeyCode.Escape)) ShowGameClear(true);
+        }
         // 건너뛰기: 바로 검게 하고 다음 레벨로
-        if (!fading && s.skipKeys != null)
+        else if (!fading && s.skipKeys != null)
         {
             foreach (var key in s.skipKeys)
             {
@@ -1094,20 +1139,32 @@ public class HeliExtraction : MonoBehaviour
     // 3) 매달림: 플레이어는 붙잡은 마디를 따라 움직이며 반동만 받음 -> 사다리 자체가 끌어올려짐 -> 화면이 검게
     private void UpdateHang(HeliExtractionSettings s, float dt)
     {
-        player.transform.position = HangPosition(s);
-        FaceHangDirection(s, 8f);
+        // [게임 클리어 퇴각] 사다리가 다 걷힌 뒤(헬기 출발)에는 플레이어를 그 자리(화면 밖 하늘)에 멈춰 둡니다.
+        bool frozen = gameClearMode && departWait >= 0f;
+        if (!frozen)
+        {
+            player.transform.position = HangPosition(s);
+            FaceHangDirection(s, 8f);
+        }
 
         if (!lifting && phaseTimer >= s.liftDelay)
         {
             lifting = true;
             phaseTimer = 0f;
+            if (gameClearMode && !gameClearShown) ShowGameClear(false); // 끌어올려지기 시작하는 순간 결과 화면
         }
         if (lifting)
         {
             liftSpeed = Mathf.Min(s.liftMaxSpeed, liftSpeed + s.liftAcceleration * dt);
             liftOffset += liftSpeed * dt;
-            UpdateDepart(s, dt); // 사다리가 다 걷힌 뒤에야 헬기가 출발
-            if (!fading && phaseTimer >= s.fadeStartAfterLift) StartFade(s.fadeDuration);
+            float departTime = UpdateDepart(s, dt); // 사다리가 다 걷힌 뒤에야 헬기가 출발
+            if (gameClearMode)
+            {
+                // 화면을 검게 만들지 않고, 도착 연출이 끝나고 떠날 때처럼 헬기 그림자가 흐려지며 사라짐
+                leaveFade = 1f - Mathf.Clamp01(departTime / Mathf.Max(0.1f, s.leaveDuration));
+                if (leaveFade <= 0f) StopAfterGameClear();
+            }
+            else if (!fading && phaseTimer >= s.fadeStartAfterLift) StartFade(s.fadeDuration);
         }
     }
 

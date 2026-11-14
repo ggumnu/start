@@ -20,6 +20,7 @@ public class PauseMenuSettings : ScriptableObject
     public string resumeLabel = "계속하기";
     public string settingsLabel = "설정";
     public string codexLabel = "도감";
+    public string controlsLabel = "조작법";
     public string restartLabel = "재시작하기";
     public string quitLabel = "그만하기";
 
@@ -48,7 +49,7 @@ public class PauseMenuSettings : ScriptableObject
 
     [Header("버튼 모양 (색/모양/글자 색은 PopupStyle)")]
     public Vector2 buttonSize = new Vector2(220f, 80f);
-    [Tooltip("같은 줄 버튼 사이 가로 간격입니다(윗줄 계속하기/설정/도감, 아랫줄 재시작하기/그만하기).")]
+    [Tooltip("같은 줄 버튼 사이 가로 간격입니다(윗줄 계속하기/설정/조작법, 아랫줄 도감/재시작하기/그만하기).")]
     public float buttonSpacing = 60f;
     [Tooltip("윗줄과 아랫줄 버튼 사이 세로 간격입니다.")]
     public float buttonRowSpacing = 30f;

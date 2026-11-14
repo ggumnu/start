@@ -158,7 +158,9 @@ MonoBehaviour:
   playerPrefab: {fileID: 6336945966448862673, guid: 75b57e43a600d8b4ab64323ea20ea64e, type: 3}
   testProfile: {fileID: 11400000, guid: 233bbfa165b3f8f41be257aff94f306d, type: 2}
   itemsToGrant:
-  - {fileID: 11400000, guid: 3d8dbd9134e756942bae057fcc23e33a, type: 2}
+  - {fileID: 11400000, guid: 693dc2a8f93fdc045bbcb487d670878f, type: 2}
+  - {fileID: 11400000, guid: 5c1bffadbe55c284cbbaa9e9fe55f64e, type: 2}
+  - {fileID: 11400000, guid: f74a537487f3931498d96ec442d85527, type: 2}
   dummyEnemies:
   - definition: {fileID: 11400000, guid: 3d7f54bfa5704ed419672368d3752be0, type: 2}
     position: {x: 0, y: 0, z: 0}

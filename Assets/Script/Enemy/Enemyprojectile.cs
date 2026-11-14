@@ -133,7 +133,7 @@ public class EnemyProjectile : MonoBehaviour
         if (consumed) return;
 
         // [87번 포섭] 아군 탄환: 적(아군이 아닌 적)에게만 맞고, 플레이어와 다른 아군은 그대로 통과합니다. 피해는 이미 x30 환산된 값입니다.
-        // 플레이어 총알처럼 간격 없이 맞을 때마다 들어갑니다(형빈 확정).
+        // 플레이어 총알처럼 간격 없이 맞을 때마다 들어갑니다(형빈 확정). 피해 숫자는 항상 Weak(아이템으로 생긴 피해 - 형빈 확정).
         if (fromAlly)
         {
             if (other.CompareTag("Player")) return;
@@ -141,7 +141,7 @@ public class EnemyProjectile : MonoBehaviour
             if (victim != null)
             {
                 if (victim.IsDead || AllyFaction.IsAlly(victim.gameObject)) return;
-                victim.TakeDamage(damage);
+                victim.TakeWeakDamage(damage);
                 Consume();
                 return;
             }

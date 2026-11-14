@@ -20,7 +20,7 @@ using UnityEngine;
 //   보스도 "닿은 적"으로서는 피해를 입습니다(밀리지만 않음).
 // - 충돌 피해량 = 맞은 순간 플레이어의 공격력 스탯(PlayerStats.Damage) x impactDamageRatio(기본 0.5) x 분열탄 효과 배율.
 //   총알 피해(23번 랜덤 피해, 11번 거리 피해, 35번 튕김 보너스 등)와는 별개입니다(형빈 확정 - 다른 아이템과 꼬이지 않게).
-//   또한 총알 적중이 아니므로 38번 매료 같은 "총알 명중 시" 효과는 걸리지 않습니다.
+//   또한 총알 적중이 아니므로 38번 매료 같은 "총알 명중 시" 효과는 걸리지 않습니다. 피해 숫자는 항상 Weak(아이템 부가 피해 - 형빈 확정).
 // - 충돌마다 두 적 사이에 충돌 이펙트를 생성합니다(비워두면 이펙트 없음).
 //
 // [구현]
@@ -152,12 +152,12 @@ public class BulletKnockbackEffect : IPassiveItemEffect, IRemovablePassiveEffect
             if (other == null) continue;
 
             Vector3 otherCenter = GetBodyCenter(other);
-            other.TakeDamage(impactDamage);
+            other.TakeWeakDamage(impactDamage); // 피해 숫자 항상 Weak(형빈 확정)
             SpawnImpactVfx((pushedCenter + otherCenter) * 0.5f);
         }
 
         // 밀려난 적은 닿은 적이 몇 마리든 딱 한 번만 피해를 입습니다(형빈 확정).
-        pushed.TakeDamage(impactDamage);
+        pushed.TakeWeakDamage(impactDamage);
     }
 
     // 밀려난 적의 몸통과 겹치는(살아 있는) 다른 적 목록입니다. 한 적의 콜라이더가 여러 개여도 한 번만 들어갑니다.

@@ -22,6 +22,7 @@ MonoBehaviour:
   rarity: 1
   category: 0
   confirmBeforeReplace: 0
+  incompatibleItemIds: []
   tags: []
   activeCost: 1
   activeEffect:

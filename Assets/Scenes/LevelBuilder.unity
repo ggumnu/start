@@ -483,6 +483,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7cc3ca23bdee02f409c81f88c6fe1da3, type: 2}
   - {fileID: 11400000, guid: a304796cd45b3cc479990cbe71443db9, type: 2}
   - {fileID: 11400000, guid: 8c5100a3ff21b55428e3c88dc3af6f2b, type: 2}
+  skipChoiceLevels: 1
+  gameClearLevel: 2
   nightLightRules: {fileID: 11400000, guid: 9601a08cdf221904ca8070ba2602ce24, type: 2}
   currentLevelNumber: 1
   currentPhase: 0
@@ -767,15 +769,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6557036922075778408, guid: b638e2821461319448de875dd6ebe0be, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.021895705
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6557036922075778408, guid: b638e2821461319448de875dd6ebe0be, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.57
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6557036922075778408, guid: b638e2821461319448de875dd6ebe0be, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -3.93
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6557036922075778408, guid: b638e2821461319448de875dd6ebe0be, type: 3}
       propertyPath: m_LocalRotation.w

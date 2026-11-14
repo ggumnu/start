@@ -7,21 +7,15 @@ using System.Collections.Generic;
 // 실제 발사 "입력"은 PlayerAimAndAttack에서 감지하고, 이 스크립트의 TryFire()를 호출합니다.
 //
 // [장전 규칙]
-// - 탄약이 0인 상태에서 공격을 시도하면(TryFire) 그 시점에 자동으로 장전을 시작합니다.
-//   (탄약이 0이 되는 순간 즉시 장전이 시작되는 것이 아니라, 그 다음 공격 시도 때 장전이
-//   시작됩니다 - 예: 연사 도중 탄약이 바닥나도 바로 장전되지 않고, 플레이어가 한 번 더
-//   공격 버튼을 눌러야 장전이 시작됩니다.)
+// - 탄약이 0인 상태에서 공격을 시도하면(TryFire) 그 시점에 자동으로 장전을 시작합니다
+//   (탄약이 0이 되는 순간이 아니라, 그 다음 공격 시도 때 장전이 시작됩니다).
 // - 탄약을 하나라도 쓴 상태라면(가득 차지 않은 상태) R키로 수동 장전이 가능합니다.
 //   단, 연사(버스트) 진행 중에는 수동 장전을 할 수 없습니다 - 연사가 끝난 뒤에만 가능합니다.
 //
 // [연사(멀티샷) 규칙]
-// - 좌클릭 1번 = 짧은 간격(multishotInterval)을 두고 연속으로 최대 stats.Multishot 발을 발사
-// - "연사"라는 이름에 맞게, 발사되는 탄환 하나하나가 실제로 탄약을 1개씩 소모합니다.
-//   예: 최대 탄창 5, 현재 탄약 5, 연사 2일 때 공격 1회 -> 2발 발사, 탄약 5 -> 3.
-// - 탄약이 연사 횟수보다 적으면, 연사 횟수와 무관하게 남은 탄약만큼만 발사하고 그 자리에서
-//   연사가 즉시 종료됩니다. 예: 연사 2인데 남은 탄약이 1이면 1발만 나가고 끝납니다.
-//   장전 후에 이어서 남은 연사분이 자동으로 나가는 일은 없습니다(연사가 이미 종료된
-//   상태이므로, 장전 완료 후에는 항상 새로운 공격 입력부터 다시 시작됩니다).
+// - 좌클릭 1번 = 짧은 간격(multishotInterval)을 두고 연속으로 stats.Multishot 발을 발사
+// - 탄약은 클릭 1번에 1개만 소모합니다(첫 발을 쏠 때) - 연사분은 탄약을 쓰지 않습니다(형빈 확정, 원래 방식으로 복구).
+//   예: 최대 탄창 5, 현재 탄약 5, 연사 2일 때 공격 1회 -> 2발 발사, 탄약 5 -> 4. 남은 탄약이 1이어도 연사분은 전부 나갑니다.
 // - 이 연속 발사(버스트)가 끝나기 전까지는 새 공격 입력도, 수동 장전(R키)도 받지 않습니다.
 // - 나중에 아이템으로 "동시 발사 탄환 추가"를 만들 경우, SpawnProjectile()을
 //   FireBurst 코루틴 밖에서 간격 없이 여러 번 호출하면 됩니다 (아래 주석 참고).
@@ -312,9 +306,7 @@ public class PlayerShooting : MonoBehaviour
         return true;
     }
 
-    // 클릭 1번에 대해 최대 stats.Multishot 발을 짧은 간격으로 연속 발사합니다.
-    // 발사되는 탄환 하나하나가 탄약을 1개씩 소모하며, 탄약이 바닥나면 그 자리에서
-    // 연사를 즉시 중단합니다(남은 발수는 발사되지 않음).
+    // 클릭 1번에 대해 stats.Multishot 발을 짧은 간격으로 연속 발사합니다. 탄약은 첫 발에서만 1개 소모합니다.
     // [19번/137번] 한 발에 나갈 총알 각도 목록을 매번 새로 만들지 않도록 재사용합니다.
     private readonly List<float> shotAngles = new List<float>(SpreadShotOverride.MaxShotCount);
 
@@ -325,36 +317,30 @@ public class PlayerShooting : MonoBehaviour
 
         for (int i = 0; i < shotsPlanned; i++)
         {
-            if (currentAmmo <= 0) break; // 안전장치 - 정상적인 흐름에서는 도달하지 않습니다.
-
-            // [104번] 이번 틱의 탄약 1발 소모를 총알을 만들기 직전에 알립니다(그 총알부터 오른 공격력이 반영됨).
-            // 실제 탄약 차감(아래 currentAmmo -= 1)과 그 시점은 기존 그대로입니다.
-            OnAmmoConsumed?.Invoke(1);
+            bool firstShot = i == 0;
+            if (firstShot)
+            {
+                if (currentAmmo <= 0) break; // 안전장치 - TryFire가 탄약을 확인하므로 정상적인 흐름에서는 도달하지 않습니다.
+                // [104번] 클릭의 탄약 1발 소모를 첫 총알을 만들기 직전에 알립니다(그 총알부터 오른 공격력이 반영됨).
+                OnAmmoConsumed?.Invoke(1);
+            }
 
             // [19번 양갈래 / 137번 확산] 이번 한 발로 나갈 총알 각도들을 받아 그만큼 쏩니다(SpreadShotOverride.FillShotAngles -
             // 아무것도 없으면 0도 한 발, 19번이면 ±30도 두 발, 137번이면 -15/0/+15도 세 발, 둘 다면 19번 각 총구에서 세 발씩 6발).
-            // EnemyRangedAttack의 샷건형 부채꼴 발사와 같은 계산 방식입니다. 연사(Multishot)와는 완전히 독립된 축이라, 이 틱
-            // 하나가 여전히 탄약 1만 소모합니다 - 아래 currentAmmo -= 1은 그대로입니다. 조준선(AimTrajectoryIndicator)도 같은
-            // 함수를 써서 실제 탄도와 항상 일치합니다.
+            // EnemyRangedAttack의 샷건형 부채꼴 발사와 같은 계산 방식입니다. 연사(Multishot)와는 완전히 독립된 축입니다.
+            // 조준선(AimTrajectoryIndicator)도 같은 함수를 써서 실제 탄도와 항상 일치합니다.
             SpreadShotOverride.FillShotAngles(shotAngles);
             for (int a = 0; a < shotAngles.Count; a++)
             {
                 float angle = shotAngles[a];
                 SpawnProjectile(Mathf.Approximately(angle, 0f) ? direction : Quaternion.Euler(0f, angle, 0f) * direction);
             }
-            // 이 틱(탄약 1발)마다 한 번 - 19번 양갈래/137번 확산이어도 한 번만. 이번 발을 쏜 뒤에도 탄약이 남고 연사분이
-            // 남아 있으면 다음 발까지 MultishotInterval, 아니면 0을 함께 알립니다.
-            bool hasNextShot = (currentAmmo - 1) > 0 && i < shotsPlanned - 1;
+            // 연사 한 발(틱)마다 한 번 - 19번 양갈래/137번 확산이어도 한 번만(반동 연출/총소리). 연사분이 남아 있으면 다음 발까지
+            // MultishotInterval, 아니면 0을 함께 알립니다.
+            bool hasNextShot = i < shotsPlanned - 1;
             OnShotFired?.Invoke(hasNextShot ? stats.MultishotInterval : 0f);
-            currentAmmo -= 1;
-
-            if (currentAmmo <= 0)
-            {
-                // 이번 발로 탄약이 바닥났습니다 - 남은 연사분은 발사하지 않고 즉시 종료합니다.
-                // 자동 장전은 여기서 바로 시작하지 않습니다 - 다음 공격 시도 때 TryFire()가
-                // "탄약 0"을 감지해서 시작합니다(장전 트리거 시점은 기존 규칙 그대로).
-                break;
-            }
+            // 자동 장전은 여기서 시작하지 않습니다 - 탄약이 0이면 다음 공격 시도 때 TryFire()가 시작합니다.
+            if (firstShot) currentAmmo -= 1;
 
             if (i < shotsPlanned - 1)
             {

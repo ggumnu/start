@@ -7,9 +7,9 @@ using UnityEngine.Rendering;
 //
 // [피해]
 // tickInterval(0.1초)마다 후광 안(총알 중심에서 반지름 = haloRadius x 지금 총알 크기 / 기본 총알 크기)에 콜라이더가 걸친 살아 있는 적
-// 전부에게 "지금 총알 피해 x 매초 비율 x 간격"을 EnemyHealth.TakeDamage로 줍니다. 콜라이더가 여러 개인 적도 한 틱에 한 번만
-// 맞습니다(EnemyHealth 단위로 중복 제거). 순수 피해만 주므로 총알 명중 효과(매료/넉백/폭발 등)는 일어나지 않고, 41번 피해 증가/
-// 피해 숫자/처치 판정은 TakeDamage를 거치므로 그대로 적용됩니다. 첫 피해는 총알이 생기고 한 간격 뒤입니다.
+// 전부에게 "지금 총알 피해 x 매초 비율 x 간격"을 EnemyHealth.TakeWeakDamage로 줍니다(아이템 부가 피해 - 피해 숫자 항상 Weak, 형빈 확정).
+// 콜라이더가 여러 개인 적도 한 틱에 한 번만 맞습니다(EnemyHealth 단위로 중복 제거). 순수 피해만 주므로 총알 명중 효과(매료/넉백/폭발 등)는
+// 일어나지 않고, 41번 피해 증가/처치 판정은 그대로 적용됩니다. 첫 피해는 총알이 생기고 한 간격 뒤입니다.
 //
 // [크기]
 // 후광 이펙트는 총알의 자식이라 총알 크기를 그대로 따라갑니다. 자식 크기를 "1 / 기본 총알 크기"로 두면, 기본 총알 크기일 때 정확히
@@ -148,7 +148,7 @@ public class BulletHalo : MonoBehaviour
             if (!isEnemy) continue;
             if (!damagedThisTick.Add(enemy)) continue;
 
-            enemy.TakeDamage(damage);
+            enemy.TakeWeakDamage(damage); // 피해 숫자 항상 Weak(형빈 확정)
         }
     }
 

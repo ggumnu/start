@@ -9,6 +9,8 @@ using UnityEngine;
 // - 사다리가 다 내려오기 전(또는 퇴각 연출 중)에는 F 대상/F 안내에서 빠집니다(PlayerInRange가 false).
 // - 확인창 [예](ConfirmAdvance) 뒤 바로 다음 레벨로 가지 않고, 퇴각 연출(사다리에 매달려 올라감)이 끝난 뒤 다음 레벨로 갑니다.
 // HeliExtraction이 없는 예전 포탈 프리팹은 예전과 100% 같게 동작합니다.
+// [게임 클리어] 게임 클리어 레벨(GameFlowManager.IsGameClearLevel)이면 [예] 뒤 다음 레벨 대신 게임 클리어 퇴각
+// (HeliExtraction.BeginGameClearExtraction - 결과 화면 GameClearUI)으로 갑니다. 이때 전투 시간 기록을 멈춥니다.
 //
 // [확인창 UI (별도 작업 예정)]
 // 실제 예/아니오 확인창(Canvas/Button)은 아직 만들지 않았습니다. 대신 OnConfirmationRequested
@@ -113,6 +115,14 @@ public class LevelPortal : MonoBehaviour, IMinimapMarker
     // 확인창의 "예" 버튼에 연결할 메서드입니다.
     public void ConfirmAdvance()
     {
+        if (gameFlowManager != null && gameFlowManager.IsGameClearLevel)
+        {
+            gameFlowManager.StopRunTimer();
+            if (heli != null) heli.BeginGameClearExtraction();
+            else GameClearUI.Show(false);
+            return;
+        }
+
         // 헬기 퇴각 프리팹이면 퇴각 연출을 먼저 보여주고, 화면이 검어진 뒤 다음 레벨로 갑니다.
         if (heli != null)
         {

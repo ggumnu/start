@@ -4,6 +4,9 @@ using UnityEngine;
 
 // 현재 레벨 번호와 페이즈(전투 레벨 vs n.5 선택방 레벨)를 추적하고 LevelBuilder에게 무엇을 빌드할지 지시하는 매니저입니다.
 // 진행: 레벨 N 전투 -> N.5 선택방 -> N+1 전투 ... (정수 레벨 번호 + LevelPhase, 표시는 DisplayLabel). 전투 레벨 설정은 combatLevelConfigs 순서.
+// gameClearLevel 레벨 보스를 깨고 헬기 [예]를 누르면 다음 레벨 대신 게임 클리어 결과 화면(GameClearUI)이 뜹니다(LevelPortal).
+// 결과 화면용 기록(전투 시간/처치한 적/클리어한 방)도 여기서 쌓습니다 - 씬을 새로 불러오면(재시작/새 게임) 0부터.
+// skipChoiceLevels가 켜져 있으면 n.5를 건너뛰고 레벨 N 전투 -> N+1 전투로 바로 갑니다(데모용 - n.5 코드는 그대로 남겨 둠).
 // 레벨을 만들 때 그 레벨 설정의 배경 재질로 화면 배경/초상화 하늘을 바꿉니다(LevelBackground). 설계 배경은 Docs/설계노트.md [게임 흐름].
 public class GameFlowManager : MonoBehaviour
 {
@@ -16,6 +19,15 @@ public class GameFlowManager : MonoBehaviour
     [Tooltip("레벨이 늘어날 때마다 여기에 RoomGenerationConfig 에셋을 순서대로 추가하세요.")]
     public List<RoomGenerationConfig> combatLevelConfigs;
 
+    [Header("n.5 선택방 레벨")]
+    [Tooltip("켜면 n.5 선택방 레벨을 건너뛰고 전투 레벨에서 바로 다음 전투 레벨로 갑니다(1 -> 2). " +
+             "끄면 예전처럼 1 -> 1.5 -> 2로 진행합니다. 최대 체력 칸 정리는 어느 쪽이든 다음 전투 레벨로 들어가기 직전에 합니다.")]
+    public bool skipChoiceLevels = true;
+
+    [Header("게임 클리어")]
+    [Tooltip("이 번호의 전투 레벨 보스를 깨고 헬기 [예]를 누르면 다음 레벨로 가지 않고 게임 클리어 결과 화면이 뜹니다. 0이면 끔(계속 다음 레벨로).")]
+    [Min(0)] public int gameClearLevel = 2;
+
     [Header("밤 전용 빛 자동 부착")]
     [Tooltip("Night Light Auto Rules 에셋. 전투 레벨이 만들어진 직후 같은 모델을 쓰는 오브젝트에 밤 전용 빛을 자동으로 붙입니다. 비우면 자동 부착 안 함.")]
     public NightLightAutoRules nightLightRules;
@@ -25,6 +37,8 @@ public class GameFlowManager : MonoBehaviour
     [SerializeField] private LevelPhase currentPhase = LevelPhase.Combat;
 
     public int CurrentLevelNumber => currentLevelNumber;
+    // 지금이 게임 클리어 레벨(의 전투 단계)인지 - LevelPortal이 헬기 [예]에서 확인합니다.
+    public bool IsGameClearLevel => gameClearLevel > 0 && currentPhase == LevelPhase.Combat && currentLevelNumber == gameClearLevel;
     public LevelPhase CurrentPhase => currentPhase;
     public string DisplayLabel => currentPhase == LevelPhase.Combat
         ? $"레벨 {currentLevelNumber}"
@@ -94,21 +108,10 @@ public class GameFlowManager : MonoBehaviour
         return released;
     }
 
-    // [v1.32 추가, v1.33에서 수정 - 레벨 내 아이템(패시브/액티브/장신구/일회용) 중복 등장 방지]
-    // 처음엔 "일회용 아이템 중 실제로 사용(소멸)까지 끝난 것만" 기록했는데, 그러면
-    // "어떤 상자가 이미 아이템 X를 뽑아서 담아뒀지만 플레이어가 아직 줍지 않은 상태"를
-    // 놓칩니다 - FilterUnowned(패시브)/FilterOutEquipped(액티브/장신구/일회용)는 전부
-    // "실제로 획득(습득/장착)했는지"만 보기 때문에, 줍지 않고 다른 방으로 넘어가면 그
-    // 아이템이 다른 상자에서 또 뽑힐 수 있었습니다. 획득 여부와 무관하게 "이 레벨의 어느
-    // 보물상자에서든 한 번 뽑혀서 내용물로 배정된 적이 있는 아이템"은 그 레벨 안에서
-    // 다시는 등장하면 안 되므로, 이제는 "사용 시점"이 아니라 "보물상자가 그 아이템을
-    // 내용물로 확정하는 시점"(TreasureChest용은 NormalRoomTreasureSpawner.
-    // ResolvePassiveItemCandidate(), 동아리방 보물상자용은 ItemPedestal.Open())에 곧바로 기록합니다.
-    // 패시브/액티브/장신구/일회용 네 분류 모두 같은 풀(ItemDatabase.GetItemsForContext)에서
-    // 뽑히는 "레벨 내 고유 등장" 아이템이라 분류 구분 없이 동일하게 적용합니다(기본 아이템
-    // 재화 묶음은 애초에 반복 등장이 정상이라 대상이 아닙니다). "같은 레벨(전투 페이즈 + 그 레벨의
-    // n.5 선택방 페이즈) 안에서는 유지되고, 다음 레벨로 넘어가면 초기화"됩니다(StartNewGame/AdvanceToNextPhase에서 Clear).
-    // (1회성 지급 기록 grantedOneTimeIds는 2026-10부터 런 전체에서 유지되므로 다음 레벨로 넘어갈 때 지우지 않습니다.)
+    // [레벨 내 아이템 중복 등장 방지] 패시브/액티브/장신구/일회용은 "보물상자/받침대/상점이 내용물로 확정한 순간"에 기록합니다
+    // (줍지 않고 넘어가도 그 레벨에서는 소진된 것 - 획득 여부만 보면 줍지 않은 아이템이 다른 상자에서 또 나옴).
+    // 확정 지점: NormalRoomTreasureSpawner.ResolvePassiveItemCandidate(), ItemPedestal.Open(). 기본 재화 묶음은 대상 아님.
+    // 다음 전투 레벨로 넘어갈 때 초기화(StartNewGame/EnterNextCombatLevel) - 1회성 지급 기록과 달리 런 전체에서 유지하지 않습니다.
     private readonly HashSet<string> assignedUniqueItemIdsThisLevel = new HashSet<string>();
 
     // 보물상자가 아이템을 실제 내용물로 확정하는 바로 그 시점에 호출합니다(뽑기 직후,
@@ -162,6 +165,52 @@ public class GameFlowManager : MonoBehaviour
         return id => id != null && map.TryGetValue(id, out var found) ? found : null;
     }
 
+    // ---------- 게임 클리어 결과 화면용 기록 ----------
+    // 전투 시간 = 새 게임 시작부터 마지막 헬기 [예]까지(StopRunTimer). 게임 시간(Time.deltaTime)으로 재므로 일시 정지(시간 멈춤)는 빠지고,
+    // 로딩 화면이 떠 있는 동안도 뺍니다. 처치한 적 = 전역 처치 알림(87번 아군의 죽음은 원래 오지 않음),
+    // 클리어한 방 = 방 클리어 알림(일반방/보스방만, 방마다 한 번).
+    private float playTimeSeconds;
+    private int enemiesKilled;
+    private int roomsCleared;
+    private bool runTimerStopped;
+
+    public float PlayTimeSeconds => playTimeSeconds;
+    public int EnemiesKilled => enemiesKilled;
+    public int RoomsCleared => roomsCleared;
+
+    // 마지막 헬기 [예]에서 부릅니다. 이후로는 시간/처치/방 기록이 늘지 않습니다.
+    public void StopRunTimer()
+    {
+        runTimerStopped = true;
+    }
+
+    void OnEnable()
+    {
+        EnemyHealth.OnAnyEnemyKilled += HandleEnemyKilled;
+        RoomController.OnAnyRoomCleared += HandleRoomCleared;
+    }
+
+    void OnDisable()
+    {
+        EnemyHealth.OnAnyEnemyKilled -= HandleEnemyKilled;
+        RoomController.OnAnyRoomCleared -= HandleRoomCleared;
+    }
+
+    void Update()
+    {
+        if (!runTimerStopped && !LoadingScreen.IsShowing) playTimeSeconds += Time.deltaTime;
+    }
+
+    private void HandleEnemyKilled(EnemyHealth enemy, Vector3 position)
+    {
+        if (!runTimerStopped) enemiesKilled++;
+    }
+
+    private void HandleRoomCleared(RoomInstance room)
+    {
+        if (!runTimerStopped) roomsCleared++;
+    }
+
     [Header("동작 설정")]
     [Tooltip("Play 모드 진입 시 자동으로 새 게임(레벨 1)을 시작할지 여부입니다.")]
     public bool startOnAwake = true;
@@ -196,12 +245,15 @@ public class GameFlowManager : MonoBehaviour
         currentPhase = LevelPhase.Combat;
         grantedOneTimeIds.Clear();
         assignedUniqueItemIdsThisLevel.Clear();
+        playTimeSeconds = 0f;
+        enemiesKilled = 0;
+        roomsCleared = 0;
+        runTimerStopped = false;
         BuildCurrentPhase(null); // 최초 진입이므로 유지할 플레이어가 없음 = 새로 스폰
     }
 
     // ---------- 다음 페이즈로 전환 ----------
-    // 나중에 LevelPortal(사다리 확인창에서 "예")이 이 메서드를 호출하게 됩니다.
-    // 지금은 ContextMenu(TestAdvanceToNextPhase)로 직접 호출해 검증합니다.
+    // LevelPortal(헬기 확인창 [예])이 부릅니다. ContextMenu(TestAdvanceToNextPhase)로도 부를 수 있습니다.
     //
     // [로딩 화면] 씬에 LoadingScreen이 있으면 검은 로딩 화면을 먼저 한 프레임 그린 뒤 레벨을 만듭니다
     // (빌드 순간의 끊김과 플레이어 낙하를 가림). 그 한 프레임 사이에 [예]가 두 번 눌려 두 레벨을
@@ -235,28 +287,43 @@ public class GameFlowManager : MonoBehaviour
         switch (currentPhase)
         {
             case LevelPhase.Combat:
-                // 전투 레벨 클리어 -> 같은 번호의 n.5 선택방 레벨로
-                currentPhase = LevelPhase.Choice;
+                if (skipChoiceLevels)
+                {
+                    // [n.5 건너뛰기 - 데모, 형빈 확정] 전투 레벨 클리어 -> 다음 번호의 전투 레벨로 바로 갑니다.
+                    // n.5 레벨이 없으니 최대 체력 칸 정리도 여기서 합니다(전투 레벨의 상점이 마지막 회복 기회).
+                    EnterNextCombatLevel(playerToKeep);
+                }
+                else
+                {
+                    // 전투 레벨 클리어 -> 같은 번호의 n.5 선택방 레벨로
+                    currentPhase = LevelPhase.Choice;
+                }
                 break;
             case LevelPhase.Choice:
                 // 선택방 레벨 통과 -> 다음 번호의 전투 레벨로
-                // [최대 체력 정리 - 형빈 확정] 다음 전투 레벨로 들어가기 직전(로딩 화면 뒤)에 채워지지 않은 최대 체력 칸을 1칸 단위로
-                // 지웁니다(3/5 -> 3/3, 3.5/5 -> 3.5/4). 전투 레벨 -> n.5 레벨로 갈 때는 지우지 않습니다(n.5 레벨이 마지막 회복 기회).
-                ApplyLevelEndMaxHealthLoss(playerToKeep);
-                currentLevelNumber++;
-                currentPhase = LevelPhase.Combat;
-                // 1회성 지급 기록(grantedOneTimeIds)은 런 전체에서 유지합니다(위 [획득 시 1회성 지급 기록] 참고).
-                assignedUniqueItemIdsThisLevel.Clear();
-                // [들고 온 슬롯 아이템 - 형빈 확정] 지금 가지고 있는 슬롯 아이템(액티브/장신구/일회용/음식)은 이 레벨에 이미 나온 것으로
-                // 기록합니다. 예전에는 장착 중일 때만 걸러져서, 이 레벨에서 교체/버리기/칸 감소로 내려놓는 순간 다른 보물상자/상점에서
-                // 같은 아이템이 또 나와 레벨 안에 두 개가 생겼습니다. 들고 온 일회용/음식을 이 레벨에서 다 써도 이 레벨에서는 다시 나오지 않습니다.
-                MarkCarriedSlotItemsAssigned(playerToKeep);
+                EnterNextCombatLevel(playerToKeep);
                 break;
         }
 
         BuildCurrentPhase(playerToKeep);
         // [헬기 퇴각 -> 도착] 헬기 사다리로 넘어왔으면, 아직 검은 로딩 화면 뒤인 지금 다음 레벨 시작방에 도착 연출(사다리 타고 내려오기)을 겁니다.
         HeliExtraction.TryStartArrival(levelBuilder);
+    }
+
+    // 다음 번호의 전투 레벨로 넘어가는 상태 처리입니다(n.5를 거쳐 오든 건너뛰든 같은 처리).
+    private void EnterNextCombatLevel(GameObject playerToKeep)
+    {
+        // [최대 체력 정리 - 형빈 확정] 다음 전투 레벨로 들어가기 직전(로딩 화면 뒤)에 채워지지 않은 최대 체력 칸을 1칸 단위로
+        // 지웁니다(3/5 -> 3/3, 3.5/5 -> 3.5/4). n.5를 거칠 때는 전투 레벨 -> n.5에서 지우지 않습니다(n.5 레벨이 마지막 회복 기회).
+        ApplyLevelEndMaxHealthLoss(playerToKeep);
+        currentLevelNumber++;
+        currentPhase = LevelPhase.Combat;
+        // 1회성 지급 기록(grantedOneTimeIds)은 런 전체에서 유지합니다(위 [획득 시 1회성 지급 기록] 참고).
+        assignedUniqueItemIdsThisLevel.Clear();
+        // [들고 온 슬롯 아이템 - 형빈 확정] 지금 가지고 있는 슬롯 아이템(액티브/장신구/일회용/음식)은 이 레벨에 이미 나온 것으로
+        // 기록합니다 - 이 레벨에서 교체/버리기/칸 감소로 내려놓아도 다른 보물상자/상점에서 같은 아이템이 또 나오지 않게 합니다.
+        // 들고 온 일회용/음식을 이 레벨에서 다 써도 이 레벨에서는 다시 나오지 않습니다.
+        MarkCarriedSlotItemsAssigned(playerToKeep);
     }
 
     // [최대 체력 정리] 유지되는 플레이어의 채워지지 않은 최대 체력을 지웁니다(PlayerHealth.ApplyLevelEndMaxHealthLoss).

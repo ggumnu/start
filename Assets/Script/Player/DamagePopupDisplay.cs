@@ -5,14 +5,18 @@ using UnityEngine.UI;
 
 // 적이 피해를 받을 때 실제 피해량을 숫자로 띄우는 HUD입니다(EnemyHealth.OnAnyEnemyDamaged 구독 - 모든 피해가 지나는 통로).
 // [포물선 연출 - 형빈 확정] 피격 즉시 적 몸통 가운데에서 "뿅" 나타나 오른쪽 위로 포물선을 그리며 튀어나가고, 꼭대기를 지나 내려가는 동안
-// 서서히 사라집니다(여러 번 맞으면 숫자마다 튀는 방향이 조금씩 달라 겹치지 않음). 98번 섬멸은 숫자 대신 글자(머리 위 고정, 예전 그대로).
+// 서서히 사라집니다. 98번 섬멸은 숫자 대신 글자(머리 위 고정, 예전 그대로).
+// [연속 피격 - 형빈 확정] 정확한 값보다 "많이 때렸다"가 보이는 게 목적입니다.
+//   - 피해가 클수록 숫자가 큼(공격력 대비 비율 - 기본 0.5배 이하 0.8배 크기 ~ 3배 이상 1.6배 크기).
+//   - 큰 숫자가 작은 숫자 위에 그려짐(같은 크기면 최근 것이 위) - 4번 폭발이 총알 숫자를 덮지 않게.
+//   - 같은 적이 짧은 시간 안에 연달아 맞으면 오른쪽 위 부채꼴 안에서 숫자마다 다른 각도로 튀어나감.
 // [블루 아카이브식 스타일 - 형빈 확정] "현재 공격력"(PlayerStats.Damage)과 비교해 세 가지로 띄웁니다(기울인 글씨):
 //   보통   = 피해 == 공격력          : 빨간 폭발 배경 + 흰 숫자 / 검붉은 테두리
 //   Weak   = 피해 > 공격력, 지속 피해 : 빨간 폭발 배경 + 노란 숫자 / 어두운 주황 테두리 + 위에 주황 "Weak"
 //   Resist = 피해 < 공격력, 보호막 피해(2레벨 보스, OnAnyEnemyShieldDamaged) : 폭발 없이 하늘색 숫자 / 파란 테두리 + "Resist"
-// 지속 피해(EnemyHealth.IsDotDamageInProgress)와 "항상 Weak" 피해(IsForcedWeakDamageInProgress - 4번 폭발, 81번 연소, 수류탄, 해킹툴,
-// 118번 포격)는 공격력과 상관없이 Weak입니다(보호막에 들어간 피해는 보호막 규칙 = Resist).
-// 수류탄 등 총알이 아닌 피해도 같은 공격력 기준으로 나눕니다. 설계 배경은 Docs/설계노트.md [피해 숫자].
+// 공격력과 비교하는 것은 총알 피해뿐입니다. 지속 피해(EnemyHealth.IsDotDamageInProgress)와 아이템 효과 부가 피해(IsForcedWeakDamageInProgress -
+// 4번 폭발, 29번, 68번 충돌, 81번 연소, 87번 아군 공격, 94번 후광, 수류탄, 해킹툴, 118번 포격)는 항상 Weak입니다(보호막에 들어간 피해는
+// 보호막 규칙 = Resist). 설계 배경은 Docs/설계노트.md [피해 숫자].
 public class DamagePopupDisplay : MonoBehaviour
 {
     [Header("글자 모양")]
@@ -79,14 +83,41 @@ public class DamagePopupDisplay : MonoBehaviour
     [Min(0.01f)] public float popOvershoot = 1.3f;
 
     [Header("포물선")]
-    [Tooltip("튀어나가는 처음 속도의 최솟값(캔버스 픽셀/초, X = 오른쪽, Y = 위). 숫자마다 최솟값~최댓값 사이에서 무작위로 고릅니다.")]
+    [Tooltip("튀어나가는 처음 속도의 최솟값(캔버스 픽셀/초, X = 오른쪽, Y = 위). 펼치기를 켜면 방향은 펼치기 각도가 정하고, " +
+             "이 값과 최댓값은 튀는 힘(속도 크기 = 이 벡터의 길이 ~ 최댓값 벡터의 길이)으로만 씁니다. 끄면 예전처럼 X/Y를 각각 무작위로 고릅니다.")]
     public Vector2 launchVelocityMin = new Vector2(110f, 380f);
-    [Tooltip("튀어나가는 처음 속도의 최댓값(캔버스 픽셀/초).")]
+    [Tooltip("튀어나가는 처음 속도의 최댓값(캔버스 픽셀/초). 쓰는 방식은 최솟값 설명 참고.")]
     public Vector2 launchVelocityMax = new Vector2(210f, 470f);
     [Tooltip("포물선을 아래로 당기는 힘(캔버스 픽셀/초²)입니다. 클수록 낮고 빠르게 꺾입니다(꼭대기 시간 = 위 속도 / 이 값).")]
     [Min(1f)] public float launchGravity = 1400f;
     [Tooltip("시작 위치: 적 몸통 가운데에서 화면 기준으로 이만큼 옮깁니다(캔버스 픽셀).")]
     public Vector2 launchStartOffset = Vector2.zero;
+
+    [Header("피해 크기별 숫자 크기")]
+    [Tooltip("켜면 피해가 클수록 숫자(폭발 배경/Weak 글자 포함)가 커집니다(현재 공격력 대비 비율). 끄면 모두 같은 크기.")]
+    public bool scaleByDamage = true;
+    [Tooltip("피해가 공격력의 이 배수 이하이면 가장 작은 크기입니다(기본 0.5배).")]
+    [Min(0f)] public float smallDamageRatio = 0.5f;
+    [Tooltip("가장 작은 크기 배율입니다(기본 0.8). 피해 = 공격력이면 항상 1배.")]
+    [Min(0.1f)] public float smallDamageScale = 0.8f;
+    [Tooltip("피해가 공격력의 이 배수 이상이면 가장 큰 크기입니다(기본 3배).")]
+    [Min(1.01f)] public float bigDamageRatio = 3f;
+    [Tooltip("가장 큰 크기 배율입니다(기본 1.6).")]
+    [Min(0.1f)] public float bigDamageScale = 1.6f;
+
+    [Header("연속 피격 펼치기 (오른쪽 위 부채꼴)")]
+    [Tooltip("켜면 같은 적이 연달아 맞을 때 숫자마다 다른 각도로 튀어나갑니다. 끄면 예전처럼 속도 범위에서 무작위.")]
+    public bool spreadConsecutiveHits = true;
+    [Tooltip("같은 적이 이 시간(초) 안에 다시 맞으면 '연달아 맞음'으로 보고 다음 각도를 씁니다. 더 늦게 맞으면 첫 각도부터 다시.")]
+    [Min(0f)] public float spreadWindow = 0.3f;
+    [Tooltip("부채꼴의 한쪽 끝 각도(도) - 바로 위(0)에서 오른쪽으로 기운 정도입니다.")]
+    [Range(-80f, 80f)] public float spreadAngleMin = 5f;
+    [Tooltip("부채꼴의 다른 쪽 끝 각도(도) - 바로 위(0)에서 오른쪽으로 기운 정도입니다(90 = 수평 오른쪽).")]
+    [Range(-80f, 80f)] public float spreadAngleMax = 50f;
+    [Tooltip("부채꼴을 몇 개의 방향으로 나눌지입니다. 연달아 맞을 때 바로 앞 숫자와 최대한 먼 방향부터 씁니다.")]
+    [Range(2, 8)] public int spreadSteps = 4;
+    [Tooltip("각 방향에 더하는 무작위 흔들림(도)입니다. 0이면 정확히 같은 각도.")]
+    [Min(0f)] public float spreadAngleJitter = 3f;
 
     [Header("98번 섬멸 글자 위치")]
     [Tooltip("섬멸 글자: 적 머리 기준점에서 화면 기준 오른쪽 위로 띄울 거리(캔버스 픽셀)입니다.")]
@@ -131,6 +162,8 @@ public class DamagePopupDisplay : MonoBehaviour
         public float labelFadeElapsed;   // 적이 사라진 뒤 흐른 시간(-1 = 아직 적이 남아 있음)
 
         public bool isShield;            // [2레벨 보스] 보호막이 받은 피해(Resist로 표시)
+        public float sizeScale = 1f;     // 피해 크기별 크기 배율(그리는 순서도 이 값 기준)
+        public int spawnOrder;           // 같은 크기일 때 최근 것이 위
 
         public HitStyle style;
         public RectTransform burstRect;
@@ -146,6 +179,15 @@ public class DamagePopupDisplay : MonoBehaviour
     private const float LabelMaxLifetime = 5f;
 
     private readonly List<Popup> popups = new List<Popup>();
+    private readonly List<Popup> drawOrderBuffer = new List<Popup>();
+    private int spawnCounter;
+
+    // 연속 피격 펼치기: 적마다 마지막으로 맞은 시간과 몇 번째 연속 피격인지.
+    private struct SpreadState { public float lastTime; public int index; }
+    private readonly Dictionary<EnemyHealth, SpreadState> spreadStates = new Dictionary<EnemyHealth, SpreadState>();
+    private readonly List<EnemyHealth> spreadPruneBuffer = new List<EnemyHealth>();
+    private int[] spreadOrder;
+    private const int SpreadPruneThreshold = 64;
     private Canvas canvas;
     private CanvasScaler canvasScaler;
     private RectTransform canvasRect;
@@ -168,6 +210,7 @@ public class DamagePopupDisplay : MonoBehaviour
         EnemyHealth.OnAnyEnemyDamaged -= HandleEnemyDamaged;
         EnemyHealth.OnAnyEnemyShieldDamaged -= HandleShieldDamaged;
         for (int i = 0; i < popups.Count; i++) Deactivate(popups[i]);
+        spreadStates.Clear();
     }
 
     void LateUpdate()
@@ -224,21 +267,118 @@ public class DamagePopupDisplay : MonoBehaviour
         ShowPopup(enemy, amount, true, false);
     }
 
-    // 피해와 현재 공격력(PlayerStats.Damage)을 비교해 스타일을 정합니다. 플레이어를 못 찾으면 보통.
-    private HitStyle ResolveStyle(float amount, bool isShield, bool alwaysWeak)
+    // 현재 공격력(PlayerStats.Damage). 플레이어를 못 찾으면 false.
+    private bool TryGetPlayerAttack(out float attack)
     {
-        if (isShield) return HitStyle.Resist;
-        if (alwaysWeak) return HitStyle.Weak;
+        attack = 0f;
         if (playerStats == null)
         {
             var health = FindFirstObjectByType<PlayerHealth>();
             if (health != null) playerStats = health.GetComponent<PlayerStats>();
         }
-        if (playerStats == null) return HitStyle.Normal;
-        float attack = playerStats.Damage;
+        if (playerStats == null) return false;
+        attack = playerStats.Damage;
+        return true;
+    }
+
+    // 피해와 현재 공격력을 비교해 스타일을 정합니다. 플레이어를 못 찾으면 보통.
+    private HitStyle ResolveStyle(float amount, bool isShield, bool alwaysWeak)
+    {
+        if (isShield) return HitStyle.Resist;
+        if (alwaysWeak) return HitStyle.Weak;
+        if (!TryGetPlayerAttack(out float attack)) return HitStyle.Normal;
         if (amount > attack + attackCompareTolerance) return HitStyle.Weak;
         if (amount < attack - attackCompareTolerance) return HitStyle.Resist;
         return HitStyle.Normal;
+    }
+
+    // 피해 크기별 숫자 크기 배율입니다(공격력 대비 비율 - 작은 쪽 ~ 1배 ~ 큰 쪽을 직선으로 이음). 공격력을 모르면 1배.
+    private float ResolveSizeScale(float amount)
+    {
+        if (!scaleByDamage) return 1f;
+        if (!TryGetPlayerAttack(out float attack) || attack <= 0f) return 1f;
+
+        float ratio = amount / attack;
+        float smallRatio = Mathf.Min(smallDamageRatio, 0.999f);
+        float bigRatio = Mathf.Max(bigDamageRatio, 1.001f);
+        if (ratio <= 1f) return Mathf.Lerp(smallDamageScale, 1f, Mathf.InverseLerp(smallRatio, 1f, ratio));
+        return Mathf.Lerp(1f, bigDamageScale, Mathf.InverseLerp(1f, bigRatio, ratio));
+    }
+
+    // 이번 숫자의 처음 속도입니다. 펼치기를 켜면 같은 적의 연속 피격마다 부채꼴 안의 다른 각도를 씁니다.
+    private Vector2 ResolveLaunchVelocity(EnemyHealth enemy)
+    {
+        if (!spreadConsecutiveHits || spreadSteps < 2)
+        {
+            return new Vector2(Random.Range(launchVelocityMin.x, launchVelocityMax.x), Random.Range(launchVelocityMin.y, launchVelocityMax.y));
+        }
+
+        float now = Time.time;
+        int index = 0;
+        if (spreadStates.TryGetValue(enemy, out SpreadState state) && now - state.lastTime <= spreadWindow) index = state.index + 1;
+        if (spreadStates.Count >= SpreadPruneThreshold) PruneSpreadStates(now);
+        spreadStates[enemy] = new SpreadState { lastTime = now, index = index };
+
+        int[] order = GetSpreadOrder(spreadSteps);
+        int step = order[index % order.Length];
+        float angle = Mathf.Lerp(spreadAngleMin, spreadAngleMax, step / (float)(order.Length - 1));
+        angle += Random.Range(-spreadAngleJitter, spreadAngleJitter);
+
+        float speed = Random.Range(launchVelocityMin.magnitude, launchVelocityMax.magnitude);
+        float rad = angle * Mathf.Deg2Rad;
+        return new Vector2(Mathf.Sin(rad), Mathf.Cos(rad)) * speed;
+    }
+
+    // 연속 피격 때 쓸 방향 순서입니다(0 = 부채꼴 한쪽 끝). 바로 앞 숫자와 최대한 먼 방향이 오도록 반씩 쪼개 나가는 순서를 쓰고,
+    // 첫 숫자는 예전 느낌(살짝 오른쪽)에 가깝도록 한 칸 옮깁니다. 예) 4칸 = 1, 3, 2, 0.
+    private int[] GetSpreadOrder(int steps)
+    {
+        if (spreadOrder != null && spreadOrder.Length == steps) return spreadOrder;
+
+        var order = new List<int>(steps);
+        var used = new bool[steps];
+        for (int i = 0; order.Count < steps && i < 1024; i++)
+        {
+            // i의 비트를 뒤집은 소수(0, 0.5, 0.25, 0.75, ...)로 칸을 고릅니다.
+            float f = 0f, b = 0.5f;
+            for (int n = i; n > 0; n >>= 1, b *= 0.5f) if ((n & 1) != 0) f += b;
+            int pos = Mathf.Min(steps - 1, Mathf.FloorToInt(f * steps));
+            if (used[pos]) continue;
+            used[pos] = true;
+            order.Add((pos + 1) % steps);
+        }
+        for (int pos = 0; order.Count < steps; pos++) if (!used[pos]) { used[pos] = true; order.Add((pos + 1) % steps); }
+
+        spreadOrder = order.ToArray();
+        return spreadOrder;
+    }
+
+    // 사라진 적/오래전에 맞은 적의 기록을 지웁니다(기록이 계속 쌓이지 않게).
+    private void PruneSpreadStates(float now)
+    {
+        spreadPruneBuffer.Clear();
+        foreach (var pair in spreadStates)
+        {
+            if (pair.Key == null || now - pair.Value.lastTime > spreadWindow) spreadPruneBuffer.Add(pair.Key);
+        }
+        for (int i = 0; i < spreadPruneBuffer.Count; i++) spreadStates.Remove(spreadPruneBuffer[i]);
+        spreadPruneBuffer.Clear();
+    }
+
+    // 그리는 순서: 작은 숫자 -> 큰 숫자(같은 크기면 오래된 것 -> 최근 것), 98번 섬멸 글자는 맨 위.
+    private void SortDrawOrder()
+    {
+        drawOrderBuffer.Clear();
+        for (int i = 0; i < popups.Count; i++) if (popups[i].active) drawOrderBuffer.Add(popups[i]);
+        drawOrderBuffer.Sort((a, b) =>
+        {
+            float sa = a.isLabel ? float.MaxValue : a.sizeScale;
+            float sb = b.isLabel ? float.MaxValue : b.sizeScale;
+            int c = sa.CompareTo(sb);
+            return c != 0 ? c : a.spawnOrder.CompareTo(b.spawnOrder);
+        });
+        for (int i = 0; i < drawOrderBuffer.Count; i++) drawOrderBuffer[i].go.transform.SetAsLastSibling();
+        drawOrderBuffer.Clear();
     }
 
     private void ShowPopup(EnemyHealth enemy, float amount, bool isShield, bool alwaysWeak)
@@ -255,14 +395,16 @@ public class DamagePopupDisplay : MonoBehaviour
         p.enemy = enemy;
         MeasureHeights(enemy, out p.headHeight, out p.bodyHeight);
         p.lastEnemyPos = enemy.transform.position;
-        p.velocity = new Vector2(Random.Range(launchVelocityMin.x, launchVelocityMax.x), Random.Range(launchVelocityMin.y, launchVelocityMax.y));
+        p.velocity = ResolveLaunchVelocity(enemy);
         p.peakTime = Mathf.Max(0f, p.velocity.y) / Mathf.Max(1f, launchGravity);
         p.isShield = isShield;
         p.style = ResolveStyle(amount, isShield, alwaysWeak);
+        p.spawnOrder = spawnCounter++;
 
         // [98번] 즉시 처치(섬멸)면 숫자 대신 설정의 글자를 띄웁니다.
         var execute = !isShield && enemy.WasExecuted ? enemy.ExecuteSettings : null;
         p.isLabel = execute != null;
+        p.sizeScale = p.isLabel ? 1f : ResolveSizeScale(amount);
         if (p.isLabel)
         {
             p.labelTextColor = execute.popupTextColor;
@@ -300,7 +442,7 @@ public class DamagePopupDisplay : MonoBehaviour
         p.text.fontStyle = p.isLabel ? FontStyles.Normal : fs;
         p.labelText.fontStyle = fs;
         p.go.SetActive(true);
-        p.go.transform.SetAsLastSibling(); // 가장 최근 피해가 항상 맨 위에 그려짐
+        SortDrawOrder();
 
         if (mainCamera == null) mainCamera = Camera.main;
         if (mainCamera != null) UpdatePopup(p, 0f); // 첫 프레임 깜빡임 방지
@@ -385,6 +527,7 @@ public class DamagePopupDisplay : MonoBehaviour
         }
 
         p.rect.anchoredPosition = p.isLabel ? local + screenOffset : local + launchStartOffset + arc;
+        scale *= p.sizeScale;
         p.rect.localScale = new Vector3(scale, scale, 1f);
 
         p.text.fontSize = p.isLabel ? p.labelFontSize : fontSize;
@@ -443,14 +586,12 @@ public class DamagePopupDisplay : MonoBehaviour
 
     private Popup AcquirePopup()
     {
-        // 1) 비활성 숫자 재사용
         for (int i = 0; i < popups.Count; i++)
             if (!popups[i].active) return popups[i];
 
-        // 2) 아직 최대 개수 전이면 새로 만듭니다.
         if (popups.Count < maxPopups) return CreatePopup();
 
-        // 3) 가득 찼으면 가장 오래된 숫자를 재사용합니다.
+        // 가득 찼으면 가장 오래된 숫자를 재사용.
         Popup oldest = popups[0];
         for (int i = 1; i < popups.Count; i++)
             if (popups[i].age > oldest.age) oldest = popups[i];

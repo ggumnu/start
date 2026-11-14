@@ -114,6 +114,7 @@ public class HoldRestart : MonoBehaviour
         if (Time.timeScale <= 0f) return false; // ESC 중단 화면/게임 오버 등으로 멈춤
         if (PauseMenuUI.IsOpen || PauseMenuUI.BlocksInteract) return false;
         if (ItemCodexUI.BlocksInput) return false;
+        if (GameClearUI.BlocksInput) return false; // 게임 클리어 결과 화면
         if (ShopUI.IsOpen || ShopUI.BlocksInteract) return false;
         if (SlotReplaceConfirmUI.IsOpen || SlotReplaceConfirmUI.BlocksInteract) return false;
         if (SlotItemDropUI.IsOpen || SlotItemDropUI.BlocksInteract) return false;
@@ -123,6 +124,7 @@ public class HoldRestart : MonoBehaviour
         if (LoadingScreen.IsShowing) return false;
         if (IntroCutscene.BlocksInput) return false; // 입장 컷씬 중
         if (HeliExtraction.BlocksInput) return false; // 헬기 퇴각 연출 중
+        if (CutsceneStudio.IsActive) return false; // 촬영 스튜디오 씬
 
         var health = Object.FindFirstObjectByType<PlayerHealth>();
         return health != null && !health.IsDead;
