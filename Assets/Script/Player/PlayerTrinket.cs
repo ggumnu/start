@@ -108,6 +108,28 @@ public class PlayerTrinket : MonoBehaviour
         }
 
         effectContext = new TrinketEffectContext(stats, health, shooting, resources, gameFlow, gameObject);
+
+        // 사망 처리로 컴포넌트가 꺼져 있어도 받도록 Awake/OnDestroy에서 구독.
+        LoadingScreen.OnBeforeSceneChange += ReleaseEffectsForSceneChange;
+    }
+
+    void OnDestroy()
+    {
+        LoadingScreen.OnBeforeSceneChange -= ReleaseEffectsForSceneChange;
+    }
+
+    // [판 정리] 씬이 바뀌기 직전에 장착 중인 장신구 효과를 전부 Remove()로 되돌립니다(PlayerInventory와 같은 이유).
+    private void ReleaseEffectsForSceneChange()
+    {
+        foreach (var item in equippedItems)
+        {
+            if (item == null || item.trinketEffect == null) continue;
+            try { item.trinketEffect.Remove(effectContext, item.itemId); }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"PlayerTrinket: '{item.displayName}' 효과를 판 정리 중 되돌리다 오류가 나 건너뜁니다: {e}");
+            }
+        }
     }
 
     // [칸이 줄었을 때] 장착 수가 칸 수보다 많으면 나중에 얻은 장신구부터 효과를 해제하고 바닥에 떨어뜨립니다(형빈 확정).

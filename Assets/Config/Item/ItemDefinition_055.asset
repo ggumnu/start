@@ -22,10 +22,11 @@ MonoBehaviour:
     \uC0C1\uD0DC\uB9CC\uC73C\uB85C\uB3C4\n\uCE20\uB8E8\uAE30\uC758 \uC138\uC2EC\uD568\uC744
     \uC5FF\uBCFC \uC218 \uC788\uB2E4."
   icon: {fileID: 21300000, guid: 8d131f714c245164e97e330cab7efe1a, type: 3}
-  weight: 60
-  rarity: 2
+  weight: 80
+  rarity: 1
   category: 0
   confirmBeforeReplace: 0
+  incompatibleItemIds: []
   tags: []
   activeCost: 1
   activeEffect:

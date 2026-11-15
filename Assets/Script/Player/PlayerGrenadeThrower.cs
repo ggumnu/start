@@ -473,20 +473,45 @@ public class PlayerGrenadeThrower : MonoBehaviour
 
     private void NotifyExplodedCore(Vector3 position, float radius, Vector3 vfxPosition)
     {
-        // [수류탄 외형 - 57번 등] 외형 아이템에 대체 폭발 프리팹이 있으면 그것으로 바꾸고, 없으면 원래 폭발 이펙트에 색을
-        // 덧씌웁니다(GrenadeVisualOverride.cs 참고). 크기/위치/소멸 시간은 아래 원래 설정을 그대로 씁니다.
-        GameObject vfxPrefab = GrenadeVisualOverride.ResolveExplosionPrefab(explosionVfxPrefab, out bool usedReplacement);
-        if (vfxPrefab != null)
+        // 폭발 이펙트(연출)에서 오류가 나도 아래 폭발 알림(특수방 잠금 해제 등 게임 처리)은 반드시 보냅니다.
+        try
         {
-            GameObject vfx = Instantiate(vfxPrefab, vfxPosition + explosionVfxOffset, Quaternion.identity);
-            // [방 전환] 플레이어가 다른 방에 들어가면 바로 지워지도록 등록합니다(RoomScope - 다른 방 위 허공에 남지 않게).
-            RoomScope.DestroyWhenPlayerLeaves(vfx);
-            ApplyVfxScale(vfx, explosionVfxScale * GetRadiusVfxFactor(radius));
-            if (!usedReplacement) GrenadeVisualOverride.ApplyToExplosion(vfx);
-            if (explosionVfxLifetime > 0f) Destroy(vfx, explosionVfxLifetime);
+            SpawnExplosionVfx(radius, vfxPosition);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"PlayerGrenadeThrower: 폭발 이펙트 생성 중 오류가 발생해 건너뜁니다(폭발 처리에는 영향 없음): {e}");
         }
 
-        OnGrenadeExploded?.Invoke(position, radius);
+        // 받는 곳(특수방 잠금 해제/57번 토끼/66번 해킹 등)을 하나씩 따로 부릅니다 - 한 곳에서 오류가 나도 나머지는 그대로 실행됩니다.
+        var handlers = OnGrenadeExploded;
+        if (handlers == null) return;
+        foreach (Delegate d in handlers.GetInvocationList())
+        {
+            try
+            {
+                ((Action<Vector3, float>)d).Invoke(position, radius);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"PlayerGrenadeThrower: 폭발 알림을 받는 곳({d.Method.DeclaringType?.Name}.{d.Method.Name})에서 오류가 발생했습니다(다른 곳은 계속 처리): {e}");
+            }
+        }
+    }
+
+    // [수류탄 외형 - 57번 등] 외형 아이템에 대체 폭발 프리팹이 있으면 그것으로 바꾸고, 없으면 원래 폭발 이펙트에 색을
+    // 덧씌웁니다(GrenadeVisualOverride.cs 참고). 크기/위치/소멸 시간은 원래 설정을 그대로 씁니다.
+    private void SpawnExplosionVfx(float radius, Vector3 vfxPosition)
+    {
+        GameObject vfxPrefab = GrenadeVisualOverride.ResolveExplosionPrefab(explosionVfxPrefab, out bool usedReplacement);
+        if (vfxPrefab == null) return;
+
+        GameObject vfx = Instantiate(vfxPrefab, vfxPosition + explosionVfxOffset, Quaternion.identity);
+        // [방 전환] 플레이어가 다른 방에 들어가면 바로 지워지도록 등록합니다(RoomScope - 다른 방 위 허공에 남지 않게).
+        RoomScope.DestroyWhenPlayerLeaves(vfx);
+        if (explosionVfxLifetime > 0f) Destroy(vfx, explosionVfxLifetime); // 아래 꾸미기에서 오류가 나도 남지 않도록 먼저 예약
+        ApplyVfxScale(vfx, explosionVfxScale * GetRadiusVfxFactor(radius));
+        if (!usedReplacement) GrenadeVisualOverride.ApplyToExplosion(vfx);
     }
 
     // 이펙트 크기를 배율만큼 조절합니다. CombatVfxSpawner/4번 폭발(ExplodeOnImpactEffect)과 같은

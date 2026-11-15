@@ -36,6 +36,24 @@ using UnityEngine.UI;
 // BlocksPlayerInput을 보고 이동 입력만 0으로 만듭니다(떨어지는 동작은 정상).
 public class LoadingScreen : MonoBehaviour
 {
+    // [판 정리 알림] 씬을 바꾸기 직전(죽은 뒤 다시하기 / R 재시작 / 재시작하기 / 그만하기 / 게임 시작)에 한 번 보냅니다.
+    // 아이템 효과 인스턴스는 아이템 에셋에 하나뿐이라, 정적 알림 구독이 씬을 넘어 다음 판까지 남습니다.
+    // 에디터는 Play를 누를 때마다 정적 메모리를 비우지만 빌드는 프로그램이 꺼질 때까지 이어지므로, 여기서 직접 정리하게 합니다.
+    // 받는 곳: PlayerInventory/PlayerTrinket(보유 효과 Remove), 43/27/40번(대기 구독 해제), Next...Override(무장 해제).
+    public static event Action OnBeforeSceneChange;
+
+    private static void RaiseBeforeSceneChange()
+    {
+        Action handlers = OnBeforeSceneChange;
+        if (handlers == null) return;
+        // 받는 곳마다 따로 실행 - 한 곳의 오류가 나머지 정리를 막지 않게.
+        foreach (Delegate d in handlers.GetInvocationList())
+        {
+            try { ((Action)d).Invoke(); }
+            catch (Exception e) { Debug.LogError($"LoadingScreen: 씬 전환 전 정리 중 오류가 나 이 항목만 건너뜁니다: {e}"); }
+        }
+    }
+
     [Header("아이콘")]
     [Tooltip("가운데에 띄울 캐릭터 아이콘입니다. 비우면 검은 화면만 보입니다.")]
     public Sprite characterIcon;
@@ -190,6 +208,7 @@ public class LoadingScreen : MonoBehaviour
         if (startLoad == null) return;
         if (Instance == null)
         {
+            RaiseBeforeSceneChange();
             startLoad();
             return;
         }
@@ -314,6 +333,8 @@ public class LoadingScreen : MonoBehaviour
     {
         pendingWork++;
         yield return null; // 검은 화면을 먼저 한 번 그립니다.
+
+        RaiseBeforeSceneChange(); // 플레이어가 아직 살아 있을 때 지난 판의 효과를 정리(검은 화면 뒤).
 
         AsyncOperation op = null;
         try

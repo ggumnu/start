@@ -67,8 +67,8 @@ public static class SpecialRoomHealthHazard
         float damage = settings != null ? settings.healthDamagePerPass : SpecialRoomEntrySettings.DefaultHealthDamagePerPass;
         if (damage <= 0f) return;
 
-        var player = GameObject.FindGameObjectWithTag("Player");
-        var health = player != null ? player.GetComponent<PlayerHealth>() : null;
+        // 태그로 찾으면 "Player" 태그가 붙은 자식이 잡힐 수 있어(빌드에서 피해가 빠짐) 루트의 PlayerHealth를 직접 찾음.
+        var health = Object.FindFirstObjectByType<PlayerHealth>();
         if (health == null) return;
 
         health.TakeDamage(damage);

@@ -59,4 +59,4 @@ MonoBehaviour:
       type: {class: Item109effect, ns: , asm: Assembly-CSharp}
       data:
         partnerItemId: 102
-        synergyDamageBonus: 50
+        synergyDamageBonus: 40

@@ -26,6 +26,7 @@ public class RoomAttackBuffEffect : IActiveItemUseRules
     // 방을 나가면 해제하기 위해 구독해둔 핸들러입니다. null이 아니면 "지금 버프가 걸려있고 구독도 이미 되어있다"는 뜻입니다
     // (같은 방에서 다시 사용해도 중복 구독되지 않도록).
     [NonSerialized] private Action<RoomInstance> roomEnteredHandler;
+    [NonSerialized] private Action sceneChangeHandler;
 
     // [사용 조건] 쿨타임 없음, 코스트는 평소와 같음.
     public float CooldownRemaining01 => 0f;
@@ -62,11 +63,22 @@ public class RoomAttackBuffEffect : IActiveItemUseRules
         var stats = context.Stats;
         roomEnteredHandler = _ =>
         {
-            stats.RemoveModifiersFromSource(SourceId);
-            RoomController.OnAnyRoomEntered -= roomEnteredHandler;
-            roomEnteredHandler = null;
+            if (stats != null) stats.RemoveModifiersFromSource(SourceId);
+            StopWatching();
         };
         RoomController.OnAnyRoomEntered += roomEnteredHandler;
+
+        // 버프 중에 판이 끝나면(사망 후 다시하기 등) 구독이 에셋에 남아 다음 판에 섞이지 않게 함께 정리.
+        sceneChangeHandler = StopWatching;
+        LoadingScreen.OnBeforeSceneChange += sceneChangeHandler;
+    }
+
+    private void StopWatching()
+    {
+        if (roomEnteredHandler != null) RoomController.OnAnyRoomEntered -= roomEnteredHandler;
+        if (sceneChangeHandler != null) LoadingScreen.OnBeforeSceneChange -= sceneChangeHandler;
+        roomEnteredHandler = null;
+        sceneChangeHandler = null;
     }
 
     // 플레이어가 있는 방의 ContentRoot 아래 모든 적(29번과 같은 방식). 레벨 생성기가 없는 씬(아이템 테스트 씬)은 씬 전체.

@@ -36,10 +36,6 @@ MonoBehaviour:
     minCount: 1
     maxCount: 1
     countWeights: []
-  - category: 4
-    minCount: 1
-    maxCount: 1
-    countWeights: []
   - category: 7
     minCount: 5
     maxCount: 7
@@ -56,9 +52,7 @@ MonoBehaviour:
     category: 3
     weight: 0
     footprint: []
-  specialLayouts:
-  - layout: {fileID: 11400000, guid: 6a8b906ed817d61479cabe24decec38a, type: 2}
-    weight: 1
+  specialLayouts: []
   specialRoomParentCategories: 0000000007000000
   startVariants: []
   bossVariants:

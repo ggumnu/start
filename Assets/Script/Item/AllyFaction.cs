@@ -259,8 +259,9 @@ public class AllyFaction : MonoBehaviour
     private static PlayerStats ResolvePlayerStats()
     {
         if (cachedPlayerStats != null) return cachedPlayerStats;
-        var player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null) cachedPlayerStats = player.GetComponent<PlayerStats>();
+        // 태그로 찾으면 "Player" 태그가 붙은 자식이 잡힐 수 있어 루트를 직접 찾음(PlayerStats는 PlayerHealth와 같은 루트에 있음).
+        var health = Object.FindFirstObjectByType<PlayerHealth>();
+        if (health != null) cachedPlayerStats = health.GetComponent<PlayerStats>();
         return cachedPlayerStats;
     }
 

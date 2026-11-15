@@ -164,8 +164,11 @@ public class SpecialRoomLock : MonoBehaviour
         // Unity 오브젝트는 파괴되면 == null이 되므로, 플레이어가 바뀐 경우에도 아래에서 다시 찾습니다.
         if (boundThrower != null && boundHackTool != null) return;
 
-        var player = GameObject.FindGameObjectWithTag("Player");
-        if (player == null) return;
+        // 플레이어 몸체(루트)로 찾습니다 - "Player" 태그는 자식 오브젝트에도 붙어 있어 태그로 찾으면 어느 것이 잡힐지 정해지지 않고
+        // (에디터와 빌드에서 다를 수 있음), 수류탄/해킹툴 부품이 없는 자식이 잡히면 구독이 걸리지 않아 바리케이드가 풀리지 않습니다.
+        var health = Object.FindFirstObjectByType<PlayerHealth>();
+        if (health == null) return;
+        var player = health.gameObject;
 
         var thrower = player.GetComponent<PlayerGrenadeThrower>();
         if (thrower != null && thrower != boundThrower)

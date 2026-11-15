@@ -195,10 +195,10 @@ public class BossArtilleryStrike : MonoBehaviour
         if (damage <= 0f) return;
         if (PlayerDash.IsDodging) return;
 
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        if (playerObj == null) return;
-        PlayerHealth health = playerObj.GetComponent<PlayerHealth>();
+        // 태그로 찾으면 "Player" 태그가 붙은 자식(FirePoint 등)이 잡혀 PlayerHealth를 못 찾을 수 있음(빌드에서 피해가 빠짐) - 루트를 직접 찾음.
+        PlayerHealth health = Object.FindFirstObjectByType<PlayerHealth>();
         if (health == null || health.IsDead) return;
+        GameObject playerObj = health.gameObject;
 
         Vector3 p = playerObj.transform.position;
         Vector2 flat = new Vector2(p.x - center.x, p.z - center.z);

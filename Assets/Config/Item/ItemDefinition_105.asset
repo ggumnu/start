@@ -20,8 +20,8 @@ MonoBehaviour:
     \uAD00\uC2EC\uACFC \uAD00\uCC30\uC740 \uADF8\uB140 \uB098\uB984\uC758 \uC560\uC815
     \uD45C\uD604\uC778\uC9C0 \uBAA8\uB978\uB2E4."
   icon: {fileID: 21300000, guid: 66876b65ee4863d4a954da4112a5ffee, type: 3}
-  weight: 80
-  rarity: 1
+  weight: 60
+  rarity: 2
   category: 0
   confirmBeforeReplace: 0
   incompatibleItemIds: []

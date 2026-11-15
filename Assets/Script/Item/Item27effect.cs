@@ -44,6 +44,7 @@ public class GuaranteedLegendaryFoodEffect : IFoodEffect
     // 대기 중 열림 신호를 기다리기 위해 구독해둔 핸들러입니다. null이 아니면 "지금 대기
     // 중이고 구독도 이미 되어있다"는 뜻입니다.
     private Action pendingHandler;
+    [NonSerialized] private Action sceneChangeHandler;
 
     public bool IsImmediate => false;
 
@@ -73,19 +74,31 @@ public class GuaranteedLegendaryFoodEffect : IFoodEffect
             ClubChestOpenEvents.OnClubChestOpened -= pendingHandler;
             BossChestOpenEvents.OnBossChestOpened -= pendingHandler;
             pendingHandler = null;
+            ClearSceneChangeHandler();
             context?.CompletePendingUse(sourceItemId);
         };
         ClubChestOpenEvents.OnClubChestOpened += pendingHandler;
         BossChestOpenEvents.OnBossChestOpened += pendingHandler;
+
+        // 대기 중에 판이 끝나면(사망 후 다시하기 등) 다음 판의 상자에 반응하지 않게 대기를 취소.
+        sceneChangeHandler = () => CancelPending(context, sourceItemId);
+        LoadingScreen.OnBeforeSceneChange += sceneChangeHandler;
     }
 
     // 대기 중에 다른 음식으로 교체되어 대기가 취소될 때 호출됩니다. 구독만 해지하고, 무장은
     // 걸지 않습니다 - 효과가 아예 없었던 것으로 되돌립니다.
     public void CancelPending(FoodEffectContext context, string sourceItemId)
     {
+        ClearSceneChangeHandler();
         if (pendingHandler == null) return;
         ClubChestOpenEvents.OnClubChestOpened -= pendingHandler;
         BossChestOpenEvents.OnBossChestOpened -= pendingHandler;
         pendingHandler = null;
+    }
+
+    private void ClearSceneChangeHandler()
+    {
+        if (sceneChangeHandler != null) LoadingScreen.OnBeforeSceneChange -= sceneChangeHandler;
+        sceneChangeHandler = null;
     }
 }

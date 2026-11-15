@@ -69,9 +69,9 @@ MonoBehaviour:
         visualPriority: 0
         rabbitPop:
           sprites:
-          - {fileID: 21300000, guid: 3f6f391aa385dfa45950c995105b4f8f, type: 3}
-          - {fileID: 21300000, guid: 2359605258f504f41a344a682f0f25c7, type: 3}
-          - {fileID: 21300000, guid: 7deb02bed510ba648a51fe89b5e53751, type: 3}
+          - {fileID: 21300000, guid: 061ed9b09c00ce74a9a66de200e6f0e0, type: 3}
+          - {fileID: 21300000, guid: af8d82d340c9f764b95e569f43a11fc8, type: 3}
+          - {fileID: 21300000, guid: 04b10a86d0a87124580293f2b6550954, type: 3}
           minCount: 3
           maxCount: 4
           minPeakSize: 0.5

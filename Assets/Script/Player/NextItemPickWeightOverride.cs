@@ -18,6 +18,15 @@ public static class NextItemPickWeightOverride
 {
     public static bool IsArmed { get; private set; }
 
+    // 무장한 채 판이 끝나면(사망 후 다시하기 등) 다음 판까지 남지 않게 씬 전환 직전에 풉니다(빌드는 정적 값이 유지됨).
+    [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void HookRunReset()
+    {
+        IsArmed = false;
+        LoadingScreen.OnBeforeSceneChange -= ClearAfterThisOpen;
+        LoadingScreen.OnBeforeSceneChange += ClearAfterThisOpen;
+    }
+
     public static void ArmForThisOpen()
     {
         IsArmed = true;

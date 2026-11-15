@@ -28,6 +28,8 @@ using UnityEngine.UI;
 // - 설정: 볼륨 설정 창(SettingsUI)을 엽니다.
 // - 나가기: 게임을 종료합니다. 에디터에서는 Play가 멈춥니다.
 //
+// [오른쪽 아래 표기] 저작권/음악 출처 문구(creditText - 흰 글자 + 검은 테두리, 오른쪽 정렬)를 화면 오른쪽 아래에 둡니다.
+//
 // [버튼 모양]
 // 다른 팝업과 같은 블루 아카이브 스타일 평행사변형 버튼(공용 부품 UIPatternBox - 색/모양/글자 색은 PopupStyle)입니다.
 // [게임 시작] = 긍정(노랑), [도감]/[조작법]/[설정] = 일반(하늘색), [나가기] = 그만두기(회색). 마우스를 올리면 색만 어두워지고,
@@ -112,6 +114,18 @@ public class TitleScreenUI : MonoBehaviour
     public ButtonSettings settingsButton = new ButtonSettings("설정");
     public ButtonSettings quitButton = new ButtonSettings("나가기");
 
+    [Header("오른쪽 아래 표기 (저작권/음악 출처)")]
+    [Tooltip("화면 오른쪽 아래에 오른쪽 정렬로 표시할 문구입니다(줄바꿈으로 여러 줄). 비우면 표시하지 않습니다.")]
+    [TextArea(2, 4)]
+    public string creditText = "© 2021 NEXON Korea Corp. & NEXON Games Co., Ltd. All Rights Reserved.\nMusic created in collaboration with ElevenLabs";
+    public int creditFontSize = 18;
+    public Color creditColor = Color.white;
+    public Color creditOutlineColor = Color.black;
+    [Tooltip("글자 테두리 두께(픽셀)입니다. 0이면 테두리 없음.")]
+    [Min(0f)] public float creditOutlinePixels = 2f;
+    [Tooltip("화면 오른쪽 아래 모서리에서 글자까지의 여백입니다. x = 오른쪽 여백, y = 아래쪽 여백(1920x1080 기준 px).")]
+    public Vector2 creditMargin = new Vector2(28f, 22f);
+
     [Header("표시 순서")]
     public int canvasSortingOrder = 0;
 
@@ -151,6 +165,7 @@ public class TitleScreenUI : MonoBehaviour
     private Material logoFlashMat;
     private Material logoGlowMat;
     private Image introOverlay;
+    private TextMeshProUGUI creditLabel; // 오른쪽 아래 표기
     private bool introPlaying;
     private float introTime;
 
@@ -376,6 +391,15 @@ public class TitleScreenUI : MonoBehaviour
         settingsView = CreateButton(groupGO.transform, "SettingsButton", UIButtonKind.Normal, OnSettingsClicked);
         quitView = CreateButton(groupGO.transform, "QuitButton", UIButtonKind.Quit, OnQuitClicked);
 
+        // 오른쪽 아래 표기(저작권/음악 출처) - 시작 연출의 흰 화면 막 아래라 막이 걷히며 함께 보입니다.
+        var creditGO = new GameObject("Credit");
+        creditGO.transform.SetParent(canvasGO.transform, false);
+        var creditRect = creditGO.AddComponent<RectTransform>();
+        creditRect.anchorMin = creditRect.anchorMax = new Vector2(1f, 0f);
+        creditRect.pivot = new Vector2(1f, 0f);
+        creditLabel = HUDText.AddTo(creditGO, TextAnchor.LowerRight);
+        creditLabel.raycastTarget = false;
+
         // 시작 연출의 흰 화면 막(버튼 위, 로고 아래)
         var overlayGO = new GameObject("IntroOverlay");
         overlayGO.transform.SetParent(canvasGO.transform, false);
@@ -450,6 +474,27 @@ public class TitleScreenUI : MonoBehaviour
         ApplyButton(quitView, quitButton, buttonsCenterOffset - new Vector2(0f, step * 2f));
 
         ApplyLogo();
+        ApplyCredit();
+    }
+
+    // 오른쪽 아래 표기: 문구/크기/색/테두리/여백(인스펙터 값을 Play 중에도 바로 반영).
+    private void ApplyCredit()
+    {
+        if (creditLabel == null) return;
+
+        string text = creditText ?? string.Empty;
+        bool show = text.Trim().Length > 0;
+        if (creditLabel.gameObject.activeSelf != show) creditLabel.gameObject.SetActive(show);
+        if (!show) return;
+
+        if (creditLabel.text != text) creditLabel.text = text;
+        if (creditLabel.fontSize != creditFontSize) creditLabel.fontSize = creditFontSize;
+        if (creditLabel.color != creditColor) creditLabel.color = creditColor;
+        HUDText.SetOutline(creditLabel, creditOutlinePixels, creditOutlineColor);
+
+        var rect = creditLabel.rectTransform;
+        rect.sizeDelta = new Vector2(1600f, creditFontSize * 6f);
+        rect.anchoredPosition = new Vector2(-creditMargin.x, creditMargin.y);
     }
 
     // 로고 크기/위치와 후광 칸(로고보다 logoGlowSize만큼 넓음 - 넓어진 만큼 로고를 작게 비춰서 둘레에 빛이 번질 자리를 만듦).

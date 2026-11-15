@@ -45,6 +45,8 @@ MonoBehaviour:
     variantId: Gematria
   - category: 8
     variantId: Schale
+  - category: 2
+    variantId: 
   statModifiers:
   - statType: 11
     modifierType: 0

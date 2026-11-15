@@ -1,0 +1,375 @@
+# 블아이작 (Mob_archive) - 핵심 상태 요약 (v1.73)
+
+## 이 문서의 규칙 (항상 지킬 것)
+
+- 이 문서는 **"지금 무엇이 맞는지"만** 담음. 설계 배경/버그 진단/세션 흐름은 적지 않음 - 그건 각 스크립트 상단 한국어 주석, `Docs\설계노트.md`,
+  아래 아카이브에 있음(필요할 때 장치에서 읽음).
+- 갱신은 형빈이 명시적으로 요청할 때만(세션 중간에 임의로 건드리지 않음). 갱신할 때는 기존 줄을 고치거나 한두 줄만 추가하고,
+  지난 내용(예전 방식/버전별 경위)은 지움.
+- **크기 상한 30,000자**: 넘으면 그 시점 문서를 장치 `Mob_archive\Docs\`에 새 아카이브로 그대로 보관(프로젝트 지식엔 올리지 않음)하고, 이 문서를 다시 짧게 정리.
+- **변경 로그는 버전당 한 줄**(무엇을 했는지만, 파일 목록/버그 경위 X).
+- 확인 필요 / 할 일·보류 항목은 `[N]` + 불릿 표기(마크다운 순서 목록 `1.` 금지 - 뷰어가 번호를 다시 매겨 번호 혼선 사고가 있었음).
+  번호는 두 칸이 공유(새 항목은 가장 큰 번호 + 1). 확인 필요 = 형빈 확인/결정이 필요한 것(해결되면 지움), 할 일·보류 = 나중에 만들 것/참조 메모.
+- 아카이브는 한 번 만들면 절대 수정/삭제하지 않음.
+
+## 아카이브 목록
+
+- 장치 `Mob_archive\Docs\`(Assets 밖, git 포함 - 프로젝트 지식엔 없음):
+  - `claude_Mob_archive_진행상황_통합요약_v1.26.md` - v1.4~v1.26 전체 히스토리(설계 배경 + 버그 진단).
+  - `claude_Mob_archive_핵심상태_아카이브_v1.27-v1.45.md` - 제어 체계/수류탄·해킹/애니메이션 경위, 툰 셰이더, TMP 전환.
+  - `claude_Mob_archive_핵심상태_아카이브_v1.46-v1.52.md` - 상점 UI, 특수방, 비주얼/애니메이션/HUD 세부 수치.
+  - `claude_Mob_archive_핵심상태_아카이브_v1.53-v1.57.md` - 아이템 확정값 전체, 상점 가격/진열, 슬롯 아이템 세부.
+  - `claude_Mob_archive_핵심상태_아카이브_v1.58.md` - SD 신규 캐릭터 세부, 이어하기 세부.
+  - 이 문서의 정리 전 원문(`claude_Mob_archive_핵심상태_아카이브_vX.md`): v1.61(시작/중단 화면·R 재시작·도감·보호막·HUD, 58/67/93/97번),
+    v1.62(컷씬/헬기, bpy 애니메이션, 팝업 패턴), v1.64(방 범위/레벨 조명·밤 빛/2레벨 보스/등록소 목록), v1.65(인코딩 파일 목록, 배경/SD 파츠 절차/슬롯 아이템),
+    v1.66(사운드/설정 창, 가속·뛰기·흙먼지·피해 숫자), v1.67(뛰기 연결, 2레벨 보스 패턴), v1.68(시작 화면·상점 카드·UI 색/글자),
+    v1.69(SD 파츠 슬롯·흔들림 본·ID 맵·SD 텍스처 작업 세부, 피해 숫자 연속 피격 수치, 수류탄/해킹 창구 목록),
+    v1.70(촬영 스튜디오 세부, 정리 전 플레이어/UI/아이템 줄 원문), v1.71(정리 전 원문 - 게임 클리어/조작법/n.5 건너뛰기, 작업 방식 세부 줄).
+  - `설계노트.md` - 스크립트 주석에서 옮긴 설계 배경 + 2레벨 보스 기획/구현 전체.
+- 프로젝트 지식: `claude/claude_Mob_archive_핵심상태_아카이브_v1.59.md` - 이 문서에서 줄인 v1.58/v1.59 아이템 확정값 원문.
+
+## 작업 방식
+
+- 형빈은 3D 모델러(코딩 X), Claude가 C# 전량 담당. 답변/안내는 항상 한국어.
+- 장치마다 작업 폴더가 다르고 git(`저장하기.bat`)으로 동기화 - 연결된 폴더는 세션마다 확인.
+- **스크립트의 원본은 장치 폴더**. 프로젝트 지식엔 스크립트 사본을 두지 않음(이 문서 + v1.59 아카이브 + SD 텍스처 도구 `claude/tools/sd_texture/`만) - 코드는 매번 장치에서 읽음.
+- 여러 채팅이 동시에 작업할 수 있음 - 기존 파일은 고치기 직전에 다시 스테이징해 최신본 기준으로 편집. 이 문서도 갱신 직전에 다시 읽어 합침.
+- 장치 파일 작업: 스테이징 → 편집 → 커밋(`expectedMtimeMs`) → **반드시 다시 스테이징해 `cmp`**(같은 출력 경로 재커밋 시 옛 내용이 들어감 - 이름을 바꿔 커밋).
+  mtime 거부 = 장치 파일이 바뀜 → 재적용. 장치 파일 삭제는 못 함 - 형빈이 Unity에서(컴포넌트 먼저 떼고 파일).
+- "분석부터"/"계획부터"/"바로 진행하지 말고"라고 하면 코드 없이 분석/계획만. "가능할까?"도 계획 + 정할 점으로 답함.
+- 착수 전: 기획 이해 + 코드 확인 결과 + 계획 + 정할 점 제시, 승인 후 코딩. 형빈이 미리 "짚을 점 없으면 바로 진행"이라 한 턴은 예외.
+  기획 문구에 모순이 있으면 두 해석을 숫자로 보여주고 고르게 함. 화면 꾸미기는 코드 전에 같은 계산으로 미리보기 이미지를 만들어 보여줌.
+- 원인이 불확실한 시각 문제는 임시 측정 컴포넌트로 Play 중 숫자를 재서 원인을 가른 뒤 고침(측정 코드는 지움).
+- 코드는 항상 완성된 전체 파일로 전달. 기존 스크립트 수정은 "어느 파일의 무엇을" 먼저 밝히고 승인 - 파일 수 최소화보다 안정성 우선.
+  요청 범위 밖의 기존 동작은 그대로 두고 짚기만 함(형빈이 정함).
+- 설계 전 실제 프리팹/코드/에셋을 먼저 확인(YAML/에셋 값/컴포넌트 순서, 모델 치수는 FBX 직접 파싱). 프리팹 구성(콜라이더/태그)에 의존하는 판정은 피함.
+  씬에 놓인 프리팹은 씬 오버라이드 값도 확인.
+- **플레이어 찾기는 `FindFirstObjectByType<PlayerHealth>()`(루트)** - "Player" 태그는 자식에도 붙어 있음(위치만 쓸 땐 태그 OK).
+- 이름 변경 시 Assets 전체(.asset/.prefab/.unity) 검색, 직렬화 필드는 `[FormerlySerializedAs]`, `[SerializeReference]` 클래스는 `[MovedFrom]`. 효과 클래스에 새 칸 =
+  옛 에셋은 0/빈 값(코드에서 대비). **스크립트 파일 이름 변경은 형빈이 Project 창에서 F2로**(.meta 유지).
+- ScriptableObject 클래스는 파일 이름과 같은 파일에 따로 둠(다른 파일 안에 두면 에셋이 깨짐).
+- 유니티 안내는 메뉴/버튼/인스펙터 필드명까지 클릭 단위로(컴포넌트 찾기 = Hierarchy `t:이름`). 에셋/애니메이터 준비가 필요하면 안내 대신 메뉴 도구/자동 생성.
+- 인코딩: 새 파일 = UTF-8(BOM) + CRLF. 기존 파일은 원래 인코딩/줄바꿈 보존(CP949/무BOM/LF/BOM 2개 파일 목록은 v1.65 아카이브 - 고치기 전 `file`로 확인).
+- 요청 없는 버전 태그 주석 금지.
+- **주석 정책(스크립트를 고칠 때만 그 파일에 적용 - 일괄 정리 X)**: 한국어로 "왜"만(역할 요약 1~3줄, 버그 방지 경고, 연결, 툴팁). 코드 풀어쓰기/기초 설명/옛 코드는 지우고
+  긴 경위는 장치 `Docs\설계노트.md`로. 결과 보고 때 기능 수정 / 주석 정리 / 설계노트 이동을 나눠 알림(세부는 v1.68 아카이브).
+- 애니메이션 = 클라우드 `bpy`로 직접 키(미리보기 GIF 먼저), 오디오 = 클라우드 ffmpeg/librosa(형빈이 귀로 확인), SD 텍스처 = `claude/tools/sd_texture/README_SD텍스처도구.md`,
+  컷씬 촬영 = 형빈이 표시를 찍고 Ctrl+S → Claude가 `.unity`에서 읽어 대본(좌표 추측/화각 임의 변경 금지) - 세부는 v1.71 아카이브.
+- 컴파일이 끝나기 전에 Play하면 튕길 수 있음 - 진행 표시가 끝난 뒤 Play하도록 안내.
+- 컴파일 사전 검사: mono `mcs`(apt `mono-mcs`, `-langversion:latest`) + 손으로 쓴 Unity API stub. 큰 파일은 문법만(`error CS1xxx`). 못 한 파일은 Console 확인 요청.
+  TMP/uGUI 원본은 장치 `Library/PackageCache/com.unity.ugui@*/Runtime/TMP`에서 읽어 API 확인 가능.
+- ScriptableObject 메뉴는 `MobArchive/<이름>`. 런타임 설정 에셋은 `Assets/Resources/<이름>` 자동 로드(없으면 기본값) 방식이 표준.
+- 새 UI 글자는 TextMeshPro: `HUDText.AddTo`/`HUDText.SetOutline`(글꼴 에셋은 Dynamic, 셰이더 Distance Field = Face Texture/Underlay 가능). 같은 Canvas 안에서는 나중 자식이 위.
+- Inspector `OnGUI`/`PropertyDrawer`에서 에셋 검색은 static 캐시로(렉 방지).
+- **빌드 함정**(에디터는 Play마다 정적 메모리를 비우고 모든 셰이더를 찾지만 빌드는 아님): 이름으로만 찾는 자체 셰이더(`Shader.Find`)는 Graphics > Always Included Shaders에
+  등록(지금 MobArchive 9개), TMP `shader_feature` 키워드(Underlay)는 켠 재질이 빌드에 있어야 함(`Resources/Fonts/TMP_UnderlayKeep`), 정적 알림 구독/정적 값은 판이 끝날 때
+  직접 정리(아이템 시스템 "판 정리"), 플레이어 컴포넌트는 태그로 찾지 않음. 런타임 `CreatePrimitive` 재질은 핑크 가능 - 재질/셰이더 칸을 둠. URP 함정은 v1.71 아카이브.
+- 입력: Active Input Handling = **Both**("Replace with InputSystemUIInputModule" 경고는 무시).
+
+## 프로젝트 개요
+
+- Unity 6.3 LTS(URP) 3D 탑다운 로그라이트. 아이작 리펜턴스식 룸 진행/아이템 시너지 + 블루아카이브식 등각 카메라/캐릭터/아이템.
+- 플레이어 모델: **`SD_Player`(형빈 직접 모델링)만 관리**. 유니티짱(UCL 3.0)/레거시 레이사 프리팹은 남아 있지만 더 이상 맞추지 않음. 배포 X, GitHub 비공개, 포트폴리오는 영상/PNG만.
+- 식별자: 샬레 `Schale`, 청휘석 `Pyroxenes`, 등급 `Tier0`~`Tier3`, n.5 선택방 서쪽 `Gematria`(`gematriaChance` - FormerlySerializedAs 유지)/동쪽 `Schale`.
+  Variant ID는 Config 에셋의 `variantId`. `ReloadTime` 표기 = "장전 시간"(작을수록 빠름).
+
+## 확정 상태
+
+### 게임 흐름
+
+- 씬: `Title`(Build Profiles 0) + `LevelBuilder`(1). LevelBuilder 단독 Play도 동작.
+- 전투 레벨 config는 `GameFlowManager.combatLevelConfigs`(Element 0 = 레벨 1)가 빌드 때마다 `LevelBuilder.config`에 덮어씀.
+  레벨 = `CurrentLevelNumber` + `CurrentPhase`(Combat = n / Choice = n.5). 빌드 순서 = 조명 `LevelLighting.Apply` → `BuildLevel` → 밤 빛 자동 부착 → 배경.
+- **n.5 건너뛰기** `GameFlowManager.skipChoiceLevels`(기본 켬, 데모용): 전투 n → n+1 직행. 다음 전투 레벨 진입 처리(최대 체력 칸 정리/레벨 아이템 기록)는
+  `EnterNextCombatLevel` 공용. n.5 코드는 그대로 남김(끄면 예전 1 → 1.5 → 2).
+- **게임 클리어**: `gameClearLevel`(기본 2) 보스 헬기 [예] → `HeliExtraction.BeginGameClearExtraction`(끌어올려질 때, ESC = 바로) → `GameClearUI`
+  (`Resources/GameClearUISettings`, 글자 크기/위치 칸). 기록 = `GameFlowManager.PlayTimeSeconds`/`EnemiesKilled`/`RoomsCleared` - 세부는 v1.71 아카이브.
+- `TitleScreenUI`: 버튼 게임 시작(로딩 + `gameSceneName`, 입장 컷씬 요청) / 도감 / 조작법 / 설정 / 나가기, 로고 `Logo_ReisaArchive`.
+  시작 연출(처음 열릴 때만, 셰이더 `MobArchive/UIFlash`) - 세부는 v1.68 아카이브. 오른쪽 아래 표기 `creditText`(넥슨 저작권 + 음악 출처, 흰 글자 + 검은 테두리).
+- `LoadingScreen`(프리팹을 두 씬에 배치, `DontDestroyOnLoad`, order 1000, 바로 검게 뜸, 로딩 중 조작 차단 `BlocksPlayerInput`). 씬 전환 직전(검은 화면 뒤) 판 정리 알림
+  `LoadingScreen.OnBeforeSceneChange`(받는 곳마다 따로 실행) - 다시하기/R 재시작/재시작하기/그만하기/게임 시작 모두 이 경로.
+- 사망: `PlayerHealth.Die()` → `OnDied`/`OnAnyPlayerDied` → `GameOverUI`(order 100, 2초 뒤 [예]/[아니오]).
+- ESC 중단 화면 `PauseMenuUI`(order 95, 버튼 두 줄 [계속하기][설정][조작법] / [도감][재시작하기][그만하기]), R 2초 재시작 `HoldRestart`(order 99) - 세부는 v1.61/v1.66 아카이브.
+  씬을 떠나는 처리 = `PauseMenuUI.LeaveScene()`(이어하기 저장 자리). 레벨 이동 확인창 `LevelTransitionConfirmUI`.
+- **설정 창 `SettingsUI`**(`Resources/SettingsUISettings`, order 150): BGM/효과음 볼륨(`GameAudio.UserBgmVolume`/`UserSfxVolume`, PlayerPrefs). `IsOpen`/`BlocksInput`.
+- **조작법 창 `ControlsUI`**(`Resources/ControlsUISettings` - 키 목록/문구, order 150): 타이틀/중단 화면에서 엶, 묶음별 "동작 + 남색 키 배지", 휠/막대 스크롤.
+
+### 연출 - 입장 컷씬 / 헬기 퇴각 (자동 생성, 설정은 `Resources`의 각 Settings 에셋 - 세부는 v1.62 아카이브)
+
+- 입장 컷씬 `IntroCutscene`([게임 시작]일 때만, 건너뛰기 가능) / 헬기 퇴각·도착 `HeliExtraction`(포탈 프리팹 `HeliExtractionPortal`). 둘 다 `BlocksInput`/`IsPlaying`.
+  헬기 연출 중엔 총을 숨김(`HideGun`/`RestoreGun`, 총 = `PlayerWeaponMode.gunModel` 우선). 두 연출 모두 카메라 끝 위치를 `CameraFollow.offset`에서 읽음.
+
+### 포트폴리오 촬영 스튜디오 (`Assets/Scenes/CutsceneStudio.unity`, `Assets/Script/Cutscene` + `Assets/Editor/CutsceneStudio*.cs`) - 세부는 v1.70 아카이브
+
+- 장면마다 `StudioShot` + 대본 `Assets/Cutscene/Shots/<장면>.txt`(문법은 `ShotScript.cs` 맨 위 주석, 비면 구도 잡기 상태), 적 배우 `StudioEnemyActors`.
+  녹화 `Recordings/<장면>_NN.mov`(ProRes 422, 1920x1080, 60fps, 소리 없음).
+- **게임 스크립트 안의 촬영용 연결(지우지 말 것)**: `Playermovement`(`CutsceneStudio.OverridesMovement` 등), `PlayerTravelBoost.TickForcedMax`,
+  `HoldRestart`/`PauseMenuUI`(`CutsceneStudio.IsActive`), `EnemyRadialAttack.SkipChargeTime`.
+
+### 사운드 (`Assets/Script/Audio`, 클립 `Assets/Audio/SFX`·`BGM`)
+
+- 재생 창구 `GameAudio`: `Play(SfxId)`, 반복음 `PlayLoop`/`StopLoop`. 설정 `Resources/SoundLibrary`(파일 이름 `SFX_<SfxId 이름>(_N)`).
+- **`SfxId` enum 값은 절대 바꾸지 않음**(에셋이 숫자로 저장) - 새 소리는 그 묶음의 빈 번호/끝에 추가. 기존 게임 알림 구독은 `SoundEventHooks`, 직접 호출 줄엔 `[사운드]` 주석.
+- UI 소리 `UISound`(Confirm/Cancel/Danger + 호버). 되돌릴 수 없는 버튼 = Danger.
+- 액티브 공용 사용음 `ItemActivate` - 전용 소리가 있는 효과는 `IHasOwnUseSound`로 생략. 출처 `Assets/Audio/SFX/_출처.txt`.
+- **BGM**: 인트로 → 반복 곡(`Crystal Gear Surge`, Eleven Music **무료 플랜** = 출처 표기 필수 → 타이틀에 "Music created in collaboration with ElevenLabs") - 세부는 v1.66 아카이브.
+
+### 아이템 도감
+
+- `ItemCodexUI`(설정 `Resources/ItemCodexSettings`), 기록 `ItemCodexRecord`(`MarkAcquired`) - 세부는 v1.61 아카이브.
+
+### 비주얼 / 셰이더
+
+- `MobArchive/Toon_Environment`(배경) / `MobArchive/Toon_Character` - URP/Lit 프로퍼티 이름 호환(`_BaseMap`/`_BaseColor`/`_EmissionColor`/`_Surface` - 새 셰이더도 유지).
+  툰 셰이더는 주광 **색만** 씀(세기/환경광/추가 조명 무시).
+- **레벨별 조명**: `LevelLightingProfile` → `RoomGenerationConfig.lightingProfile` → `LevelLighting.Apply`(비우면/n.5는 낮, 툰 셰이더 전역값 `_MobLv*` - 세부는 v1.64 아카이브).
+- **밤 전용 빛 `NightLight`**(`NightGlow_Mat`): 밤 레벨만, 자동 부착 `NightLightAutoRules`(`GameFlowManager.nightLightRules`, 세부는 v1.65 아카이브).
+- **배경 외곽선 보정**: `OutlineSmoothNormalBaker`(`Assets/Object` 모델 UV4, 설정 `Resources/OutlineWidthSettings`, 메뉴 `MobArchive/외곽선/...` - 세부는 v1.61 아카이브).
+- 굴절 셰이더(90/110번)는 URP Opaque Texture 필요. 일괄 툰 교체 `MobArchive/셰이더 일괄 교체`.
+- **화면 배경(레벨별)**: Skybox 재질 `MobArchive/ScreenBackground`(`Assets/Background`) → 레벨 설정 `backgroundMaterial` → `LevelBackground.Apply`(세부는 v1.65 아카이브).
+- 빌드 VSync = Quality `PC` 단계 `Every V Blank`(프레임 제한 없던 문제).
+- **게임 카메라** `GameCamera` 프리팹(`Assets/Config/Level`, FOV 60) + `CameraFollow`: 각도 (50, -45, 0) 고정, Offset (2.25, 3.75, -2.25)(예전 (3, 5, -3) x 0.75).
+  거리 조절은 Offset 세 값을 **같은 비율로**(각도 유지).
+
+### 플레이어
+
+- 관성 없는 CharacterController 이동, twin-stick 조준(우클릭 = 마우스 조준), 사거리 소멸 탄환, 무적 프레임 체력.
+- 프리팹 `Assets/Player/Character/Player/SD_Player`(값은 이 프리팹만 고침 - `UnityChan_Player`/`Reisa_Player_Fixed`는 관리 안 함).
+  쓰는 프리팹은 `LevelBuilder`/`ItemTestArenaBuilder`의 Player Prefab 칸으로 교체. 기본 이동 속도 2.
+- **SD_Player 충돌 캡슐**: 높이 0.6 / 반지름 0.3 / Skin Width 0.03(줄이지 않음) / **Center Y 0.33**(발 접지 보정).
+- `PlayerStats` 단일 소스: (기본 + 덧셈 합) x 곱셈 곱 → `statFloors`(최종 값에만). 새 `StatType`은 **enum 맨 끝**에 + 매핑 추가.
+  `RemoveModifiersFromSource`/`RemoveModifiersFromSourceExcept(id, 남길 스탯)`. 특수효과가 준 스탯은 출처 `PassiveEffectIds.EffectStatSourceId(id)`
+  (= id + "_effect", 잃어도 남는 "귀속" 스탯). 잃으면 사라지는 실시간 스탯은 별도 출처(예: 76번 id + "_passiveCount").
+- **공격력 하한선 = 고정값(Absolute) 1**(Player 프리팹 `statFloors`). 하한선 없이 아이템 효과만 적용 = `PlayerStats.ApplyModifiersTo(StatType, 기본값)`(87번 아군).
+- **최대 체력 상한 `maxHealthCap` 10** - 넘는 증가분은 기억하지 않고 그만큼 회복(`OnMaxHealthIncreaseCapped`). 테스트 프로필 `noMaxHealthCap`/`noShieldCap`으로 테스트 씬만 해제.
+- **이동 속도 상한 `moveSpeedCap` 4** - 최종값만 자름(초과분은 모디파이어로 남아 기억됨).
+- **비전투 가속 `PlayerTravelBoost`**(`Resources/TravelBoostSettings`): 비전투 1초 뒤 x1.5(상한 5), 공격/조준/장전/피격/전투방에서 풀림 - 세부는 v1.66 아카이브.
+- **보호막**(아이작 소울하트, 최대 5): `PlayerHealth.AddShield(수, 연출 여부)`/`SetShield`, 피격 1번을 통째로 막음. 연출 `PlayerShieldBreakVfx`(`GetSharedMesh` - 2레벨 보스 막도 씀).
+- **연사 = 클릭 1번에 탄약 1발 소모 + `Multishot` 발 발사**(남은 탄약 1이어도 전부). 사격 알림 `PlayerShooting.OnAmmoConsumed`(클릭당 1번)/`OnShotFired`(발마다)/
+  `OnReloadStarted`, 즉시 장전 `TryInstantReload()`. 투명 `PlayerInvisibility`(112번).
+- 74번 돌진 `PlayerDash`(`IsDodging` - 회피는 피해원마다 확인), 액티브 사용 규칙 `IActiveItemUseRules.CanActivateNow`, 디버프 면역 `PlayerDebuffImmunity`(94번).
+- 시작 자원은 `PlayerResources`. 무기 모드 `PlayerWeaponMode` 1 총/2 수류탄/3 해킹 - 0개여도 들어갈 수 있고, 0이 되는 순간에만 총으로 자동 복귀.
+  수류탄/해킹 모드 자원 표시 = `WeaponModeResourceIndicator` + 탄약 보조 상자(`AmmoBoxDisplay`).
+  **총 숨김**(`PlayerWeaponMode.UpdateGunVisibility`, LateUpdate): 수류탄/해킹 모드, 비전투 뛰기, 아이템 획득 연출 중(`hideGunIn...`/`hideGunWhileRunning` 칸). 등에 메기는 폐지.
+- 수류탄 `PlayerGrenadeThrower`/`Grenade`(폭발 알림 `OnGrenadeExploded` - 받는 곳마다 따로 실행해 한 곳의 오류가 특수방 해제 등을 막지 않음, 이펙트도 try/catch,
+  중심 `CurrentGroundPoint()`), **118번 포격 `ArtilleryStrike`는 폭발 처리를 따로 구현**(반복 작업 [21]).
+  해킹툴 `PlayerHackTool`(`ApplyHackArea`/`ApplyHackToEnemy`, `OnHackDeployed`/`OnHackToolSpent`). 창구 목록은 v1.69 아카이브, 세부는 v1.53-v1.57 아카이브.
+- 아이템 획득 연출: `ItemPickupEvents.Raise` → `PlayerItemPickupPresenter`(연출 중 행동 차단 `BlocksActions`). 여러 개 = `PassiveRerollUI.RaisePickupsInSequence`.
+- F 상호작용 = 가장 가까운 하나(`InteractionTargetSelector`). 팝업이 떠 있으면 대상 없음.
+- 테스트: `PlayerTestProfile` → `ItemTestArenaBuilder.testProfile`. 방 클리어가 필요한 아이템(39/72/111번)은 실제 레벨에서 테스트.
+
+### 플레이어 애니메이션
+
+- 애니메이션 FBX 15개(Mixamo, Humanoid, 몸 높이 Original), Controller `ReisaAnimatorController`(SD 직접 사용). Mixamo 걷기는 SD에서 발이 2~3cm 가라앉음 - 그대로 둠([108]).
+- **지우면 안 됨**: `Reisa_AvatarSource.fbx`, `Animation/Generic/` 전체, `Animation` 원본 FBX, `Reisa_Fixed.fbx`, `Reisa_gun_Fixed.fbx`, `Assets/UnityChan`.
+- 레이어 Locomotion/UpperBody/UpperBodyTorso(Sync), 조준 IK `HumanoidAimLookAt`, 반동 `UpperBodyRecoil`. 프리팹 `MeshRotationOffset` Y -20 = Mixamo 모션용 보정.
+- **SD 전용 모션**(`Assets/Player/Character/Animation`): `SD_Reload`, `SD_IntroPose`, 뛰기 `SD_Run`(A)/`SD_Run_B`(B, 사용 중 - 메뉴 `MobArchive/애니메이션/비전투 달리기 - B`로
+  다시 연결), 흙먼지 `PlayerRunDust` - 세부는 v1.66/v1.67 아카이브.
+
+### SD 신규 캐릭터 (`Assets/Player/Character/Player/SD`) - 세부는 v1.58/v1.62 아카이브
+
+- 알바디 `SD_AltBody_v02.fbx`(바이패드 `Bip001`, Humanoid, 기본 자세 신발 바닥 = 높이 0, 키 약 0.46) + `SDCharacterSkin`/`SDPartAttacher`(`Equip`/`Unequip`)/`SDFaceController`/`SDFaceExpressionSet`.
+  셰이더 `MobArchive/Toon_Character_SD`/`Toon_Face_SD`. 재질 자동 설정 `MobArchive/SD 캐릭터 재질 자동 설정`.
+- **파츠 슬롯** `SDPartDefinition`(`SDPart_{부위}`, Slot enum은 끝에만 추가, `Back`/`Front` = 몸통 후면/전면 악세서리). 파츠가 바뀌면 `OnPartsChanged` →
+  `PlayerHitFlash.RefreshRenderers`(`ResetToNormal` 이름은 `PlayerDeathHandler`가 리플렉션으로 부름 - 바꾸지 말 것). 세부는 v1.69 아카이브.
+- **효과 제외 표시 `PlayerEffectExclude`**: 붙은 오브젝트(자식 포함)는 피격 깜빡임/112번 투명/74번 잔상에서 빠짐(헤일로).
+- 헤일로 `SDHaloController`(머리 뼈 아래 2D), 총 `SDGunController`(오른손 뼈, 장착 시 gunModel/총구/FirePoint 갱신), 흔들림 본 `SDJiggleBones`(`Jiggle_` 본,
+  `Resources/SDJiggleSettings`), 색 영역 = ID 맵(`T_SD_{부위}_ID.png`, 최대 32영역 + `_IDColors.txt`) - 세부는 v1.69 아카이브.
+- 현재 레이사 파츠: 머리 `Hair_Reisa02`(`Hair_Reisa01`은 예비), 전면 `AccFront_Reisa01`, 후면 가방 `AccBack_Reisa01`, 총 `Gun_Reisa01`(세부는 v1.69 아카이브).
+- 표정(`SDFaceGameEvents`, 우선순위 큰 것이 보임): 기본(0) < 뛰기 `Run` 눈4/입1(5) < 장전(10) < 획득(20) < 피격(30) < 사망(100). 새 표정은 반복 작업 [30].
+- **실시간 초상화 `PlayerPortraitCamera`**(SD_Player 루트, 카메라 2대, 하늘 색은 레벨 배경이 덮어씀, 레벨 조명 틴트 적용).
+
+### 적 AI
+
+- 근접 `EnemyAIController`, 원거리 `EnemyRangedAIController`, 보스 아래.
+- **적 프리팹 Rigidbody는 Is Kinematic + 중력 끔**(아니면 판정 위치가 어긋남) - 돌진 부품이 없는 적 컨트롤러는 Awake에서 직접 맞춤(`BossLv2AIController`처럼).
+- 레벨별 일반 적: `RoomGenerationConfig`의 일반 적 칸(`normalEnemyPool` 비우면 `RealEnemySpawner`의 Enemy Pool). 강화 적 = `Assets/Config/Enemy/lv1`·`lv2`의 EnemyDefinition.
+- 적 탄환 = 코드 생성 구체 + `EnemyProjectile`(정적 목록 `Active`) - 한 발 = 한 번 명중.
+- 적 수치: 공통 = `EnemyDefinition`(모든 적 Attack Power 1), 공격 방식별 = `attackConfig`.
+- **목표 정하기 `CombatTargeting`**(`Resolve`/`CurrentTarget`/`TargetIsInvisiblePlayer`): 적 = 플레이어(투명 제외)/아군 중 가까운 쪽, 아군 = 가장 가까운 적.
+  **새 적 AI/공격도 이 창구 사용**. 켜진 적 목록 `EnemyHealth.ActiveEnemies`.
+- **87번 아군 `AllyFaction`**(세부는 v1.59 아카이브): Enemy 태그 제거(태그를 안 보는 새 효과는 `AllyFaction.IsAlly`로 제외).
+- 정적 등록소: `EnemyDetectRangeOverride`, `EnemySightOverride`, `EnemySpeedModifier`, `EnemyDamageTakenModifier`(41번), `EnemyAttackSpeedModifier`(91번).
+- 처치 이벤트 `EnemyHealth.OnAnyEnemyKilled(적, 위치)`(구독 코드는 try/catch).
+- 피해 입구: `EnemyHealth.TakeDamage`(총알 등 - 공격력과 비교) / `TakeDotDamage`(지속) / `TakeWeakDamage`(아이템 부가 피해 - 항상 Weak) - 처리는 같고 피해 숫자 구분 플래그만 다름.
+- 제어 체계 `EnemyControlState`: 강력(수면/해킹) 1칸 + 일반(매료) 1칸. 새 제어 = `EnemyControlType` 추가 + `GetTier()`(규칙은 v1.65 아카이브).
+- 적 상태: `EnemyChillState`(91번), `EnemyDotState`(102+109), `EnemySugarStack`(113번), 제어 지속 이펙트 `EnemyStatusVfx`.
+- 전투방 재입장 시 적만 초기 상태로 재생성. 다른 방의 적은 꺼져 있음.
+- 넉백 `ForcedPush.Apply`(적도 밈) - 밀리는 동안 `ForcedPush.IsBeingPushed`면 AI가 이동 판단을 쉼. 돌진 중 판정 = `IDashDamageSource.IsDashing`.
+
+### 보스 (설계/기획 전체는 `Docs\설계노트.md` [2레벨 보스] 등)
+
+- 보스 판별 = `GetComponent<BossAIController>() != null`(체력바, 매료/오한/넉백/87번 제외, 90번 규칙) - **새 보스 컨트롤러는 `BossAIController`를 상속**.
+  보스 선택 = Level Config `bossVariants`의 variantId ↔ 씬 `RealEnemySpawner.bossPool`(빈 variantId = 기본 = 1레벨 보스). 보스 수치는 프리팹에 직접.
+- 1레벨 `EnemyBoss_DroneElite_Boss_lv1`(흰+하늘색): 5연사 + 전방위 + 연속 돌진.
+- **2레벨 `EnemyBoss_DroneElite_Boss_lv2`**(`drone_elite_lv2`, 체력 700 / 보호막 500): `BossLv2AIController` + `BossShield`(패턴 세부는 설계노트/v1.64 아카이브).
+- 보호막 `BossShield`(피해 흡수, 제어 필터 `IEnemyControlFilter`, 보호막 바 `BossHealthBarDisplay`), 소환 = `RealEnemySpawner.SpawnSummonedEnemy` +
+  `EnemyKillObjective.TryAddAlongside`. 90번 물결 규칙은 v1.64 아카이브.
+
+### 레벨 생성
+
+- `RoomGenerationConfig` → `LevelGraphGenerator` → `LevelBuilder.BuildRooms`, `RoomVisibilityManager`가 현재 방만 활성화. 방 = 한 변 `cellSize`(6) 칸 하나.
+  NavMesh는 방마다 런타임 베이크. 층 이동 = `LevelRoot` 통째 삭제 후 재생성. 방은 런타임 생성이라 정적 배칭 없음.
+- 현재 방: `LevelBuilder.CurrentPlayerCell`/`GeneratedRooms`/`GetRoomController(id)`, 위치가 속한 방 = `RoomScope.RoomOf`.
+  방 클리어 `RoomController.OnAnyRoomCleared`(일반방/보스방만), 방 입장 `OnAnyRoomEntered`, `RequiresClear`. 전투 없는 방 = `SlotItemDropper.IsInCombatFreeRoom()`.
+  상자 열림 공용 알림 `ContainerOpenEvents.OnAnyContainerOpened`(TreasureChest/ItemPedestal 처음 열 때만, 보관 좌대 X - 97번).
+- **방 범위 규칙 `RoomScope`**: 그 방에서 생긴 일은 그 방에서만(소속 = 생성 순간 플레이어가 있던 방). `DestroyWhenPlayerLeaves(go)` = 방을 나가면 즉시 삭제,
+  적 총알은 쏜 방을 벗어나면 소멸, 플레이어 없는 방의 수류탄/115/118 폭발은 조용한 폭발(특수방 잠금만 `TryUnlockByGrenade`).
+- 레벨 포탈 `LevelPortal`. Wall 태그로 방 벽 구분 불가(120번은 칸 경계로 판정). 런타임 방 추가 `TryAddExtraRoom`(16번), 텔레포트 `TryTeleportPlayerToRandomRoom`.
+- 일반맵 보물상자 `NormalRoomTreasureSpawner`, 보스방 보상 `ResolveBossRewardContent`, 후보 = `ItemDatabase.GetAllCategoryItemsForRoom(room, true)`.
+- **레벨 내 아이템 중복 등장 방지**: `GameFlowManager` `MarkItemAssignedThisLevel`/`FilterOutAlreadyAssignedThisLevel`/`Unmark...`(레벨마다 초기화). ID로 찾기 `ResolveItemById`.
+- 아이템 등장 가중치 = `ItemWeightModifier.GetWeight(item)`(권장 weight 등급별 100/80/60/40).
+
+### 특수방 (크레딧 더미 `credit_pile`만 제작됨) - 세부는 v1.46-v1.52 아카이브
+
+- `RoomCategory.Special`(4) 하나로 통합(5, 6번 비어 있음). 종류 = 레이아웃 에셋 `SpecialRoomLayout` → Level Config `specialLayouts`. 항상 막다른 방.
+- 진입 조건(Free/Grenade/HackingTool/Health) 추첨, 잠금 `SpecialRoomLock`(플레이어를 `PlayerHealth`로 찾아 수류탄/해킹 알림 구독 - 태그로 찾으면 빌드에서 자식이 잡혀 안 풀린 사례), 체력 = 지날 때마다 0.5 피해.
+
+### 상점 (편의점 `convenience_store`만 제작 중) - 세부는 v1.53-v1.57 아카이브
+
+- 바닥 프리팹 안 `ShopNPC`(Shop Config) + 보관 좌대 `HoldingPedestal` 4개. 진열은 처음 열 때 뽑고 유지, 갱신 1 크레딧/최대 2회.
+  가격 = `ShopNPC.GetUnitPrice(listing)`(`ShopPriceModifier`, 86번 `RegisterLevelFree`). 창 `ShopUI`(order 85). 보관 좌대 = 범용 좌대(9/106번 대상 아님).
+- `ShopUI`: 카드 8칸 + 열기/닫기 연출. `IsOpen`/`IsVisible`/`IsDimmed`/`IsPointerOverWindow`, 설명칸은 상점 위(86) - 세부는 v1.68 아카이브.
+
+### 팝업 / 공용 UI
+
+- **블루 아카이브 스타일(전 UI)**: `UIPatternBox` + `Resources/PopupStyle`, 버튼 `UIButtonKind` Positive 노랑 / Quit 회색 / Normal 하늘색, **뗀 순간 클릭**.
+  **새 UI도 이 부품/에셋 값 사용**(세부는 v1.68/v1.70 아카이브). 키 배지/수치 판 = 남색(`namePlateColor`) 평행사변형(`SetupShape`, 조작법 창/결과 화면).
+- 팝업 공통 패턴(세부는 v1.62 아카이브): static `IsOpen` + `BlocksInteract` - `InteractionTargetSelector`/`HUDClickBlocker`/`PauseMenuUI`/`SlotItemDropUI`/`HoldRestart`가
+  확인함. **새 팝업을 만들면 이 다섯 곳에 조건 추가**.
+- 사용 불가 이유 알림 창 = `PassiveRerollUI.ShowMessage(플레이어, 문구)`.
+- **머리 위 아이콘 연출 범용** `CreditPopupDisplay`(Item54effect.cs 안, order 8) - 대상별 줄 세우기. 성공/실패 알림 공용 `HeadAlertRoomRules`(39/103/111번).
+
+### 슬롯 아이템 (장신구 / 일회용 Q / 음식 E) - 세부는 v1.53-v1.57 아카이브
+
+- `PlayerTrinket`/`PlayerDisposableItem`/`PlayerFoodItem`: 먼저 얻은 것이 앞, `SlotCount` = 1 + `AddExtraSlots`, 꽉 차면 가장 먼저 얻은 것이 교체.
+- 일회용/음식은 앞칸만, `CanUse` false = 소모 X, 사용 연출 `ItemUsePopup.Show`, 버리기 Ctrl 0.8초 → `SlotItemDropUI`(세부는 v1.65 아카이브).
+
+### 아이템 시스템
+
+- 패시브: `ItemDefinition.specialEffects`(`[SerializeReference] IPassiveItemEffect` - `[Serializable]` + 매개변수 없는 생성자, 에셋의 효과 인스턴스를
+  공유하므로 런타임 필드는 `[NonSerialized]`, `Apply`는 먼저 이전 구독 해제), 훅 `OnProjectileSpawned`/`OnShotFired`/`Projectile.OnDespawning`.
+  "보유 중" 상시 동작은 런타임 러너 MonoBehaviour(지울 땐 `DestroyImmediate`). 정적 알림을 구독하는 효과는 플레이어가 사라지면 스스로 구독 정리(97번).
+- **판 정리**(효과 인스턴스가 에셋에 하나라 정적 구독이 다음 판에 남던 문제): `OnBeforeSceneChange`에서 `PlayerInventory`/`PlayerTrinket`이 보유 효과 `Remove()`(Awake/OnDestroy 구독 -
+  사망으로 꺼져도 받음), 판을 넘는 대기 구독(43번 버프, 27/40번 음식 대기)과 `Next...Override` 3개 무장도 같은 알림으로 해제.
+- **총알 피해** `Projectile.Damage` = (기본 + `AddDamageBonusProvider`) x `AddDamageMultiplierProvider` → 하한 → 23번. 명중 = (`Damage` + `PlayerBulletBonusDamage`) x 받는 피해 배율
+  (`OnDespawning` 중엔 충돌 순간 값 고정). 튕김 횟수 `BounceCount`/`WallBounceCount`/`EnemyBounceCount`.
+- **총알 1발 = 적 1명**(소멸 확정 총알은 무시, 관통처럼 `CancelDespawn`한 총알만 계속 맞힘). 명중 알림 `OnPlayerBulletHitEnemy`/`OnPlayerBulletHitEnemyDetailed`.
+- **관통**: 적 = `SetEnemyPiercing`(99번), 벽 = `SetWallPiercing`(120번), 둘 다 = `SetPiercing`(110번). 벽 관통 총알은 처음 있던 방의 칸을 벗어나면 소멸.
+- **상극** `ItemDefinition.incompatibleItemIds` + `ItemCompatibility`(99↔69, 120↔35). 시너지 감시 `SynergyWatcher`(102+109). 확률 판정 창구 `LuckOdds.Roll`.
+- **패시브 잃기** `IRemovablePassiveEffect.Remove`(새 패시브는 필수), `PlayerInventory.RemoveItem`/`ReplaceItems`/`TryAcquireItem`. 잃어도 최대 체력/특수효과 스탯/
+  1회성 재화/보호막은 남음. 변화 알림 `OnPassiveItemsChanged` + `PassiveCount`.
+- **1회 지급 규칙**: `GameFlowManager.TryConsumeOneTimeGrant("{ID}_용도")`(한 판 내내 유지). 새 사본 = `AcquireItemCopy(item, 새 사본인지, 획득)` = 매번 지급,
+  다시 주운 것은 X, 48/56번은 `IgnoreOneTimeGrantLimit`로 항상 지급. 테스트 씬은 경고만 남기고 지급.
+- 액티브 `IActiveItemEffect`/`IDelayedActiveItemEffect`, 음식 `IFoodEffect`, 일회용 `IDisposableItemEffect`, 장신구 `ITrinketEffect`. 상태 있는 효과 재실행은 `JsonUtility` 복제.
+  방에 적이 없으면 사용 불가인 액티브(29/43번 등) = `IActiveItemUseRules.CanActivateNow`(코스트 X, 알림 없음).
+- 구현된 아이템 = `Assets/Script/Item`의 `ItemNN effect.cs`(상세 기획은 각 파일 주석, 번호 목록은 v1.64 아카이브).
+  (4번 폭발 효과 클래스 `ExplodeOnImpactEffect`는 `Item04effect.cs` 안에 있음. 94번 후광 피해는 `BulletHalo.cs`.)
+- 아이템별 확정값: 10~86번 v1.53-v1.57 / 87~137번 v1.59 / 58·67·93·97번 v1.61 아카이브 + 각 파일 주석. 43번 = 같은 방 사용마다 x1.5 곱 중첩(상한 없음, 방 나가면 해제).
+- 플레이어 총알 색: 등록소 `ProjectileColorOverride` + `BulletColorEffect`(23번 색이 최우선).
+- ItemDefinition 에셋은 복제해서 만들어도 됨 - `Item Id` 변경 + ItemDatabase 등록 필수(도감도 ItemDatabase 기준). 상점에 나오게 하려면 Appearance Contexts에 `Store`.
+- 정적 등록소 = 이름이 `...Override`/`...Modifier`인 클래스(아이템 번호별 목록은 v1.64 아카이브), 각각 해제 메서드 있음. 분류별 보정 공용 계산 `CategoryModifierSet`(67).
+- 등급 색 = Tier0 흰 / Tier1 청록 / Tier2 노랑 / Tier3 자홍.
+
+### 전투 연출
+
+- **피해 숫자 `DamagePopupDisplay`**(값은 `PlayerHUD` 프리팹): 총알 피해만 공격력과 비교 - 보통 흰 숫자 / **Weak** 노랑 / **Resist** 하늘색.
+  지속 피해와 아이템 부가 피해(4/29/68/81/87/94/118번, 수류탄, 해킹툴)는 항상 Weak, 보스 보호막에 들어간 피해는 항상 Resist.
+  연속 피격 크기/펼치기 규칙은 v1.69 아카이브(합산 숫자는 안 만듦).
+- `EnemyHealthBarDisplay`(보스 제외, 아군 = 초록), `CombatVfxSpawner`(총구/피격/벽/처치 슬롯 - 보호막이 막을 피격은 적 피격 이펙트 X).
+- 이펙트 조정 = `Assets/VFX/Custom/`에 복제해 수정(원본 팩 X). 크기 칸 = `ApplyVfxScale`.
+
+### HUD
+
+- `PlayerHUDManager`의 단일 Canvas(1920x1080) 위에 각 스크립트가 패널 생성. 대부분 `PlayerHUD` 프리팹(`Assets/Config/Level/PlayerHUD.prefab`) 안 - 값 바꾸면
+  Overrides → Apply All. 글자 = TMP, 글꼴 `Assets/Resources/Fonts/경기천년제목_Bold SDF`(**이름 바꾸면 `HUDFont.GetTMP()`가 못 찾음**).
+- 체력 칸 `PlayerHeartDisplay`(세부는 v1.61 아카이브). 새 스탯 한글 이름은 `ItemInfoPanelView.GetStatDisplayName`. 패널 접기 `CollapsibleHUDPanel`, 클릭 차단 `HUDClickBlocker`.
+- **미니맵 `MinimapDisplay`**: 포탈 아이콘 없음, 보스방 아이콘은 클리어 후에도 유지(`keepIconAfterVisitCategories`).
+
+## 반복 작업 (새 에셋/씬을 만들 때마다 확인)
+
+- [1] Wall 태그 콜라이더는 새 프리팹도 Box/Convex 체크리스트 적용.
+- [2] 새 원거리 적 프리팹엔 `EnemyRangedAIController` 확인.
+- [3] 상체 동작이 몸 전체를 흔들면 클립 루트 커브 문제 - RootFixed 사본(Humanoid + `Animation/Generic`) + Override 연결.
+- [4] 교체 확인창이 필요한 슬롯 아이템은 아이템 에셋의 `Confirm Before Replace` 체크.
+- [5] 새 모델/재질은 `MobArchive/셰이더 일괄 교체`로 툰 적용. 새 씬은 조명/환경광/Skybox/Volume을 [비주얼] 값으로.
+- [6] 포트폴리오에 유니티짱이 나오면 UCL 3.0 표기.
+- [7] 새 게임 씬은 `LoadingScreen` 프리팹 배치 + Build Profiles 등록(Title 0번 유지).
+- [8] 새 상점 바닥 프리팹은 `ShopNPC` + `HoldingPedestal` 4개. 상점별 상품은 Shop Config 등장 위치와 아이템 Appearance Contexts를 맞춤.
+- [9] 새 특수방 레이아웃: 레이아웃 에셋 + Room Visual Set + **레벨마다** Level Config의 Special Layouts에 등록.
+- [10] 복제로 만든 ItemDefinition은 `Item Id`를 새 번호로 + ItemDatabase 등록. 상극이 있으면 `Incompatible Item Ids`에 상대 ID(한쪽만 적어도 됨).
+- [11] 총알 색 아이템 = Special Effects에 `BulletColorEffect`. 새 제어 지속 이펙트 = 프리팹 복제 + 출처 효과에 설정 칸 + `Attach`.
+- [12] 새 패시브 효과는 `IRemovablePassiveEffect.Remove` 구현(48/56/62번으로 잃을 수 있음). 1회성 지급은 `TryConsumeOneTimeGrant` + `IgnoreOneTimeGrantLimit`
+  예외 처리.
+- [13] 아이템 테스트 씬(LevelBuilder 없음)에서 48/56/62/80번을 쓰려면 아이템 에셋 Disposable Effect의 `Item Database` 칸을 채움.
+- [14] 새 팝업 UI = `UIPatternBox` + `PopupStyle` + `IsOpen`/`BlocksInteract`를 위 다섯 곳에 연결 + ESC 겹침(`PauseMenuUI.CanOpenNow`) + UI 소리(`UISound`).
+- [15] 새 아이템 획득 경로: `AcquireItemCopy`, 추첨 `ItemWeightModifier.GetWeight`, 가격 `ShopNPC.GetUnitPrice`, 상극 `ItemCompatibility`, 넣을 땐 `TryAcquireItem`/`ReplaceItems`
+  (직접 고치면 `ItemCodexRecord.MarkAcquired`). 수류탄 계열 자해 = `GrenadeSelfDamageOverride.IsBlocked` + `PlayerDash.IsDodging`.
+- [16] 스스로 이동하는 새 적 AI/공격 컴포넌트를 만들면 `ForcedPush.IsBeingPushed(gameObject)` 검사 + `EnemyAttackSpeedModifier` 적용. 수류탄 폭발 위치는
+  `OnGrenadeExploded`의 위치를 사용.
+- [17] 새 총알 피해 효과: 더하기 `AddDamageBonusProvider`, 곱하기 `AddDamageMultiplierProvider`, 명중 시 고정 추가 `PlayerBulletBonusDamage`. 튕김/관통은
+  `Redirect`(벽)/`RedirectFromEnemy`(적)로(관통 총알이면 `IsPierceHit` - 튕기지 않음).
+- [18] 새 SD 파츠: 바이패드 Skin + 재질 `M_SD_{부위}` + UV → 텍스처 → FBX Rig Generic → 재질 자동 설정 메뉴 → `SDPart_{부위}`(절차 전체는 v1.69 아카이브).
+- [19] 몸에 붙이는 물건은 **`Bip001` 뼈** 아래에. 컴포넌트 Copy/Paste 후 참조 칸은 다시 연결. 피격/투명/잔상 제외는 `PlayerEffectExclude`.
+- [20] 적을 대상으로 하는 새 플레이어 효과는 "Enemy" 태그로 고르거나 `AllyFaction.IsAlly`로 87번 아군 제외. 새 적 AI/공격은 `CombatTargeting`으로 목표를 정함.
+- [21] 새 수류탄 계열 아이템은 `Grenade.cs`와 118번 포격 `ArtilleryStrike.cs` 양쪽에 반영할지 확인.
+- [22] 플레이어 머리 위 알림 + 이펙트는 `CreditPopupDisplay.Show(..., followTarget: true, onStarted)`로.
+- [23] 새 플레이어 피해원은 `PlayerHealth.TakeDamage`를 거쳐야 보호막이 막음. 피격 순간 이펙트/점멸/반응은 `IsHitInvincible`·`WillShieldBlockNextHit`로 거르고,
+  피격 반응 아이템은 `OnDamageTaken`(보호막 피격엔 안 옴)을 구독. 보호막을 주는 새 효과는 `AddShield(수, 연출 여부)`.
+- [24] 외곽선 보정 배경 모델은 `Assets/Object` 아래(아니면 `OutlineSmoothNormalBaker.TargetFolders` 추가), 정적 배칭 금지, 3ds Max 내보내기 전 Reset XForm.
+- [25] 스크립트를 고칠 때 그 파일에 주석 정책 적용 + "레벨당 1회" 옛 주석/툴팁이 있으면 새 1회 지급 규칙에 맞게 고침.
+- [26] 새 레벨: Level Config(일반 적 칸 + `bossVariants` + `backgroundMaterial` + `lightingProfile`) → `GameFlowManager.combatLevelConfigs` 순서 등록 → 보스면
+  `RealEnemySpawner.bossPool`에 같은 variantId 항목. 새 보스: `BossAIController` 상속, Rigidbody Kinematic 확인, 초상화/이름(`BossPortrait`), 처치 폭발/보상 상자 확인.
+  마지막 레벨이 바뀌면 `GameFlowManager.gameClearLevel`도 맞춤.
+- [27] 방에 남는 새 오브젝트(투척물/VFX/지속 구역)는 `RoomScope.DestroyWhenPlayerLeaves`, 터지는 것은 플레이어 없는 방이면 조용한 폭발.
+- [28] 새 창문/자판기/가로등 모델은 `NightLightAutoRules`에 등록(스왑 = `Same Shape Models`, 모양 다르면 새 견본). 견본 Glow Material = `NightGlow_Mat` 필수.
+- [29] 새 소리 = `SfxId` 새 값(기존 번호 변경 금지) → `SoundLibrary` 메뉴 → `GameAudio.Play`. 방에 남는 반복음은 `PlayLoop(roomScoped)` + `StopLoop`, 출처는 `_출처.txt`.
+- [30] 새 SD 표정은 `SDFaceExpression` 맨 끝에 추가 + 표정 세트 에셋 칸. 새 SD 직접 제작 모션이 정면 기준이면 `MeshRotationOffset` -20 보정을 그 상태 동안 풀어야 함.
+- [31] **총알 말고 아이템이 주는 모든 부가 피해**(폭발/구역/틱/충돌/방 전체/87번 아군 공격 등)는 `EnemyHealth.TakeWeakDamage`(피해 숫자 항상 Weak), 지속 피해는
+  `TakeDotDamage`로 줌. 일반 `TakeDamage`는 총알처럼 공격력과 비교할 피해에만.
+- [32] 촬영용 새 적/보스 동작은 `StudioEnemyActors` 명령 + `ShotScript` 주석에 추가(게임 스크립트는 되도록 안 고침, 고치면 "촬영용 연결" 목록에 추가).
+- [33] 새 조작 키를 만들면 조작법 창 목록(`ControlsUISettings.sections` 기본값 또는 `Resources/ControlsUISettings` 에셋)에도 추가.
+- [34] 정적 알림을 구독하거나 정적 값을 남기는 새 효과/등록소는 판이 끝날 때 풀리는지 확인 - 패시브/장신구는 `Remove()`가 자동 호출되고, 그 밖(액티브/음식 대기,
+  주인 없는 정적 값)은 `LoadingScreen.OnBeforeSceneChange`로 직접 해제. 이름으로만 찾는 새 자체 셰이더는 Always Included Shaders에 추가.
+
+## 확인 필요 항목 (해결되면 지울 것)
+
+- [96] 외곽선 2차 보정 확인 - 다시 굽기 후 작은 소품 두께/창문 음각 확인, `OutlineWidthSettings` 조절.
+- [99] (형빈 정리 중) `Assets/Audio/BGM/BGM_CrystalGearSurge_Original.wav`(비교용 원곡, 안 씀) 삭제 여부, 효과음 클립 음량/음색 다듬기.
+- [100] BGM 출처 표기(무료 플랜 = 필수)를 `_출처.txt`와 포트폴리오 영상 크레딧에도 같은 문구로 넣기(타이틀은 완료).
+- [111] 빌드에서 런타임 반투명 재질(74번 잔상/94번 후광/110번 충전탄/조준선·수류탄 조준)이 불투명·안 보임이면 알릴 것(URP 키워드 빌드 제외 의심), 16:9 아닌 모니터 UI 위치.
+- [104] (형빈 정리, 선택) SD 테스트 에셋 `SDHalo_Test`/`SDGun_Legacy`/`SDGunPrefab_Legacy`(먼저 `SD_Player`의 Test 목록에서 뺌), 옛 `T_SD_*_Mask` 3개 삭제 여부.
+
+## 할 일 / 보류 (나중에 만들 것, 참조 메모)
+
+- [48] 행운(Luck) 스탯 미구현 - 반영 창구 `LuckOdds`(지금 106번만). 54번 처치 확률/80번 개수 확률도 이 창구로 옮김.
+- [49] 미니맵 마커 아이콘 8종 스프라이트 연결(포탈 아이콘은 폐지).
+- [54] 등급 스프라이트 오른쪽 "태그 UI" 자리 남아 있음.
+- [78] (참조만) 특수방 진입 비용 변형(수류탄 3개 등) 레벨별 난이도로 검토.
+- [79] 특수방 개수 규칙(Level1 Special 필수 1개 - 확인용)/레이아웃 가중치 조정 예정 + 테스트 레이아웃 정리 필요.
+- [81] 비어 있는 방 번호 5, 6 - 나중에 새 방 종류에 사용.
+- [82] (보류, 참조만) 이어하기(저장 슬롯 1개, 사망 시 삭제) - 세부는 v1.58 아카이브, 저장 자리는 `PauseMenuUI.LeaveScene()`(그만하기만).
+- [87] **다음 작업 후보 - SD 외형 아이템 시스템 + 외형 설정 창**(슬롯별 파츠/헤일로/총 선택, ID 영역 색 바꾸기 - 교체 창구 `SDPartAttacher.Equip`/`SDHaloController`/
+  `SDGunController`는 준비됨). 이후 파츠 모델링 모자 → 머리 장신구 → 옷 → 장갑 → 신발. 세부는 v1.58 아카이브.
+- [88] (보류) `SDPartAttacher` Skeleton Root에 캐릭터 밖 오브젝트가 들어가면 무시하고 자동 탐색하는 실수 방지 장치.
+- [95] (형빈 모델링) 골목 끝 바닥 틈 - `Field_Player` 스케일 미적용이 원인, Reset XForm 후 재수출 예정.
+- [97] **3레벨 준비**: `Level3Config`(2레벨 복사본) - Level Number가 2(로그 표시만, 3으로 고칠 것), `bossVariants` 비어 있음(지금은 1레벨 보스가 나옴),
+  일반 적 칸 비어 있음(1레벨 적/마릿수). 3레벨 전용 보스/강화 적 제작 예정. 배경 `BG_ScreenSky_Lv3` + 밤 조명 프로필 연결. 지금은 2레벨이 게임 클리어라 3레벨에 가지 않음.
+- [98] (참조만) 90번은 `RoomScope` 방 범위 정리 대상에서 일부러 제외(현재 동작 유지).
+- [101] (형빈) 빈 효과음 `GunShot`/`ChargeShotFire`(110번)는 `SFX_<이름>.ogg`로 넣고 자동 배치 메뉴.
+- [102] (보류) BGM 여러 곡 - 지금은 한 곡 고정, 화면별 곡 교체 기능이 필요.
+- [103] (참조만) 뛰기 발소리/먼지 풀링/가속 HUD 표시는 안 만들기로 정함.
+- [108] (보류) SD 걷기 중 발 가라앉음(2~3cm)이 거슬리면 Mixamo 클립 Root Transform Y = Feet(메뉴로 일괄) 또는 발 높이 보정 컴포넌트.
+- [109] (보류) `Item104effect.cs` 맨 위 주석 "연사는 한 발 한 발마다 +3" → 연사 복구로 실제는 클릭당 +3(동작은 확정대로, 주석만 고칠 것).
+- [110] (보류, 참조만) n.5 레벨 재구상 - 지금은 `skipChoiceLevels`로 건너뜀(선택방 보상/아이템은 아직 미제작).
+
+## 변경 로그 (버전당 한 줄)
+
+- v1.4~v1.57: 기반 구축 ~ 신규 SD 캐릭터(각 버전 구간 아카이브 참고).
+- v1.58~v1.67: 아이템 대량 추가, 보호막/도감/중단 화면, SD 장전·입장 컷씬·헬기 연출, 2레벨 + 보스, `RoomScope`, 레벨별 조명/배경/밤 빛, 사운드/BGM/설정 창,
+  비전투 가속 + 뛰기, 피해 숫자, 전 UI 블루 아카이브 스타일(v1.65~v1.68 아카이브 참고).
+- v1.68~v1.69: SD 레이사 파츠 확장(악세서리/총/헤일로/흔들림 본, ID 맵 32영역), 아이템 부가 피해 항상 Weak, 피해 숫자 다듬기, SD_Player 발 접지, 카메라 0.75배 접근.
+- v1.70: 포트폴리오 촬영 스튜디오(장면/표시/대본, 구도 잡기, 플레이어·적 배우, 슬로모션, ProRes 녹화) + 컷씬 02~07 촬영.
+- v1.71: 데모 마무리 - n.5 건너뛰기, 조작법 창(타이틀/중단 화면 버튼 재배치), 2레벨 게임 클리어 결과 화면 + 기록, 43번 곱 중첩/적 없으면 사용 불가, 연사 클릭당 탄약 1발 복구.
+- v1.72: 빌드에서 수류탄 특수방이 안 풀리던 문제 대비(잠금의 플레이어 찾기 + 폭발 알림 분리 실행), 타이틀 오른쪽 아래 저작권/음악 출처 표기.
+- v1.73: 빌드 문제 정리 - 보스 보호막 셰이더 빌드 포함, 다시하기 후 이전 판 효과가 남던 문제(판 정리 알림), 태그 플레이어 찾기 3곳(2레벨 포격/체력 특수방/87번) 수정, TMP Underlay 유지 재질, VSync.

@@ -65,6 +65,33 @@ public class PlayerInventory : MonoBehaviour
         }
 
         effectContext = new PassiveEffectContext(stats, shooting, this, resources, health, gameObject);
+
+        // OnEnable이 아니라 Awake/OnDestroy에서 구독 - 사망 처리로 컴포넌트가 꺼져 있어도 정리는 받아야 하므로.
+        LoadingScreen.OnBeforeSceneChange += ReleaseEffectsForSceneChange;
+    }
+
+    void OnDestroy()
+    {
+        LoadingScreen.OnBeforeSceneChange -= ReleaseEffectsForSceneChange;
+    }
+
+    // [판 정리] 씬이 바뀌기 직전에 보유 패시브의 특수 효과를 전부 Remove()로 되돌립니다(정적 알림 구독/등록이 다음 판에 남지
+    // 않게 - LoadingScreen.OnBeforeSceneChange 주석 참고). 목록/스탯은 플레이어와 함께 곧 사라지므로 건드리지 않습니다.
+    private void ReleaseEffectsForSceneChange()
+    {
+        foreach (var item in ownedItems)
+        {
+            if (item == null) continue;
+            foreach (var effect in item.GetEffects())
+            {
+                if (!(effect is IRemovablePassiveEffect removable)) continue;
+                try { removable.Remove(effectContext, item.itemId); }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"PlayerInventory: '{item.displayName}' 효과를 판 정리 중 되돌리다 오류가 나 건너뜁니다: {e}");
+                }
+            }
+        }
     }
 
     public bool HasItem(string itemId)
