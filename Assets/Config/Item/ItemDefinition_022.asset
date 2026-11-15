@@ -23,6 +23,7 @@ MonoBehaviour:
   rarity: 0
   category: 3
   confirmBeforeReplace: 0
+  incompatibleItemIds: []
   tags: []
   activeCost: 1
   activeEffect:
@@ -34,10 +35,6 @@ MonoBehaviour:
   foodEffect:
     rid: -2
   appearanceContexts:
-  - category: 1
-    variantId: 
-  - category: 2
-    variantId: 
   - category: 3
     variantId: 
   - category: 7

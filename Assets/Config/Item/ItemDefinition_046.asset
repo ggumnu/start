@@ -21,10 +21,11 @@ MonoBehaviour:
     \uB2E4\uC591\uD55C \uC74C\uC545\uC744 \uC88B\uC544\uD558\uB294 \uC0AC\uB78C\uC5D0\uAC8C
     \uCD5C\uC801\uC778 \uC120\uBB3C."
   icon: {fileID: 21300000, guid: a35c0502a550c22438b01293e860819c, type: 3}
-  weight: 80
-  rarity: 1
+  weight: 100
+  rarity: 0
   category: 3
   confirmBeforeReplace: 0
+  incompatibleItemIds: []
   tags: []
   activeCost: 1
   activeEffect:
@@ -36,10 +37,6 @@ MonoBehaviour:
   foodEffect:
     rid: -2
   appearanceContexts:
-  - category: 1
-    variantId: 
-  - category: 2
-    variantId: 
   - category: 3
     variantId: 
   - category: 7

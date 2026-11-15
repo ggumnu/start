@@ -517,7 +517,7 @@ public class ArtilleryStrike : MonoBehaviour
 
         Vector3 p = owner.transform.position;
         Vector2 flat = new Vector2(p.x - c.x, p.z - c.z);
-        if (flat.magnitude <= radius) health.TakeDamage(damage);
+        if (flat.magnitude <= radius) health.TakeDamage(damage, PlayerDamageSource.ItemArtillerySelf); // [플레이 통계] 사망 원인 = 포격 자해
     }
 
     // [92번] 지금 중심에서 forward 기준 X자 4방향(앞 ±splitAngle, 뒤 ±(180 - splitAngle))에 분열 포격을 시작합니다(다시 분열 X).

@@ -202,7 +202,11 @@ public class BossArtilleryStrike : MonoBehaviour
 
         Vector3 p = playerObj.transform.position;
         Vector2 flat = new Vector2(p.x - center.x, p.z - center.z);
-        if (flat.magnitude <= radius) health.TakeDamage(damage);
+        // [플레이 통계] 사망 원인 = 이 포격을 부른 보스(보스가 없으면 2레벨 보스 포격으로 기록 - 지금은 2레벨 보스만 포격을 씀)
+        PlayerDamageSource source = owner != null
+            ? PlayerDamageSource.FromEnemy(owner, PlayerDamageSource.AttackArtillery)
+            : new PlayerDamageSource(PlayerDamageSource.AttackerBossLv2, PlayerDamageSource.AttackArtillery, "");
+        if (flat.magnitude <= radius) health.TakeDamage(damage, source);
     }
 
     private void SpawnExplosionVfx()

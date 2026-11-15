@@ -68,6 +68,15 @@ public static class ItemCodexRecord
         return item != null && HasAcquired(item.itemId);
     }
 
+    // [플레이 통계] 지금까지 도감에 기록된 아이템 ID 전체의 사본입니다(정렬됨). 도감 수집율 통계용입니다.
+    public static List<string> GetAcquiredIdsSnapshot()
+    {
+        EnsureLoaded();
+        var list = new List<string>(acquiredIds);
+        list.Sort(StringComparer.Ordinal);
+        return list;
+    }
+
     // 아이템이 인벤토리/슬롯에 들어온 순간 부릅니다. 처음 얻은 아이템이면 기록하고 바로 저장합니다.
     // 무슨 일이 있어도 예외를 밖으로 내보내지 않습니다(아이템 획득 처리를 절대 막지 않도록).
     public static void MarkAcquired(ItemDefinition item)
@@ -75,6 +84,8 @@ public static class ItemCodexRecord
         try
         {
             if (item == null || string.IsNullOrEmpty(item.itemId)) return;
+            // [플레이 통계] 이번 판에서 얻은 아이템으로 기록합니다(도감에 이미 있는 아이템도 판마다 따로 셈). 통계 쪽은 절대 예외를 내지 않습니다.
+            RunAnalytics.NoteItemAcquired(item);
             if (IsTestScene()) return;
 
             EnsureLoaded();

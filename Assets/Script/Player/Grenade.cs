@@ -806,7 +806,7 @@ public class Grenade : MonoBehaviour
         Vector2 flatOffset = new Vector2(playerPos.x - center.x, playerPos.z - center.z);
         if (flatOffset.magnitude <= radius)
         {
-            health.TakeDamage(selfDamage);
+            health.TakeDamage(selfDamage, PlayerDamageSource.GrenadeSelf); // [플레이 통계] 사망 원인 = 수류탄 자해
         }
     }
 }

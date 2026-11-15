@@ -32,6 +32,7 @@ public class GameClearUI : MonoBehaviour
     // 결과 화면을 엽니다. skipToEnd = 연출 없이 완성된 화면으로(헬기 탑승 중 ESC). 이미 떠 있으면 skipToEnd일 때만 끝으로 건너뜁니다.
     public static void Show(bool skipToEnd)
     {
+        RunAnalytics.NotifyGameClear(); // [플레이 통계] 클리어 기록(여러 번 불려도 한 번만 기록됨)
         if (instance == null)
         {
             var go = new GameObject("GameClearUI");

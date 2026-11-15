@@ -148,6 +148,10 @@ public class EnemyMeleeContactTrigger : MonoBehaviour
             OnAnyMeleeHitPlayer?.Invoke(hitPoint, direction);
         }
 
-        playerHealth.TakeDamage(damage);
+        // [플레이 통계 - 사망 원인] 실제로 피해가 들어갈 수 있을 때만 원인을 계산합니다(무적 중 매 프레임 반복 판정에서 낭비하지 않도록).
+        PlayerDamageSource source = (!playerHealth.IsDead && !playerHealth.IsInvincible)
+            ? PlayerDamageSource.FromEnemy(this, isDashing ? PlayerDamageSource.AttackDash : PlayerDamageSource.AttackContact)
+            : PlayerDamageSource.Unknown;
+        playerHealth.TakeDamage(damage, source);
     }
 }

@@ -27,6 +27,7 @@ using UnityEngine.UI;
 // - 조작법: 조작법 창(ControlsUI)을 엽니다.
 // - 설정: 볼륨 설정 창(SettingsUI)을 엽니다.
 // - 나가기: 게임을 종료합니다. 에디터에서는 Play가 멈춥니다.
+// - [업데이트 알림] 새 버전이 있으면 시작 연출이 끝난 뒤 UpdateNoticeUI 창이 뜨고, 떠 있는 동안 이 화면의 버튼은 반응하지 않습니다.
 //
 // [오른쪽 아래 표기] 저작권/음악 출처 문구(creditText - 흰 글자 + 검은 테두리, 오른쪽 정렬)를 화면 오른쪽 아래에 둡니다.
 //
@@ -171,6 +172,9 @@ public class TitleScreenUI : MonoBehaviour
 
     private bool leaving; // 게임 시작/나가기를 이미 눌렀으면 중복 처리하지 않습니다.
 
+    // [업데이트 알림] 시작 연출 중이거나 씬을 떠나는 중인지입니다(UpdateNoticeUI가 창을 띄울 때를 고르는 데 씀).
+    public bool IsBusy => leaving || introPlaying;
+
     void Awake()
     {
         // 게임 오버 등에서 정지된 채 넘어온 경우를 대비해 시간 흐름과 커서를 원래대로 돌려 둡니다.
@@ -180,6 +184,7 @@ public class TitleScreenUI : MonoBehaviour
 
         EnsureEventSystem();
         BuildUI();
+        UpdateNoticeUI.Ensure(this); // [업데이트 알림] 새 버전이 있으면 시작 연출이 끝난 뒤 알림 창을 띄웁니다(실행당 한 번).
 
         // 게임을 실행한 뒤 처음 열린 시작 화면에서만 연출합니다.
         introPlaying = !introPlayedThisRun;
@@ -218,7 +223,7 @@ public class TitleScreenUI : MonoBehaviour
         ApplyIntroVisual();
 
         // 도감/조작법/설정 창이 떠 있거나, 씬을 떠나는 중이거나, 시작 연출 중이면 호버/누름/클릭 없이 평소 색으로 둡니다.
-        bool blocked = leaving || introPlaying || skippedNow || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput;
+        bool blocked = leaving || introPlaying || skippedNow || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput || UpdateNoticeUI.BlocksInput;
         TickButton(startView, blocked);
         TickButton(codexView, blocked);
         TickButton(controlsView, blocked);
@@ -240,7 +245,7 @@ public class TitleScreenUI : MonoBehaviour
 
     private void OnStartClicked()
     {
-        if (leaving || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput) return;
+        if (leaving || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput || UpdateNoticeUI.BlocksInput) return;
 
         if (!LoadingScreen.CanLoadScene(gameSceneName))
         {
@@ -260,7 +265,7 @@ public class TitleScreenUI : MonoBehaviour
     // 아이템 도감 화면을 엽니다(ItemCodexUI.cs).
     private void OnCodexClicked()
     {
-        if (leaving || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput) return;
+        if (leaving || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput || UpdateNoticeUI.BlocksInput) return;
         UISound.Confirm();
         ItemCodexUI.Open();
     }
@@ -268,7 +273,7 @@ public class TitleScreenUI : MonoBehaviour
     // 조작법 창(ControlsUI)을 엽니다.
     private void OnControlsClicked()
     {
-        if (leaving || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput) return;
+        if (leaving || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput || UpdateNoticeUI.BlocksInput) return;
         UISound.Confirm();
         ControlsUI.Open();
     }
@@ -276,14 +281,14 @@ public class TitleScreenUI : MonoBehaviour
     // 볼륨 설정 창(SettingsUI)을 엽니다.
     public void OnSettingsClicked()
     {
-        if (ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput) return;
+        if (ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput || UpdateNoticeUI.BlocksInput) return;
         UISound.Confirm();
         SettingsUI.Open();
     }
 
     private void OnQuitClicked()
     {
-        if (leaving || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput) return;
+        if (leaving || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput || UpdateNoticeUI.BlocksInput) return;
         UISound.Cancel();
         leaving = true;
 
@@ -429,7 +434,7 @@ public class TitleScreenUI : MonoBehaviour
         view.box.raycastTarget = true;
         view.group = go.AddComponent<CanvasGroup>();
         // [사운드] 마우스를 올리면 호버음(도감이 떠 있거나 씬을 떠나는 중이거나 시작 연출 중이면 소리 없음)
-        go.AddComponent<UIButtonHoverSound>().isBlocked = () => leaving || introPlaying || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput;
+        go.AddComponent<UIButtonHoverSound>().isBlocked = () => leaving || introPlaying || ItemCodexUI.BlocksInput || ControlsUI.BlocksInput || SettingsUI.BlocksInput || UpdateNoticeUI.BlocksInput;
 
         var textGO = new GameObject("Label");
         textGO.transform.SetParent(go.transform, false);

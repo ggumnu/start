@@ -188,9 +188,25 @@ public class EnemyRangedAttack : MonoBehaviour
         projectile.Launch(direction, damage, stats.rangedAttackRange, projectileSpeed, projectileSize);
         // [87번 포섭] 아군이 쏜 탄환은 적에게만 맞고 플레이어/다른 아군은 통과합니다(피해는 이미 x30 환산된 rangedDamage).
         if (AllyFaction.IsAlly(gameObject)) projectile.SetFromAlly(true);
+        projectile.SetDamageSource(GetBulletDamageSource()); // [플레이 통계] 사망 원인 = 이 적의 탄환
 
         // firePoint가 비어 있어도 이펙트가 최소한 이 적을 따라가도록 몸통 Transform을 넘깁니다.
         OnAnyEnemyProjectileSpawned?.Invoke(firePoint != null ? firePoint : transform, direction);
+    }
+
+    // [플레이 통계 - 사망 원인] 이 적이 쏜 탄환의 원인 정보입니다. 적의 종류는 바뀌지 않으므로 처음 한 번만 계산해 둡니다
+    // (전방위 공격처럼 한 번에 여러 발을 쏠 때 매번 부품을 찾지 않도록).
+    private PlayerDamageSource bulletDamageSource;
+    private bool bulletDamageSourceCached;
+
+    private PlayerDamageSource GetBulletDamageSource()
+    {
+        if (!bulletDamageSourceCached)
+        {
+            bulletDamageSource = PlayerDamageSource.FromEnemy(this, PlayerDamageSource.AttackBullet);
+            bulletDamageSourceCached = true;
+        }
+        return bulletDamageSource;
     }
 
     // 스폰 순서상 Awake 때 플레이어가 아직 없을 수 있어, 찾을 때까지 조용히 재시도합니다.

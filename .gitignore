@@ -109,3 +109,6 @@ InitTestScene*.unity*
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Debug data from builds (IL2CPP backup, Burst debug info) - keep locally, never commit or ship
+/[Bb]uilds_Debug/

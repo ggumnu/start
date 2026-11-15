@@ -305,8 +305,24 @@ public class EnemyRadialAttack : MonoBehaviour, IEnemyAttackBehavior, IEnemyColo
         projectile.Launch(direction, damage, stats.rangedAttackRange, stats.rangedProjectileSpeed, projectileScale);
         // [87번 포섭] 아군이 쏜 방사 탄환은 적에게만 맞고 플레이어/아군은 통과합니다.
         if (AllyFaction.IsAlly(gameObject)) projectile.SetFromAlly(true);
+        projectile.SetDamageSource(GetBulletDamageSource()); // [플레이 통계] 사망 원인 = 이 적의 탄환
 
         if (useChargedBulletVisual) ApplyChargedVisual(bulletObj, bulletRend, projectile);
+    }
+
+    // [플레이 통계 - 사망 원인] 이 적이 쏜 탄환의 원인 정보입니다. 적의 종류는 바뀌지 않으므로 처음 한 번만 계산해 둡니다
+    // (전방위 공격처럼 한 번에 여러 발을 쏠 때 매번 부품을 찾지 않도록).
+    private PlayerDamageSource bulletDamageSource;
+    private bool bulletDamageSourceCached;
+
+    private PlayerDamageSource GetBulletDamageSource()
+    {
+        if (!bulletDamageSourceCached)
+        {
+            bulletDamageSource = PlayerDamageSource.FromEnemy(this, PlayerDamageSource.AttackBullet);
+            bulletDamageSourceCached = true;
+        }
+        return bulletDamageSource;
     }
 
     // 구슬은 충돌 판정(Sphere Collider)에 필요해 오브젝트는 남기고 그림만 끕니다. 외형 생성이 실패하면 구슬을 다시 보여 줍니다.

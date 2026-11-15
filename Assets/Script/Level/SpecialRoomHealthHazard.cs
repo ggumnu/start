@@ -71,7 +71,7 @@ public static class SpecialRoomHealthHazard
         var health = Object.FindFirstObjectByType<PlayerHealth>();
         if (health == null) return;
 
-        health.TakeDamage(damage);
+        health.TakeDamage(damage, PlayerDamageSource.HealthSpecialRoom); // [플레이 통계] 사망 원인 = 체력 소모 특수방
     }
 
     private static bool IsHealthSpecial(RoomInstance room)

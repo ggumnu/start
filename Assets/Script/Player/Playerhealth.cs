@@ -162,8 +162,19 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
-    // 적 공격 등 외부에서 호출하는 피격 함수
+    // [플레이 통계 - 사망 원인] 체력을 실제로 깎은 마지막 피해의 원인입니다(보호막으로 막은 공격은 남기지 않음).
+    // 죽는 순간 플레이 통계(RunAnalytics)가 이 값을 사망 원인으로 읽습니다. 원인 없이 들어온 피해는 PlayerDamageSource.Unknown(기타).
+    public PlayerDamageSource LastDamageSource { get; private set; } = PlayerDamageSource.Unknown;
+
+    // 적 공격 등 외부에서 호출하는 피격 함수입니다. 원인을 모르는 피해(예전 호출 방식)는 "기타"로 기록됩니다.
     public void TakeDamage(float amount)
+    {
+        TakeDamage(amount, PlayerDamageSource.Unknown);
+    }
+
+    // [플레이 통계] 피해 원인을 함께 넘기는 피격 함수입니다. 피해 처리 자체(무적/보호막/21번 고정 피해/사망)는 위와 완전히 같고,
+    // 체력이 실제로 깎일 때 원인만 LastDamageSource에 남깁니다. 새로 플레이어에게 피해를 주는 코드를 만들면 이쪽을 써 주세요.
+    public void TakeDamage(float amount, PlayerDamageSource source)
     {
         if (IsDead) return;
         if (testInvincible) return; // 테스트 무적 모드
@@ -182,6 +193,7 @@ public class PlayerHealth : MonoBehaviour
         }
 
         float actualAmount = fixedIncomingDamage ?? amount;
+        LastDamageSource = source.IsSet ? source : PlayerDamageSource.Unknown; // [플레이 통계] 사망 원인 기록용
         currentHealth -= actualAmount;
         invincibilityTimer = invincibilityDuration + invincibilityDurationBonus;
         invincibilityFromHit = true;

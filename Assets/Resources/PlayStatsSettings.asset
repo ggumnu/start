@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e56e854f72b730242a77dcb24990e7bc, type: 3}
+  m_Name: PlayStatsSettings
+  m_EditorClassIdentifier: Assembly-CSharp::PlayStatsSettings
+  enabled: 1
+  endpointUrl: https://script.google.com/macros/s/AKfycbwh4iB_EQNELwB2IZfSH4k9W2gpL5dQKT1hzweNsZ5Og0QJjT44ol4XT2IwFac4Ho2ayw/exec
+  token: mob-7c85583b9352d66b67de0f71
+  sendInEditor: 0
+  logInEditor: 1
+  maxErrorsPerSession: 10
+  maxQueuedRecords: 50

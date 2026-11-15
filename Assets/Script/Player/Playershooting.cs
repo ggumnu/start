@@ -7,8 +7,10 @@ using System.Collections.Generic;
 // 실제 발사 "입력"은 PlayerAimAndAttack에서 감지하고, 이 스크립트의 TryFire()를 호출합니다.
 //
 // [장전 규칙]
-// - 탄약이 0인 상태에서 공격을 시도하면(TryFire) 그 시점에 자동으로 장전을 시작합니다
-//   (탄약이 0이 되는 순간이 아니라, 그 다음 공격 시도 때 장전이 시작됩니다).
+// - 탄약이 0이 되면 자동으로 장전을 시작합니다(TryStartAutoReload, 형빈 확정). 연사 중이면 마지막 발이 나간 뒤,
+//   110번 충전 중이면 충전이 끝난 뒤, 수류탄/해킹 모드면 총 모드로 돌아온 뒤, 아이템 획득 연출 중이면 연출이 끝난 뒤 시작합니다.
+//   입장 컷씬/헬기 연출/결과 화면/사망 중에는 시작하지 않고, 진행 중이던 장전도 끊습니다(총이 숨은 채 장전 모션이 돌지 않게).
+// - 다음 레벨로 넘어가면 장전 완료 상태로 채웁니다(RefillForNewLevel - GameFlowManager가 로딩 화면 뒤에서 부름).
 // - 탄약을 하나라도 쓴 상태라면(가득 차지 않은 상태) R키로 수동 장전이 가능합니다.
 //   단, 연사(버스트) 진행 중에는 수동 장전을 할 수 없습니다 - 연사가 끝난 뒤에만 가능합니다.
 //
@@ -86,6 +88,8 @@ public class PlayerShooting : MonoBehaviour
 
     private PlayerStats stats;
     private PlayerWeaponMode weaponMode; // 총 모드가 아닐 때 R키 재장전 차단용 (없으면 null)
+    private PlayerHealth health;
+    private PlayerChargeShot chargeShot; // 110번 충전 - 아이템을 얻을 때 붙을 수 있어 없으면 다시 찾음
     private int currentAmmo;
     private float fireCooldownTimer = 0f;
     private float reloadTimer = 0f;
@@ -118,13 +122,14 @@ public class PlayerShooting : MonoBehaviour
     // [104번 연동] RefundAmmo로 탄약을 실제로 돌려받은 순간 발생합니다(110번 충전 0발에서 뗐을 때). 인자 = 실제로 돌려받은 발 수.
     public event Action<int> OnAmmoRefunded;
 
-    // [104번 연동] 장전이 시작되는 순간 발생합니다(R 수동 장전, 탄약 0에서 클릭한 자동 장전 모두).
+    // [104번 연동] 장전이 시작되는 순간 발생합니다(R 수동 장전, 탄약 0 자동 장전 모두). 레벨 이동 채움(RefillForNewLevel)은 제외.
     public event Action OnReloadStarted;
 
     void Awake()
     {
         stats = GetComponent<PlayerStats>();
         weaponMode = GetComponent<PlayerWeaponMode>();
+        health = GetComponent<PlayerHealth>();
         if (animator == null) animator = GetComponentInChildren<Animator>();
         currentAmmo = stats.MagazineSize; // 시작 시 탄창 가득 채움
     }
@@ -134,8 +139,48 @@ public class PlayerShooting : MonoBehaviour
         if (fireCooldownTimer > 0f) fireCooldownTimer -= Time.deltaTime;
 
         CancelReloadIfNotGunMode();
+        CancelReloadDuringScriptedScene();
         HandleManualReloadInput();
+        TryStartAutoReload();
         HandleReloadProgress();
+    }
+
+    // 입장 컷씬/헬기 연출/결과 화면 중이거나 사망했는지 - 이때는 장전 모션을 돌리지 않습니다(형빈 확정).
+    bool InScriptedSceneOrDead()
+    {
+        if (IntroCutscene.BlocksInput || HeliExtraction.BlocksInput || GameClearUI.BlocksInput) return true;
+        return health != null && health.IsDead;
+    }
+
+    void CancelReloadDuringScriptedScene()
+    {
+        if (isReloading && InScriptedSceneOrDead()) CancelReload();
+    }
+
+    // [자동 장전] 탄약이 0이고 지금 장전을 시작할 수 있으면 바로 시작합니다. 조건이 안 맞는 동안은 매 프레임 기다렸다가
+    // 맞는 순간 시작하므로, 연사 끝/충전 끝/총 모드 복귀/획득 연출 끝/연출 종료가 모두 이 한 곳으로 처리됩니다.
+    void TryStartAutoReload()
+    {
+        if (stats == null || isReloading || isBursting || currentAmmo > 0) return;
+        if (stats.MagazineSize <= 0) return; // 채울 탄창이 없으면 장전을 무한 반복하지 않게
+        if (weaponMode == null) weaponMode = GetComponent<PlayerWeaponMode>();
+        if (weaponMode != null && !weaponMode.IsGun) return;
+        if (PlayerItemPickupPresenter.BlocksActions) return; // R 장전과 같은 규칙 - 연출이 끝나면 시작
+        if (LoadingScreen.BlocksPlayerInput) return;
+        if (InScriptedSceneOrDead()) return;
+        if (chargeShot == null) chargeShot = GetComponent<PlayerChargeShot>();
+        if (chargeShot != null && chargeShot.IsCharging) return; // 충전 중 탄약이 0이 돼도 떼기 전엔 채우지 않음(되돌려주기 계산이 깨짐)
+
+        StartReload();
+    }
+
+    // [레벨 이동] 다음 레벨로 넘어갈 때(로딩 화면 뒤) 장전 완료 상태로 채웁니다(형빈 확정). 장전으로 치지 않으므로
+    // 장전 알림(OnReloadStarted - 104번 초기화 등)과 소리는 보내지 않습니다.
+    public void RefillForNewLevel()
+    {
+        if (stats == null) return;
+        if (isReloading) CancelReload();
+        currentAmmo = Mathf.Max(currentAmmo, stats.MagazineSize);
     }
 
     // 장전 중에 총 모드가 아니게 되면(수류탄/해킹툴로 전환) 장전을 취소합니다(형빈 확정).
@@ -295,8 +340,10 @@ public class PlayerShooting : MonoBehaviour
 
         if (currentAmmo <= 0)
         {
+            // 보통은 TryStartAutoReload가 먼저 장전을 시작해 여기 오지 않습니다. 자동 장전이 기다리는 중(획득 연출 등)에
+            // 클릭하면 예전처럼 빈 탄창 소리와 함께 바로 장전합니다.
             GameAudio.Play(SfxId.GunEmpty); // [사운드] 빈 탄창 클릭(바로 이어서 장전 시작음)
-            StartReload(); // 탄약이 없는데 클릭하면 자동 장전 시작
+            StartReload();
             return false;
         }
 
@@ -339,7 +386,7 @@ public class PlayerShooting : MonoBehaviour
             // MultishotInterval, 아니면 0을 함께 알립니다.
             bool hasNextShot = i < shotsPlanned - 1;
             OnShotFired?.Invoke(hasNextShot ? stats.MultishotInterval : 0f);
-            // 자동 장전은 여기서 시작하지 않습니다 - 탄약이 0이면 다음 공격 시도 때 TryFire()가 시작합니다.
+            // 자동 장전은 여기서 시작하지 않습니다 - 연사가 모두 끝나 isBursting이 풀린 뒤 TryStartAutoReload가 시작합니다(모션 겹침 방지).
             if (firstShot) currentAmmo -= 1;
 
             if (i < shotsPlanned - 1)

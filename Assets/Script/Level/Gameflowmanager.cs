@@ -21,8 +21,13 @@ public class GameFlowManager : MonoBehaviour
 
     [Header("n.5 선택방 레벨")]
     [Tooltip("켜면 n.5 선택방 레벨을 건너뛰고 전투 레벨에서 바로 다음 전투 레벨로 갑니다(1 -> 2). " +
-             "끄면 예전처럼 1 -> 1.5 -> 2로 진행합니다. 최대 체력 칸 정리는 어느 쪽이든 다음 전투 레벨로 들어가기 직전에 합니다.")]
+             "끄면 예전처럼 1 -> 1.5 -> 2로 진행합니다.")]
     public bool skipChoiceLevels = true;
+
+    [Header("최대 체력")]
+    [Tooltip("켜면 다음 전투 레벨로 들어갈 때 채워지지 않은 최대 체력 칸을 지웁니다(3/5 -> 3/3, 예전 규칙). " +
+             "끄면 깎인 최대 체력이 그대로 남은 채 넘어갑니다(3/5 -> 3/5, 형빈 확정 - 난이도 완화).")]
+    public bool trimMaxHealthOnNextLevel = false;
 
     [Header("게임 클리어")]
     [Tooltip("이 번호의 전투 레벨 보스를 깨고 헬기 [예]를 누르면 다음 레벨로 가지 않고 게임 클리어 결과 화면이 뜹니다. 0이면 끔(계속 다음 레벨로).")]
@@ -117,7 +122,16 @@ public class GameFlowManager : MonoBehaviour
     // 보물상자가 아이템을 실제 내용물로 확정하는 바로 그 시점에 호출합니다(뽑기 직후,
     // 플레이어가 줍기 전이어도 상관없습니다 - "뽑힌 순간" 그 레벨에서는 소진된 것으로
     // 취급합니다).
+    // [플레이 통계 - 아이템 등장] 보물상자/받침대/상점이 부르는 이 함수는 "이 판에 아이템이 등장했다"로도 기록합니다.
+    // 다음 레벨로 들고 온 슬롯 아이템 기록(MarkCarriedSlotItemsAssigned)은 등장이 아니므로 아래 AddAssignedThisLevel을 직접 씁니다.
     public void MarkItemAssignedThisLevel(string itemId)
+    {
+        if (string.IsNullOrEmpty(itemId)) return;
+        AddAssignedThisLevel(itemId);
+        RunAnalytics.NoteItemAppeared(itemId);
+    }
+
+    private void AddAssignedThisLevel(string itemId)
     {
         if (string.IsNullOrEmpty(itemId)) return;
         assignedUniqueItemIdsThisLevel.Add(itemId);
@@ -249,6 +263,8 @@ public class GameFlowManager : MonoBehaviour
         enemiesKilled = 0;
         roomsCleared = 0;
         runTimerStopped = false;
+        // [플레이 통계] 새 판 시작을 알립니다(타이틀 시작/재시작 모두 여기를 지남). 레벨을 만들기 전에 불러야 시작방 진입부터 기록됩니다.
+        RunAnalytics.BeginRun(this);
         BuildCurrentPhase(null); // 최초 진입이므로 유지할 플레이어가 없음 = 새로 스폰
     }
 
@@ -290,7 +306,6 @@ public class GameFlowManager : MonoBehaviour
                 if (skipChoiceLevels)
                 {
                     // [n.5 건너뛰기 - 데모, 형빈 확정] 전투 레벨 클리어 -> 다음 번호의 전투 레벨로 바로 갑니다.
-                    // n.5 레벨이 없으니 최대 체력 칸 정리도 여기서 합니다(전투 레벨의 상점이 마지막 회복 기회).
                     EnterNextCombatLevel(playerToKeep);
                 }
                 else
@@ -305,6 +320,13 @@ public class GameFlowManager : MonoBehaviour
                 break;
         }
 
+        // [레벨 이동 시 탄창 채움 - 형빈 확정] 남은 탄약과 상관없이 장전 완료 상태로 다음 레벨에 들어갑니다(로딩 화면 뒤).
+        if (playerToKeep != null)
+        {
+            var shooting = playerToKeep.GetComponent<PlayerShooting>();
+            if (shooting != null) shooting.RefillForNewLevel();
+        }
+
         BuildCurrentPhase(playerToKeep);
         // [헬기 퇴각 -> 도착] 헬기 사다리로 넘어왔으면, 아직 검은 로딩 화면 뒤인 지금 다음 레벨 시작방에 도착 연출(사다리 타고 내려오기)을 겁니다.
         HeliExtraction.TryStartArrival(levelBuilder);
@@ -313,9 +335,9 @@ public class GameFlowManager : MonoBehaviour
     // 다음 번호의 전투 레벨로 넘어가는 상태 처리입니다(n.5를 거쳐 오든 건너뛰든 같은 처리).
     private void EnterNextCombatLevel(GameObject playerToKeep)
     {
-        // [최대 체력 정리 - 형빈 확정] 다음 전투 레벨로 들어가기 직전(로딩 화면 뒤)에 채워지지 않은 최대 체력 칸을 1칸 단위로
-        // 지웁니다(3/5 -> 3/3, 3.5/5 -> 3.5/4). n.5를 거칠 때는 전투 레벨 -> n.5에서 지우지 않습니다(n.5 레벨이 마지막 회복 기회).
-        ApplyLevelEndMaxHealthLoss(playerToKeep);
+        // [최대 체력 정리 - 기본 끔] trimMaxHealthOnNextLevel을 켰을 때만 채워지지 않은 최대 체력 칸을 1칸 단위로 지웁니다
+        // (3/5 -> 3/3, 3.5/5 -> 3.5/4). 끄면 깎인 최대 체력이 그대로 다음 레벨로 넘어갑니다(형빈 확정).
+        if (trimMaxHealthOnNextLevel) ApplyLevelEndMaxHealthLoss(playerToKeep);
         currentLevelNumber++;
         currentPhase = LevelPhase.Combat;
         // 1회성 지급 기록(grantedOneTimeIds)은 런 전체에서 유지합니다(위 [획득 시 1회성 지급 기록] 참고).
@@ -340,7 +362,7 @@ public class GameFlowManager : MonoBehaviour
         if (player == null) return;
 
         var active = player.GetComponent<PlayerActiveItem>();
-        if (active != null && active.EquippedItem != null) MarkItemAssignedThisLevel(active.EquippedItem.itemId);
+        if (active != null && active.EquippedItem != null) AddAssignedThisLevel(active.EquippedItem.itemId);
 
         var trinket = player.GetComponent<PlayerTrinket>();
         if (trinket != null) MarkAll(trinket.EquippedItems);
@@ -357,7 +379,7 @@ public class GameFlowManager : MonoBehaviour
         if (items == null) return;
         for (int i = 0; i < items.Count; i++)
         {
-            if (items[i] != null) MarkItemAssignedThisLevel(items[i].itemId);
+            if (items[i] != null) AddAssignedThisLevel(items[i].itemId);
         }
     }
 

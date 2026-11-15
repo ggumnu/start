@@ -78,6 +78,10 @@ public class EnemyProjectile : MonoBehaviour
     public bool FromAlly => fromAlly;
     public void SetFromAlly(bool value) { fromAlly = value; }
 
+    // [플레이 통계 - 사망 원인] 이 탄환을 쏜 적입니다. EnemyRangedAttack/EnemyRadialAttack이 발사 직후 넣습니다(안 넣으면 "기타").
+    private PlayerDamageSource damageSource = PlayerDamageSource.Unknown;
+    public void SetDamageSource(PlayerDamageSource source) { damageSource = source; }
+
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -178,7 +182,7 @@ public class EnemyProjectile : MonoBehaviour
                         Debug.LogError($"EnemyProjectile: 탄환 피격 연출 중 오류가 발생해 건너뜁니다: {e}");
                     }
                 }
-                playerHealth.TakeDamage(damage);
+                playerHealth.TakeDamage(damage, damageSource);
             }
             Consume();
             return;

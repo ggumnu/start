@@ -39,8 +39,6 @@ MonoBehaviour:
     variantId: 
   - category: 2
     variantId: 
-  - category: 3
-    variantId: 
   - category: 7
     variantId: 
   statModifiers: []

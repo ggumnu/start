@@ -107,6 +107,17 @@ public class RoomController : MonoBehaviour
     // "방을 나가면 해제"를 구현하기 위해 구독합니다.
     public static event Action<RoomInstance> OnAnyRoomEntered;
 
+    // 방 알림을 받는 곳마다 따로 실행합니다 - 한 곳(아이템 효과 등)의 오류가 뒤에 등록된 곳(클리어 기록/크레딧 지급/효과음)을 막지 않게.
+    private static void RaiseEach(Action<RoomInstance> handlers, RoomInstance room, string label)
+    {
+        if (handlers == null) return;
+        foreach (Delegate d in handlers.GetInvocationList())
+        {
+            try { ((Action<RoomInstance>)d).Invoke(room); }
+            catch (Exception e) { Debug.LogError($"RoomController: {label} 알림을 받는 곳에서 오류가 나 이 항목만 건너뜁니다: {e}"); }
+        }
+    }
+
     public void Setup(RoomInstance data, RoomVisibilityManager manager, GameObject content, GameObject portalPrefab, NormalRoomTreasureSpawner treasureSpawner, IEnemyRespawner enemyRespawner = null)
     {
         roomData = data;
@@ -168,7 +179,7 @@ public class RoomController : MonoBehaviour
 
         // 방 스코프 액티브 아이템 버프 해제 등 "플레이어가 이 방에 들어왔다"에만 관심 있는
         // 리스너들에게 알립니다. 구독자가 없어도(?.Invoke) 안전합니다.
-        OnAnyRoomEntered?.Invoke(roomData);
+        RaiseEach(OnAnyRoomEntered, roomData, "방 입장");
 
         visibilityManager.ShowOnly(contentRoot);
 
@@ -255,9 +266,8 @@ public class RoomController : MonoBehaviour
         roomData.isCleared = true;
         UnlockGates();
 
-        // 코스트 지급 등 "방이 클리어됐다"에만 관심 있는 리스너들에게 알립니다. 이 방
-        // 자체는 누가 듣고 있는지 알 필요가 없으므로, 구독자가 없어도(?.Invoke) 안전합니다.
-        OnAnyRoomCleared?.Invoke(roomData);
+        // 클리어 기록/코스트 지급 등 "방이 클리어됐다"에만 관심 있는 곳에 알립니다(받는 곳마다 따로 실행 - RaiseEach).
+        RaiseEach(OnAnyRoomCleared, roomData, "방 클리어");
 
         if (roomData.category == RoomCategory.Boss)
         {

@@ -23,6 +23,7 @@ MonoBehaviour:
   rarity: 0
   category: 0
   confirmBeforeReplace: 0
+  incompatibleItemIds: []
   tags: []
   activeCost: 1
   activeEffect:
@@ -49,7 +50,7 @@ MonoBehaviour:
   - rid: 4841274495229493317
   specialEffectDescription: "\n\uC801\uC774 \uCD1D\uC54C\uC5D0 \uD53C\uACA9 \uB2F9\uD558\uBA74
     \n3\uCD08 \uB3D9\uC548 \uC624\uD55C \uC0C1\uD0DC\uAC00 \uB418\uBA70\r\n\uACF5\uACA9
-    \uC18D\uB3C4\uC640 \uC774\uB3D9 \uC18D\uB3C4\uAC00 50% \uAC10\uC18C\uD55C\uB2E4"
+    \uC18D\uB3C4\uC640 \uC774\uB3D9 \uC18D\uB3C4\uAC00 30% \uAC10\uC18C\uD55C\uB2E4"
   references:
     version: 2
     RefIds:
@@ -59,8 +60,8 @@ MonoBehaviour:
       type: {class: Item91effect, ns: , asm: Assembly-CSharp}
       data:
         chillDuration: 10
-        moveSpeedMultiplier: 0.5
-        attackSpeedMultiplier: 0.5
+        moveSpeedMultiplier: 0.3
+        attackSpeedMultiplier: 0.3
         chillColor: {r: 0.4156863, g: 0.3529412, b: 0.8039216, a: 1}
         chillStatusVfx:
           prefab: {fileID: 852277127398752463, guid: 4fff1f6d239558044a40ac7a46db496e, type: 3}
