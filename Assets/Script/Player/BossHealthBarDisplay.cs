@@ -6,6 +6,9 @@ using UnityEngine.UI;
 // 켜져 있는 BossAIController(상속한 2레벨 보스 포함)를 찾아 EnemyHealth 값을 매 프레임 읽습니다 - 플레이어가 보스방에 있을 때만 보스가 켜져 있어
 // 자연히 그때만 보임. 초상화/이름/이름 색은 보스 프리팹의 BossPortrait. 2레벨 보스(BossShield)는 체력바 위에 보호막 바(주황, 깎인 자리는 검은 빈칸)가
 // 더해지고 이름은 그 위로 올라갑니다. 위치/크기/색은 매 프레임 다시 적용(Play 중 조절 가능). 설계 배경은 Docs/설계노트.md [보스 체력바].
+// [그로기 게이지 - 3레벨 보스] 보스가 IBossGroggyGauge를 구현하면 체력바 오른쪽에 흰 테두리 + 회색 원 + 노란 도넛 게이지가 뜨고, 도넛이 12시부터
+// 시계 방향으로 차오릅니다(형빈 확정). 그림 파일 없이 코드로 원/도넛 그림을 만들어 씁니다. 회색 원에는 시계처럼 12칸 눈금선, 노란 도넛에는
+// 노란 버튼과 같은 삼각형 무늬(UIPatternBox 셰이더와 같은 계산 - 반짝임 없이 고정)를 그려 넣습니다.
 [RequireComponent(typeof(RectTransform))]
 public class BossHealthBarDisplay : MonoBehaviour
 {
@@ -69,6 +72,43 @@ public class BossHealthBarDisplay : MonoBehaviour
     [Min(0f)] public float shieldBorderThickness = 2f;
     public Color shieldBorderColor = Color.white;
 
+    [Header("그로기 게이지 (3레벨 보스 - 체력바 오른쪽, IBossGroggyGauge를 구현한 보스만)")]
+    [Tooltip("게이지 전체 지름(흰 테두리 포함, 픽셀).")]
+    [Min(4f)] public float groggyGaugeDiameter = 46f;
+    [Tooltip("체력바 테두리 오른쪽 끝과 게이지 왼쪽 끝 사이 간격.")]
+    public float groggyGaugeSpacing = 10f;
+    [Tooltip("게이지 위치 미세 조정(X: 좌우, Y: 상하). 기본은 체력바와 세로 가운데가 맞는 위치.")]
+    public Vector2 groggyGaugeOffset = Vector2.zero;
+    [Tooltip("흰 테두리 두께(픽셀).")]
+    [Min(0f)] public float groggyGaugeBorder = 3f;
+    [Tooltip("노란 도넛 바깥 지름 = 회색 원 지름 x 이 값.")]
+    [Range(0.1f, 1f)] public float groggyGaugeRingOuter = 0.82f;
+    [Tooltip("노란 도넛 안쪽 구멍 지름 = 도넛 바깥 지름 x 이 값(클수록 도넛이 얇아짐).")]
+    [Range(0f, 0.95f)] public float groggyGaugeRingInner = 0.45f;
+    public Color groggyGaugeBorderColor = Color.white;
+    [Tooltip("회색 원(도넛이 아직 안 찬 자리) 색.")]
+    public Color groggyGaugeBackgroundColor = new Color(0.62f, 0.62f, 0.62f, 1f);
+    [Tooltip("도넛 가운데 구멍 색.")]
+    public Color groggyGaugeHoleColor = new Color(0.32f, 0.32f, 0.32f, 1f);
+    public Color groggyGaugeFillColor = new Color(1f, 0.8f, 0.1f, 1f);
+    [Tooltip("도넛이 목표량까지 차오르는/비워지는 속도(초당 게이지 전체 비율). 3이면 가득 차는 데 약 0.33초.")]
+    [Min(0.01f)] public float groggyGaugeFillSpeed = 3f;
+    [Tooltip("회색 원에 그리는 시계 눈금선 개수(12시부터 같은 간격, 구멍 가장자리에서 회색 원 가장자리까지). 0이면 없음.")]
+    [Min(0)] public int groggyGaugeTickCount = 12;
+    [Tooltip("눈금선 두께(픽셀).")]
+    [Min(0.1f)] public float groggyGaugeTickWidth = 1.5f;
+    public Color groggyGaugeTickColor = new Color(0.08f, 0.08f, 0.08f, 1f);
+    [Tooltip("노란 도넛에 삼각형 무늬(노란 버튼과 같은 모양)를 넣을지.")]
+    public bool groggyGaugePattern = true;
+    [Tooltip("삼각형 한 변 길이(픽셀). 작을수록 촘촘.")]
+    [Min(1f)] public float groggyGaugePatternSide = 7f;
+    [Tooltip("무늬 최대 진하기(0이면 안 보임, 1이면 가장 밝은 삼각형이 무늬 색 그대로).")]
+    [Range(0f, 1f)] public float groggyGaugePatternAlpha = 0.6f;
+    [Tooltip("무늬 색(노란색 위에 이 색이 삼각형마다 다른 진하기로 섞임).")]
+    public Color groggyGaugePatternColor = Color.white;
+    [Tooltip("무늬 배치를 바꾸는 값 - 바꾸면 밝은 삼각형 자리가 달라집니다.")]
+    public float groggyGaugePatternSeed = 3f;
+
     [Header("보스 이름 (체력바 위쪽 - 이름/색은 보스 프리팹의 BossPortrait에서 정합니다)")]
     [Tooltip("이름 위치를 조정합니다(X: 좌우, Y: 상하). 기준점은 체력바 위쪽 변의 가운데이며, " +
              "양수면 각각 오른쪽/위쪽입니다.")]
@@ -105,6 +145,26 @@ public class BossHealthBarDisplay : MonoBehaviour
     private RectTransform shieldFillRect;
     private Image shieldFillImage;
     private bool shieldShown;           // 이번 프레임 보호막 바를 보이는지(레이아웃이 이름 위치에 반영)
+    private RectTransform gaugeBorderRect;
+    private Image gaugeBorderImage;
+    private RectTransform gaugeBgRect;
+    private Image gaugeBgImage;
+    private RectTransform gaugeHoleRect;
+    private Image gaugeHoleImage;
+    private RectTransform gaugeFillRect;
+    private Image gaugeFillImage;
+    private bool gaugeShown;
+    private float gaugeDisplayed;       // 화면에 보이는 게이지 양(목표량을 부드럽게 따라감)
+    private Object gaugeOwner;          // 게이지 값을 읽던 보스(바뀌면 바로 그 값으로 맞춤)
+    private Texture2D circleTexture;    // 코드로 만든 원 그림(테두리/회색 원/구멍)
+    private Sprite circleSprite;
+    private Texture2D ringTexture;      // 코드로 만든 노란 도넛(+ 삼각형 무늬) 그림 - 색/무늬/크기 값이 바뀌면 다시 만듦
+    private Sprite ringSprite;
+    private string ringTextureKey;
+    private Texture2D dialTexture;      // 코드로 만든 회색 원(+ 눈금선) 그림 - 색/눈금/크기 값이 바뀌면 다시 만듦
+    private Sprite dialSprite;
+    private string dialTextureKey;
+    private const int GaugeTextureSize = 256;
     private TextMeshProUGUI nameText;
 
     // Filled 방식은 스프라이트가 있어야 동작하므로, 자리표시 바용 1x1 흰색 스프라이트를 직접 만듭니다.
@@ -140,6 +200,12 @@ public class BossHealthBarDisplay : MonoBehaviour
     {
         if (whiteSprite != null) Destroy(whiteSprite);
         if (whiteTexture != null) Destroy(whiteTexture);
+        if (circleSprite != null) Destroy(circleSprite);
+        if (circleTexture != null) Destroy(circleTexture);
+        if (ringSprite != null) Destroy(ringSprite);
+        if (ringTexture != null) Destroy(ringTexture);
+        if (dialSprite != null) Destroy(dialSprite);
+        if (dialTexture != null) Destroy(dialTexture);
     }
 
     // ------------------------------------------------------------------
@@ -269,6 +335,9 @@ public class BossHealthBarDisplay : MonoBehaviour
             shieldFillImage.fillAmount = Mathf.Clamp01(shield.DisplayRatio);
         }
 
+        // [3레벨 보스] 그로기 게이지 - 보스가 IBossGroggyGauge를 구현했을 때만
+        ApplyGroggyGauge();
+
         // 이름: 보스 프리팹의 BossPortrait에 이름이 있을 때만 표시
         string bossName = portraitComp != null ? portraitComp.bossName : null;
         bool hasName = !string.IsNullOrEmpty(bossName);
@@ -344,6 +413,21 @@ public class BossHealthBarDisplay : MonoBehaviour
             nameBaseY = shieldPos.y + st;
         }
 
+        // [3레벨 보스] 그로기 게이지: 체력바 테두리 오른쪽, 세로 가운데. 테두리 원 -> 회색 원 -> 구멍 원 -> 노란 도넛 순서로 겹침(모두 같은 중심).
+        if (gaugeShown)
+        {
+            float d = Mathf.Max(4f, groggyGaugeDiameter);
+            float inner = Mathf.Max(1f, d - 2f * Mathf.Max(0f, groggyGaugeBorder));
+            float ringOuter = inner * Mathf.Clamp(groggyGaugeRingOuter, 0.1f, 1f);
+            float hole = ringOuter * Mathf.Clamp(groggyGaugeRingInner, 0f, 0.95f);
+            Vector2 gaugeCenter = new Vector2(barPos.x + barSize.x + BarBorder + groggyGaugeSpacing + d * 0.5f,
+                                              barPos.y - barSize.y * 0.5f) + groggyGaugeOffset;
+            SetCentered(gaugeBorderRect, d, gaugeCenter);
+            SetCentered(gaugeBgRect, inner, gaugeCenter);
+            SetCentered(gaugeHoleRect, hole, gaugeCenter);
+            SetCentered(gaugeFillRect, ringOuter, gaugeCenter);
+        }
+
         // 보스 이름: 체력바(보호막이 있으면 보호막 바) 위쪽 변 가운데에 아래쪽 가운데가 닿게(글자는 아래 정렬).
         nameRect.sizeDelta = new Vector2(barSize.x, nameFontSize * 1.5f);
         nameRect.anchoredPosition = new Vector2(barPos.x + barSize.x * 0.5f, nameBaseY) + nameOffset;
@@ -362,6 +446,230 @@ public class BossHealthBarDisplay : MonoBehaviour
     {
         rt.sizeDelta = size;
         rt.anchoredPosition = anchoredPos;
+    }
+
+    // 지름 diameter인 원을 center(패널 왼쪽 위 기준 좌표)에 중심이 오게 둡니다(이 함수용 이미지는 위-왼쪽 기준이라 반지름만큼 옮김).
+    private static void SetCentered(RectTransform rt, float diameter, Vector2 center)
+    {
+        rt.sizeDelta = new Vector2(diameter, diameter);
+        rt.anchoredPosition = center + new Vector2(-diameter * 0.5f, diameter * 0.5f);
+    }
+
+    // 그로기 게이지 상태/색/채움. 게이지 양은 목표량을 Fill Speed로 따라가 도넛이 시계 방향으로 스르륵 차오르게(줄 때는 거꾸로) 합니다.
+    private void ApplyGroggyGauge()
+    {
+        IBossGroggyGauge gauge = null;
+        foreach (var mb in currentBoss.GetComponents<MonoBehaviour>())
+        {
+            if (mb is IBossGroggyGauge g) { gauge = g; break; }
+        }
+        gaugeShown = gauge != null && gauge.ShowsGroggyGauge;
+        SetActiveIfChanged(gaugeBorderRect, gaugeShown && groggyGaugeBorder > 0f);
+        SetActiveIfChanged(gaugeBgRect, gaugeShown);
+        SetActiveIfChanged(gaugeHoleRect, gaugeShown);
+        SetActiveIfChanged(gaugeFillRect, gaugeShown);
+        if (!gaugeShown) return;
+
+        EnsureGaugeSprites();
+        gaugeBorderImage.sprite = circleSprite;
+        gaugeBorderImage.color = groggyGaugeBorderColor;
+        gaugeBgImage.sprite = dialSprite;      // 색/눈금이 그림에 들어 있음
+        gaugeBgImage.color = Color.white;
+        gaugeHoleImage.sprite = circleSprite;
+        gaugeHoleImage.color = groggyGaugeHoleColor;
+        gaugeFillImage.sprite = ringSprite;    // 색/무늬가 그림에 들어 있음
+        gaugeFillImage.color = Color.white;
+
+        float target = Mathf.Clamp01(gauge.GroggyGaugeRatio);
+        if (gaugeOwner != currentBoss)
+        {
+            gaugeOwner = currentBoss; // 다른 보스로 바뀐 첫 프레임은 바로 그 값으로(이전 보스 값에서 차오르는 것처럼 보이지 않게)
+            gaugeDisplayed = target;
+        }
+        else
+        {
+            gaugeDisplayed = Mathf.MoveTowards(gaugeDisplayed, target, groggyGaugeFillSpeed * Time.deltaTime);
+        }
+        gaugeFillImage.fillAmount = gaugeDisplayed;
+    }
+
+    // 회색 원(눈금선)과 노란 도넛(삼각형 무늬) 그림: 관련 값이 바뀌었을 때만 다시 만듭니다(Play 중 Inspector에서 바꿔도 반영).
+    // 눈금 두께/삼각형 크기를 화면 픽셀로 맞추려고 지금 게이지 크기(ApplyLayout과 같은 계산)도 함께 봅니다.
+    private void EnsureGaugeSprites()
+    {
+        float d = Mathf.Max(4f, groggyGaugeDiameter);
+        float inner = Mathf.Max(1f, d - 2f * Mathf.Max(0f, groggyGaugeBorder));
+        float outerRatio = Mathf.Clamp(groggyGaugeRingOuter, 0.1f, 1f);
+        float innerRatio = Mathf.Clamp(groggyGaugeRingInner, 0f, 0.95f);
+        float ringOuterPx = inner * outerRatio;
+        // 눈금선은 구멍 가장자리부터(회색 원 기준 반지름 비율).
+        float holeOnDial = outerRatio * innerRatio;
+
+        string dialKey = $"{inner:F2}|{holeOnDial:F4}|{groggyGaugeTickCount}|{groggyGaugeTickWidth:F2}|{groggyGaugeBackgroundColor}|{groggyGaugeTickColor}";
+        if (dialSprite == null || dialKey != dialTextureKey)
+        {
+            if (dialSprite != null) Destroy(dialSprite);
+            if (dialTexture != null) Destroy(dialTexture);
+            dialTexture = BuildDialTexture(inner, holeOnDial);
+            dialSprite = Sprite.Create(dialTexture, new Rect(0f, 0f, GaugeTextureSize, GaugeTextureSize), new Vector2(0.5f, 0.5f), 100f);
+            dialTextureKey = dialKey;
+        }
+
+        string ringKey = $"{ringOuterPx:F2}|{innerRatio:F4}|{groggyGaugeFillColor}|{groggyGaugePattern}|{groggyGaugePatternSide:F2}|" +
+                         $"{groggyGaugePatternAlpha:F3}|{groggyGaugePatternColor}|{groggyGaugePatternSeed:F3}";
+        if (ringSprite == null || ringKey != ringTextureKey)
+        {
+            if (ringSprite != null) Destroy(ringSprite);
+            if (ringTexture != null) Destroy(ringTexture);
+            ringTexture = BuildRingTexture(ringOuterPx, innerRatio);
+            ringSprite = Sprite.Create(ringTexture, new Rect(0f, 0f, GaugeTextureSize, GaugeTextureSize), new Vector2(0.5f, 0.5f), 100f);
+            ringTextureKey = ringKey;
+        }
+    }
+
+    // 회색 원 + 12시부터 같은 간격의 눈금선(구멍 가장자리 ~ 원 가장자리). dialPx = 화면에서의 지름(눈금 두께를 화면 픽셀로 맞춤).
+    private Texture2D BuildDialTexture(float dialPx, float holeRatio)
+    {
+        int size = GaugeTextureSize;
+        var tex = NewGaugeTexture();
+        float outer = size * 0.5f - 1f;
+        float hole = outer * holeRatio;
+        float c = (size - 1) * 0.5f;
+        float texelsPerPixel = (outer * 2f) / Mathf.Max(dialPx, 1f);
+        float halfLine = Mathf.Max(0.05f, groggyGaugeTickWidth) * 0.5f * texelsPerPixel;
+        int ticks = Mathf.Max(0, groggyGaugeTickCount);
+        float step = ticks > 0 ? Mathf.PI * 2f / ticks : 0f;
+        Color bg = groggyGaugeBackgroundColor;
+        Color line = groggyGaugeTickColor;
+
+        var pixels = new Color32[size * size];
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dx = x - c, dy = y - c;
+                float dist = Mathf.Sqrt(dx * dx + dy * dy);
+                float cover = Mathf.Clamp01(outer - dist + 0.5f);
+                Color col = bg;
+                if (ticks > 0 && dist > hole)
+                {
+                    // 12시(위)에서 시계 방향 각도 -> 가장 가까운 눈금까지의 수직 거리
+                    float angle = Mathf.Atan2(dx, dy);
+                    float nearest = Mathf.Round(angle / step) * step;
+                    float perp = Mathf.Abs(Mathf.Sin(angle - nearest)) * dist;
+                    float lineA = Mathf.Clamp01(halfLine - perp + 0.5f) * Mathf.Clamp01(dist - hole + 0.5f) * line.a;
+                    col = Color.Lerp(bg, new Color(line.r, line.g, line.b, bg.a), lineA);
+                }
+                col.a *= cover;
+                pixels[y * size + x] = col;
+            }
+        }
+        tex.SetPixels32(pixels);
+        tex.Apply();
+        return tex;
+    }
+
+    // 노란 도넛 + 삼각형 무늬(UIPatternBox 셰이더의 Pattern과 같은 삼각형 배치/진하기 규칙, 반짝임 없음). ringPx = 화면에서의 바깥 지름.
+    private Texture2D BuildRingTexture(float ringPx, float innerRatio)
+    {
+        int size = GaugeTextureSize;
+        var tex = NewGaugeTexture();
+        float outer = size * 0.5f - 1f;
+        float inner = outer * innerRatio;
+        float c = (size - 1) * 0.5f;
+        float pixelsPerTexel = Mathf.Max(ringPx, 1f) / (outer * 2f);
+        float side = Mathf.Max(1f, groggyGaugePatternSide);
+        float h = side * 0.8660254f;
+        Color fill = groggyGaugeFillColor;
+        Color tint = groggyGaugePatternColor;
+
+        var pixels = new Color32[size * size];
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dx = x - c, dy = y - c;
+                float dist = Mathf.Sqrt(dx * dx + dy * dy);
+                float cover = Mathf.Clamp01(outer - dist + 0.5f);
+                if (innerRatio > 0f) cover = Mathf.Min(cover, Mathf.Clamp01(dist - inner + 0.5f));
+
+                Color col = fill;
+                if (groggyGaugePattern && cover > 0f)
+                {
+                    float k = TrianglePattern(x * pixelsPerTexel, y * pixelsPerTexel, side, h, pixelsPerTexel) * groggyGaugePatternAlpha;
+                    col = Color.Lerp(fill, new Color(tint.r, tint.g, tint.b, fill.a), k * tint.a);
+                }
+                col.a = fill.a * cover;
+                pixels[y * size + x] = col;
+            }
+        }
+        tex.SetPixels32(pixels);
+        tex.Apply();
+        return tex;
+    }
+
+    // 삼각형 무늬 진하기(0~1). p = 화면 픽셀 좌표. 위/아래로 번갈아 놓인 정삼각형마다 다른 진하기(가끔 아주 밝은 삼각형).
+    private float TrianglePattern(float px, float py, float side, float h, float pixelsPerTexel)
+    {
+        float row = Mathf.Floor(py / h);
+        float fy = py / h - row;
+        float xs = px / side + (Mathf.Abs(row) % 2f >= 1f ? 0.5f : 0f);
+        float col = Mathf.Floor(xs);
+        float fx = xs - col;
+
+        float g = (1f - Mathf.Abs(2f * fx - 1f)) - fy;
+        float upIdx = 2f * col;
+        float downIdx = fx < 0.5f ? 2f * col - 1f : 2f * col + 1f;
+        float aa = Mathf.Max((2f / side + 1f / h) * pixelsPerTexel, 1e-5f);
+        float w = Mathf.Clamp01(g / aa + 0.5f);
+        return Mathf.Lerp(TriValue(row, downIdx), TriValue(row, upIdx), w);
+    }
+
+    private float TriValue(float row, float idx)
+    {
+        float h0 = Hash2(row, idx);
+        float h1 = Hash2(row + 17f, idx + 3f);
+        return h0 < 0.07f ? 0.95f : h1 * 0.62f;
+    }
+
+    private float Hash2(float a, float b)
+    {
+        float v = Mathf.Sin(a * 127.1f + b * 311.7f + groggyGaugePatternSeed * 74.7f) * 43758.5453f;
+        return v - Mathf.Floor(v);
+    }
+
+    private static Texture2D NewGaugeTexture()
+    {
+        var tex = new Texture2D(GaugeTextureSize, GaugeTextureSize, TextureFormat.RGBA32, false);
+        tex.wrapMode = TextureWrapMode.Clamp;
+        tex.filterMode = FilterMode.Bilinear;
+        return tex;
+    }
+
+    // 가장자리를 부드럽게 처리한 흰 원(innerRatio > 0이면 가운데가 뚫린 도넛) 그림을 만듭니다. 색은 Image.color로 입힙니다.
+    private static Texture2D BuildDiscTexture(float innerRatio)
+    {
+        const int size = 256;
+        var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.wrapMode = TextureWrapMode.Clamp;
+        tex.filterMode = FilterMode.Bilinear;
+        float outer = size * 0.5f - 1f;
+        float inner = outer * innerRatio;
+        float c = (size - 1) * 0.5f;
+        var pixels = new Color32[size * size];
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dist = Mathf.Sqrt((x - c) * (x - c) + (y - c) * (y - c));
+                float a = Mathf.Clamp01(outer - dist + 0.5f);
+                if (innerRatio > 0f) a = Mathf.Min(a, Mathf.Clamp01(dist - inner + 0.5f));
+                pixels[y * size + x] = new Color32(255, 255, 255, (byte)Mathf.RoundToInt(a * 255f));
+            }
+        }
+        tex.SetPixels32(pixels);
+        tex.Apply();
+        return tex;
     }
 
     // ------------------------------------------------------------------
@@ -383,6 +691,9 @@ public class BossHealthBarDisplay : MonoBehaviour
         whiteTexture.SetPixel(0, 0, Color.white);
         whiteTexture.Apply();
         whiteSprite = Sprite.Create(whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 100f);
+
+        circleTexture = BuildDiscTexture(0f);
+        circleSprite = Sprite.Create(circleTexture, new Rect(0f, 0f, circleTexture.width, circleTexture.height), new Vector2(0.5f, 0.5f), 100f);
     }
 
     private void BuildPanel(Transform canvasRoot)
@@ -418,6 +729,21 @@ public class BossHealthBarDisplay : MonoBehaviour
         shieldBorderRect.gameObject.SetActive(false);
         shieldBgRect.gameObject.SetActive(false);
         shieldFillRect.gameObject.SetActive(false);
+
+        // [3레벨 보스] 그로기 게이지(테두리 원 -> 회색 원 -> 구멍 원 -> 노란 도넛 순서로 그려짐). 도넛은 12시부터 시계 방향으로 차오름.
+        gaugeBorderRect = CreateImage("GroggyGaugeBorder", out gaugeBorderImage);
+        gaugeBgRect = CreateImage("GroggyGaugeBackground", out gaugeBgImage);
+        gaugeHoleRect = CreateImage("GroggyGaugeHole", out gaugeHoleImage);
+        gaugeFillRect = CreateImage("GroggyGaugeFill", out gaugeFillImage);
+        gaugeFillImage.type = Image.Type.Filled;
+        gaugeFillImage.fillMethod = Image.FillMethod.Radial360;
+        gaugeFillImage.fillOrigin = (int)Image.Origin360.Top;
+        gaugeFillImage.fillClockwise = true;
+        gaugeFillImage.fillAmount = 0f;
+        gaugeBorderRect.gameObject.SetActive(false);
+        gaugeBgRect.gameObject.SetActive(false);
+        gaugeHoleRect.gameObject.SetActive(false);
+        gaugeFillRect.gameObject.SetActive(false);
 
         // 보스 이름 (체력바 위쪽). 초상화보다 먼저 만들어야 아래의 SetAsLastSibling으로 초상화가 계속 맨 위에 옵니다.
         var nameGo = new GameObject("BossName");

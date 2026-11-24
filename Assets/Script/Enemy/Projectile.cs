@@ -73,6 +73,17 @@ public class ProjectileDespawnEvent
 // - 플레이어가 다른 방에 들어가는 순간, 이전 방에서 날아가던 총알은 아무 반응 없이 바로 지워집니다(꼬리 포함 -
 //   RoomScope.DestroyWhenPlayerLeaves).
 // - 방을 판단할 수 없으면(테스트 씬 등) 예전과 똑같이 동작합니다.
+//
+// [63번 유도 미사일 - 미사일 모드(ConfigureAsMissile)]
+// 63번 미사일은 플레이어 총알과 같은 취급을 받도록 이 클래스를 그대로 씁니다(총알 아이템 효과가 OnProjectileSpawned로 똑같이 붙음).
+// 미사일 모드인 총알만 아래처럼 다르게 동작하고, 일반 총알은 예전과 완전히 같습니다(형빈 확정).
+// - 방향은 유도 조종기(HomingMissile)가 매 프레임 SetMissileDirection으로 정합니다(직진 후 회전 반경을 가지고 유도).
+// - 벽은 완전히 무시합니다(35번 튕김/벽 폭발·분열 없음). 99번/120번/110번 관통은 강제로 끕니다(EnforceMissileRules).
+// - 자기 목표(MissileTarget, 3레벨 보스 총알 비콘을 노리면 MissileBeaconTarget)에만 맞고, 무장(MissileArmed) 전에는 맞지 않습니다(발사/분열 직후 겹쳐 태어나도 바로 터지지 않게).
+// - 사거리/쏜 방 경계로는 사라지지 않습니다. 최대 비행 시간이 지나면 조종기가 DespawnQuietly로 조용히 지웁니다(사거리 소진과 같은 소멸 -
+//   4번/5번 반응 없음). 플레이어가 방을 나가면 일반 총알처럼 바로 지워집니다.
+// - 113번 슈가 추가 피해를 받지 않고, 명중 알림 동안 CurrentHitProjectile로 자신을 알려 113번이 중첩을 쌓지 않게 합니다.
+// - 피해 숫자는 "공격력 x 미사일 피해 배율"을 기준으로 비교합니다(EnemyHealth.TakeDamageWithReferenceScale - 형빈 확정).
 [RequireComponent(typeof(Rigidbody))]
 public class Projectile : MonoBehaviour
 {
@@ -92,6 +103,24 @@ public class Projectile : MonoBehaviour
     // [v1.44 추가] RequestDespawn이 실제로 Destroy를 부른 뒤에는 더 이상 처리하지 않기
     // 위한 안전장치입니다 - 아래 [사거리/벽 충돌 순서] 주석 참고.
     private bool hasDespawned = false;
+
+    // [3레벨 보스 레이저] 지난 프레임 위치 - 이번 프레임 이동 경로가 레이저에 걸렸는지 확인합니다(BossLaserBlockers).
+    private Vector3 bossLaserCheckPos;
+    private bool bossLaserCheckStarted;
+
+    // [3레벨 보스 그로기 비콘] 이 총알이 이미 반응한(또는 통과해야 하는) 비콘입니다. 한 총알은 한 비콘에 한 번만 반응합니다
+    // (관통/튕김 뒤 다시 닿아도 통과, 5번 분열탄은 부모가 맞힌 비콘을 통과).
+    private readonly HashSet<GroggyBeacon> ignoredBeacons = new HashSet<GroggyBeacon>();
+    // 비콘 명중 소멸 알림(OnDespawning)을 보내는 동안의 그 비콘 - 그 사이 생긴 분열탄(MarkAsSplit)이 이 비콘을 통과하게 합니다.
+    private static GroggyBeacon dispatchingBeaconHit;
+
+    // [3레벨 보스 그로기 비콘] 비콘 명중 알림이 도는 동안 맞은 비콘입니다(그 밖에는 null). 5번 분열 미사일이 맞은 비콘을 목표에서 뺄 때 읽습니다.
+    public static GroggyBeacon CurrentBeaconHit => dispatchingBeaconHit;
+    // 이 총알이 그 비콘에 이미 반응했는지(또는 통과해야 하는지) - 69번 튕김/63번 미사일이 같은 비콘을 다시 노리지 않게 합니다.
+    public bool HasReactedToBeacon(GroggyBeacon beacon) => beacon != null && ignoredBeacons.Contains(beacon);
+    // [118번 포격 - 형빈 확정] 플레이어 총알(63번 미사일 포함)이 비콘에 닿은 순간(비콘에 알린 직후, 소멸 처리 전)입니다. 피해 알림
+    // (OnPlayerBulletHitEnemy)과 달리 적 상태 효과(38/91/102/113번 등)는 받지 않고, 맞은 자리에 반응하는 효과만 구독합니다.
+    public static event Action<Projectile, GroggyBeacon> OnPlayerBulletHitBeacon;
 
     private Rigidbody rb;
 
@@ -115,6 +144,83 @@ public class Projectile : MonoBehaviour
     public int Generation => generation;
     public float EffectScale => effectScale;
     public bool IsSplitProjectile => isSplitProjectile;
+
+    // ---- [63번 유도 미사일 - 미사일 모드] (클래스 주석 참고) ----
+    private bool isMissile;
+    private EnemyHealth missileTarget;
+    private GroggyBeacon missileBeaconTarget; // [3레벨 보스 그로기 비콘] 총알 비콘을 노릴 때(이때 missileTarget은 비어 있음)
+    private bool missileArmed;
+    private float missileDamageReferenceScale = 1f;
+
+    public bool IsMissile => isMissile;
+    public EnemyHealth MissileTarget => missileTarget;
+    public GroggyBeacon MissileBeaconTarget => missileBeaconTarget;
+    // 지금 노리는 대상(적 또는 총알 비콘, 없으면 null)입니다.
+    public Component MissileTargetObject => missileBeaconTarget != null ? (Component)missileBeaconTarget : missileTarget;
+    public bool MissileArmed => missileArmed;
+
+    // 명중 알림(OnPlayerBulletHitEnemy/Detailed)이 도는 동안 맞힌 총알입니다(그 밖에는 null). 113번처럼 "어떤 총알이 맞혔는지"가 필요한
+    // 효과가 기존 알림 인자를 바꾸지 않고 읽습니다.
+    public static Projectile CurrentHitProjectile { get; private set; }
+
+    // 미사일 모드로 바꿉니다. 아이템 훅(OnProjectileSpawned)보다 먼저 불러야 훅이 IsMissile/EffectScale을 읽을 수 있습니다.
+    // missileEffectScale = 아이템 효과 배율(4번 폭발/94번 후광/68번/118번/23번 - 미사일 피해 배율과 같은 50%, 형빈 확정 A안).
+    // damageReferenceScale = 피해 숫자 비교 기준(공격력 x 이 값).
+    public void ConfigureAsMissile(EnemyHealth target, float missileEffectScale, float damageReferenceScale)
+    {
+        isMissile = true;
+        missileTarget = target;
+        missileArmed = false;
+        effectScale = Mathf.Max(missileEffectScale, 0f);
+        missileDamageReferenceScale = Mathf.Max(damageReferenceScale, 0.0001f);
+        EnforceMissileRules();
+    }
+
+    // 아이템 훅이 켠 관통/벽 튕김 표시를 미사일에서는 끕니다(형빈 확정 - 99번/120번/35번 효과 없음). 훅을 보낸 뒤 한 번 더 부릅니다.
+    public void EnforceMissileRules()
+    {
+        if (!isMissile) return;
+        isPiercing = false;
+        isEnemyPiercing = false;
+        isWallPiercing = false;
+        hasWallBounceEffect = false;
+    }
+
+    public void SetMissileTarget(EnemyHealth target)
+    {
+        if (!isMissile) return;
+        missileTarget = target;
+        missileBeaconTarget = null;
+    }
+
+    // 적 또는 총알 비콘을 목표로 정합니다(그 밖의 대상이면 목표 없음).
+    public void SetMissileTargetObject(Component target)
+    {
+        if (!isMissile) return;
+        missileTarget = target as EnemyHealth;
+        missileBeaconTarget = target as GroggyBeacon;
+    }
+
+    public void ArmMissile()
+    {
+        if (isMissile) missileArmed = true;
+    }
+
+    // 유도 조종기가 진행 방향을 정합니다(Redirect와 달리 위치를 밀거나 사거리/튕김 횟수를 건드리지 않음).
+    // [주의 - 형빈 확인 버그] 여기서 transform(회전 포함)을 건드리면 안 됩니다. 매 프레임 transform을 바꾸면 Rigidbody가 그 순간의 transform
+    // 자세로 다시 맞춰지면서(보간 중이면 한 박자 뒤처진 위치) FixedUpdate의 MovePosition 이동이 계속 지워져, 방향을 트는 동안 미사일이
+    // 제자리에 멈춘 것처럼 보였습니다. 구체라 회전은 보이지 않으므로 진행 방향 값만 바꿉니다(연기/튕김은 Direction을 읽음).
+    public void SetMissileDirection(Vector3 newDirection)
+    {
+        if (!isMissile || newDirection.sqrMagnitude < 0.000001f) return;
+        direction = newDirection.normalized;
+    }
+
+    // 사거리 소진과 같은 조용한 소멸(어떤 아이템도 반응하지 않음) - 미사일 최대 비행 시간/목표 없음.
+    public void DespawnQuietly()
+    {
+        RequestDespawn(ProjectileDespawnReason.RangeExceeded, null, Vector3.zero);
+    }
 
     // 5번 아이템이 분열탄의 사거리/속도/크기를 정할 때 부모 값을 읽는 용도입니다.
     public float MaxRange => maxRange;
@@ -317,8 +423,9 @@ public class Projectile : MonoBehaviour
 
     // PlayerShooting에서 발사 직후 호출합니다.
     // damageRoll: [23번 30색 물감 세트] 이 총알에 붙을 랜덤 추가 피해/색입니다. 23번이 없으면 null(기존과 완전히 동일).
+    // attachTrail: false면 별똥별 꼬리를 붙이지 않습니다(63번 미사일 - 꼬리 대신 연기, 형빈 확정).
     public void Launch(Vector3 fireDirection, float bulletDamage, float bulletRange, float bulletSpeed, float bulletSize,
-                       BulletDamageRoll? damageRoll = null)
+                       BulletDamageRoll? damageRoll = null, bool attachTrail = true)
     {
         direction = fireDirection.normalized;
         damage = bulletDamage;
@@ -348,7 +455,7 @@ public class Projectile : MonoBehaviour
 
         // [탄환 꼬리] 위치/크기가 정해진 뒤 별똥별 꼬리를 붙입니다(분열탄도 이 Launch를 거침). 꼬리 모양/색은
         // Resources/BulletTrailSettings 설정과 그 템플릿 프리팹에서 정하고, 탄환이 사라지면 꼬리는 스스로 사라집니다.
-        BulletTrail.Attach(gameObject, BulletTrailKind.Bullet);
+        if (attachTrail) BulletTrail.Attach(gameObject, BulletTrailKind.Bullet);
 
         // [방 전환] 쏜 방을 기억하고, 플레이어가 다른 방에 들어가면 바로 지워지도록 등록합니다(클래스 주석 [방 전환] 참고).
         originRoom = RoomScope.CurrentPlayerRoom();
@@ -370,6 +477,8 @@ public class Projectile : MonoBehaviour
         }
 
         if (enemyToIgnore != null) ignoredEnemies.Add(enemyToIgnore);
+        // [3레벨 보스 그로기 비콘] 부모가 비콘을 맞혀 분열했으면, 비콘 안에서 태어나도 그 비콘을 다시 맞히지 않습니다.
+        if (dispatchingBeaconHit != null) ignoredBeacons.Add(dispatchingBeaconHit);
     }
 
     void OnDestroy()
@@ -470,6 +579,12 @@ public class Projectile : MonoBehaviour
     // 소멸되지 않습니다.
     void Update()
     {
+        // [3레벨 보스 레이저] 조사 중인 레이저에 닿으면 아이템 효과 없이 그 즉시 소멸합니다(미사일/관통 총알 포함 - 형빈 확정).
+        if (CheckBossLaser()) return;
+
+        // [63번 미사일] 사거리/쏜 방 경계/벽 관통 경계로는 사라지지 않습니다(최대 비행 시간은 HomingMissile이 처리).
+        if (isMissile) return;
+
         if (distanceTraveled >= maxRange)
         {
             RequestDespawn(ProjectileDespawnReason.RangeExceeded, null, Vector3.zero);
@@ -500,6 +615,30 @@ public class Projectile : MonoBehaviour
         }
     }
 
+    // [3레벨 보스 레이저] 지난 프레임 위치 -> 지금 위치 경로가 레이저에 걸렸으면 소멸하고 true. 조사 중인 레이저가 없으면 위치만 기억합니다.
+    private bool CheckBossLaser()
+    {
+        Vector3 now = transform.position;
+        Vector3 from = bossLaserCheckStarted ? bossLaserCheckPos : now;
+        bossLaserCheckPos = now;
+        bossLaserCheckStarted = true;
+
+        if (hasDespawned || !BossLaserBlockers.AnyActive) return false;
+        if (!BossLaserBlockers.TryGetFirstHit(from, now, 0f, out _)) return false;
+
+        VanishByBossLaser();
+        return true;
+    }
+
+    // [3레벨 보스 레이저] 레이저에 닿은 총알의 소멸입니다. 벽/적/사거리 소멸과 달리 OnDespawning을 부르지 않으므로
+    // 어떤 아이템(4번 폭발, 5번 분열, 35번/69번 튕김, 99/110/120번 관통 등)도 반응하지 않고, 관통 총알도 여기서 끝납니다.
+    private void VanishByBossLaser()
+    {
+        if (hasDespawned) return;
+        hasDespawned = true;
+        Destroy(gameObject);
+    }
+
     void OnTriggerEnter(Collider other)
     {
         // [총알 1발 = 적 1명 - 형빈 확정] 서로 겹쳐 있는 적 두 마리의 겹친 부분을 맞히면, 같은 물리 스텝 안에서 두 적의
@@ -510,6 +649,20 @@ public class Projectile : MonoBehaviour
 
         if (other.CompareTag("Player")) return; // 자기 자신을 쏜 플레이어는 무시
 
+        // [63번 미사일] 벽은 무시하고, 무장된 뒤 자기 목표에만 맞습니다(지나가는 다른 적은 통과).
+        if (isMissile)
+        {
+            if (!missileArmed) return;
+            // [3레벨 보스 그로기 비콘] 총알 비콘을 노리는 미사일은 그 비콘에만 맞습니다.
+            if (missileBeaconTarget != null)
+            {
+                if (other.GetComponentInParent<GroggyBeacon>() == missileBeaconTarget) HitGroggyBeacon(missileBeaconTarget, other.gameObject);
+                return;
+            }
+            if (missileTarget == null || !other.CompareTag("Enemy")) return;
+            if (other.GetComponent<EnemyHealth>() != missileTarget) return;
+        }
+
         if (other.CompareTag("Enemy"))
         {
             EnemyHealth enemy = other.GetComponent<EnemyHealth>();
@@ -517,7 +670,8 @@ public class Projectile : MonoBehaviour
             // [5번 패시브] 분열의 원인이 된 부모가 이미 맞힌 적은 그대로 통과합니다(피해도,
             // 소멸도 없음). 분열탄이 태어날 때 그 적의 콜라이더와 겹쳐 있어도 바로 사라지지
             // 않게 하는 역할도 합니다.
-            if (enemy != null && ignoredEnemies.Contains(enemy)) return;
+            // [63번 미사일] 분열 미사일은 그 적밖에 남지 않았으면 다시 그 적을 노리므로(형빈 확정) 이 규칙을 건너뜁니다(무장 지연이 대신함).
+            if (!isMissile && enemy != null && ignoredEnemies.Contains(enemy)) return;
 
             // [69번] 방금 튕겨 나온 적은 통과합니다(RedirectFromEnemy 참고).
             if (enemy != null && enemy == lastBouncedEnemy) return;
@@ -525,27 +679,14 @@ public class Projectile : MonoBehaviour
             // [99번 적 관통] 이번에(마지막 벽 튕김 이후) 이미 뚫고 지나간 적은 통과합니다(피해/소멸 판정 없음).
             if (enemy != null && isEnemyPiercing && piercedEnemies.Contains(enemy)) return;
 
-            if (enemy != null)
-            {
-                // [113번 슈가 중첩 등 - 총알 명중 추가 피해] 총알 피해(모든 총알 보정 반영)에 추가 피해를 더해 한 번에 줍니다. 41번 같은
-                // "적이 받는 피해 % 증가"는 TakeDamage 안에서 이 합계에 마지막으로 곱해집니다(PlayerBulletBonusDamage.cs 참고).
-                // 중첩은 아래 명중 알림(피해를 준 뒤)에서 쌓이므로, 이번 총알은 "쌓이기 전" 중첩 기준입니다.
-                enemy.TakeDamage(Damage + PlayerBulletBonusDamage.Resolve(enemy));
-                OnPlayerBulletHitEnemy?.Invoke(enemy); // [38번 패시브 연동]
-                OnPlayerBulletHitEnemyDetailed?.Invoke(this, enemy); // [118번 포격 등]
-
-                // [110번 관통 총알] 같은 적을 다시 맞히지 않도록 통과 목록에 넣습니다.
-                if (isPiercing) ignoredEnemies.Add(enemy);
-
-                // [99번 적 관통] 같은 적을 다시 맞히지 않도록 기록합니다(벽에 튕기면 비워짐).
-                if (isEnemyPiercing) piercedEnemies.Add(enemy);
-            }
-            RequestDespawn(ProjectileDespawnReason.HitEnemy, other.gameObject, Vector3.zero);
+            ApplyEnemyHit(enemy, other.gameObject);
             return;
         }
 
         if (other.CompareTag("Wall"))
         {
+            if (isMissile) return; // [63번 미사일] 벽 무시(위에서 이미 걸러지지만 안전장치)
+
             // [120번/110번 벽 관통] 벽 한 덩어리에 한 번만 반응하고, 무시할 벽에는 반응하지 않습니다.
             if (PiercesWalls)
             {
@@ -558,7 +699,116 @@ public class Projectile : MonoBehaviour
 
             Vector3 normal = ComputeWallNormal();
             RequestDespawn(ProjectileDespawnReason.HitWall, other.gameObject, normal);
+            return;
         }
+
+        // [3레벨 보스 그로기 비콘] 적도 벽도 아니지만 총알을 받는 오브젝트입니다(63번 미사일은 위에서 자기 목표 비콘만 맞음).
+        GroggyBeacon beacon = other.GetComponentInParent<GroggyBeacon>();
+        if (beacon != null) HitGroggyBeacon(beacon, other.gameObject);
+    }
+
+    // [3레벨 보스 그로기 비콘] 비콘에 알린 뒤(총알 비콘 = 명중 횟수, 수류탄/해킹 비콘 = MISS) 적 명중과 같은 소멸 창구를 지납니다 -
+    // 4번 폭발, 5번 분열, 69번 튕김, 관통 등 "총알이 적에 닿았을 때" 아이템 효과는 그대로 일어나지만, 적이 아니므로 피해 알림
+    // (OnPlayerBulletHitEnemy - 38/91/102/113번 등 적 상태 효과)은 보내지 않고, 비콘 명중 알림(OnPlayerBulletHitBeacon - 118번 포격)을 보냅니다.
+    private void HitGroggyBeacon(GroggyBeacon beacon, GameObject hitObject)
+    {
+        if (ignoredBeacons.Contains(beacon) || !beacon.AcceptsBullets) return;
+        ignoredBeacons.Add(beacon);
+
+        beacon.HandleBulletHit();
+
+        Projectile previousHit = CurrentHitProjectile;
+        CurrentHitProjectile = this;
+        try
+        {
+            OnPlayerBulletHitBeacon?.Invoke(this, beacon);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Projectile: 비콘 명중 알림 처리 중 오류가 발생해 건너뜁니다: {e}");
+        }
+        finally
+        {
+            CurrentHitProjectile = previousHit;
+        }
+
+        GroggyBeacon previous = dispatchingBeaconHit;
+        dispatchingBeaconHit = beacon;
+        try
+        {
+            RequestDespawn(ProjectileDespawnReason.HitEnemy, hitObject, Vector3.zero);
+        }
+        finally
+        {
+            dispatchingBeaconHit = previous;
+        }
+    }
+
+    // 적 명중 처리(피해 -> 명중 알림 -> 관통 기록 -> 소멸 요청)입니다. OnTriggerEnter와 63번 미사일 근접 명중(ForceMissileHit)이 함께 씁니다.
+    private void ApplyEnemyHit(EnemyHealth enemy, GameObject hitObject)
+    {
+        // [3레벨 보스 피해 감소막 - 형빈 확정] 막에 닿은 총알은 맞은 것처럼 보이되(MISS + 피격 깜빡임 + 적중 이펙트) 추가 효과 없이 사라집니다.
+        if (enemy != null && enemy.BlocksBulletEffects)
+        {
+            BlockByEnemyShield(enemy, hitObject);
+            return;
+        }
+
+        if (enemy != null)
+        {
+            // [113번 슈가 중첩 등 - 총알 명중 추가 피해] 총알 피해(모든 총알 보정 반영)에 추가 피해를 더해 한 번에 줍니다. 41번 같은
+            // "적이 받는 피해 % 증가"는 TakeDamage 안에서 이 합계에 마지막으로 곱해집니다(PlayerBulletBonusDamage.cs 참고).
+            // 중첩은 아래 명중 알림(피해를 준 뒤)에서 쌓이므로, 이번 총알은 "쌓이기 전" 중첩 기준입니다.
+            // [63번 미사일] 113번 슈가 추가 피해는 받지 않고, 피해 숫자는 미사일 기준 피해와 비교합니다(형빈 확정).
+            if (isMissile) enemy.TakeDamageWithReferenceScale(Damage, missileDamageReferenceScale);
+            else enemy.TakeDamage(Damage + PlayerBulletBonusDamage.Resolve(enemy));
+
+            Projectile previousHit = CurrentHitProjectile;
+            CurrentHitProjectile = this;
+            try
+            {
+                OnPlayerBulletHitEnemy?.Invoke(enemy); // [38번 패시브 연동]
+                OnPlayerBulletHitEnemyDetailed?.Invoke(this, enemy); // [118번 포격 등]
+            }
+            finally
+            {
+                CurrentHitProjectile = previousHit;
+            }
+
+            // [110번 관통 총알] 같은 적을 다시 맞히지 않도록 통과 목록에 넣습니다.
+            if (isPiercing) ignoredEnemies.Add(enemy);
+
+            // [99번 적 관통] 같은 적을 다시 맞히지 않도록 기록합니다(벽에 튕기면 비워짐).
+            if (isEnemyPiercing) piercedEnemies.Add(enemy);
+        }
+        RequestDespawn(ProjectileDespawnReason.HitEnemy, hitObject, Vector3.zero);
+    }
+
+    // 피해 알림(OnPlayerBulletHitEnemy - 113번 슈가 중첩, 38/91/102/118번 등)과 소멸 알림(OnDespawning - 4/5/69번, 관통 등)을 모두 건너뜁니다.
+    // TakeDamage는 MISS와 피격 깜빡임만 냅니다(피해 0). 관통 총알도 여기서 소멸합니다.
+    private void BlockByEnemyShield(EnemyHealth enemy, GameObject hitObject)
+    {
+        if (hasDespawned) return;
+        enemy.TakeDamage(Mathf.Max(Damage, 0.01f));
+        Vector3 pos = transform.position;
+        CombatVfxSpawner.PlayEnemyHitAt(pos, pos - (hitObject != null ? hitObject.transform.position : pos));
+        hasDespawned = true;
+        Destroy(gameObject);
+    }
+
+    // [63번 미사일] 목표 중심 가까이 왔는데 콜라이더끼리 겹치지 않고 지나치는 경우(작은 구체, 큰 회전) 조종기가 직접 명중시킵니다.
+    // OnTriggerEnter로 맞힌 것과 완전히 같은 처리입니다.
+    public void ForceMissileHit()
+    {
+        if (!isMissile || hasDespawned || !missileArmed) return;
+        if (missileBeaconTarget != null)
+        {
+            if (missileBeaconTarget.IsTargetable) HitGroggyBeacon(missileBeaconTarget, missileBeaconTarget.gameObject);
+            return;
+        }
+        if (missileTarget == null) return;
+        if (missileTarget.IsDead || !missileTarget.isActiveAndEnabled) return;
+        ApplyEnemyHit(missileTarget, missileTarget.gameObject);
     }
 
     // [120번/110번 벽 관통] 지나가던 벽 콜라이더에서 빠져나오면 "벽 안"에서 뺍니다(그 뒤 새로 닿는 벽에는 다시 반응).

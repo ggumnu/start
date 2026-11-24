@@ -75,6 +75,15 @@ public class BulletHalo : MonoBehaviour
         halo.projectile = projectile;
         halo.haloRadius = settings.haloRadius;
         halo.baseBulletSize = Mathf.Max(baseBulletSize, 0.0001f);
+
+        // [63번 미사일] 후광 반경 = 기본 총알 후광 x 미사일 효과 배율(50%, 분열 미사일은 25%)입니다 - 미사일 구체 크기와 상관없이
+        // (형빈 확정 A안). 반경/외곽 그림이 모두 "현재 크기 / 기준 크기"로 정해지므로 기준 크기를 그 비율이 나오게 맞춥니다.
+        // 피해는 미사일 피해(공격력 50%) 기준이라 이미 절반입니다.
+        if (projectile.IsMissile)
+        {
+            float scale = Mathf.Max(projectile.EffectScale, 0.01f);
+            halo.baseBulletSize = Mathf.Max(projectile.transform.lossyScale.x / scale, 0.0001f);
+        }
         halo.tickInterval = Mathf.Max(settings.tickInterval, 0.02f);
         halo.damagePerTick01 = settings.damageRatioPerSecond * halo.tickInterval;
         halo.enemyTag = settings.enemyTag;

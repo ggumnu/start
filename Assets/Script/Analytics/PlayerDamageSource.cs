@@ -16,6 +16,7 @@ public readonly struct PlayerDamageSource
     public const string AttackerRanged = "ranged";
     public const string AttackerBossLv1 = "boss_lv1";
     public const string AttackerBossLv2 = "boss_lv2";
+    public const string AttackerBossLv3 = "boss_lv3";
     public const string AttackerSelf = "self";
     public const string AttackerSpecialRoom = "special_room";
     public const string AttackerUnknown = "unknown";
@@ -27,6 +28,7 @@ public readonly struct PlayerDamageSource
     public const string AttackGrenade = "grenade";
     public const string AttackItemArtillery = "item_artillery";
     public const string AttackHealthRoom = "health_room";
+    public const string AttackLaser = "laser"; // [3레벨 보스] 레이저
     public const string AttackUnknown = "unknown";
 
     public readonly string attacker;
@@ -49,7 +51,7 @@ public readonly struct PlayerDamageSource
     public static PlayerDamageSource HealthSpecialRoom => new PlayerDamageSource(AttackerSpecialRoom, AttackHealthRoom, "");
 
     // 적의 아무 부품(공격 컴포넌트, 접촉 트리거, EnemyHealth 등)을 넘기면 그 적이 어떤 종류인지 판별해 원인을 만듭니다.
-    // 판별: 보스 컨트롤러가 있으면 보스(2레벨 보스 전용 컨트롤러면 boss_lv2, 아니면 boss_lv1) -> 원거리 공격(EnemyRangedAttack)이 있으면 ranged -> 나머지는 melee.
+    // 판별: 보스 컨트롤러가 있으면 보스(2레벨 보스 전용 컨트롤러면 boss_lv2, 3레벨이면 boss_lv3, 아니면 boss_lv1) -> 원거리 공격(EnemyRangedAttack)이 있으면 ranged -> 나머지는 melee.
     // 어떤 경우에도 예외를 밖으로 내보내지 않습니다(피해 처리를 절대 막지 않도록).
     public static PlayerDamageSource FromEnemy(Component anyPartOfEnemy, string attack)
     {
@@ -72,7 +74,12 @@ public readonly struct PlayerDamageSource
         if (root == null) return AttackerUnknown;
 
         var boss = root.GetComponentInChildren<BossAIController>(true);
-        if (boss != null) return boss is BossLv2AIController ? AttackerBossLv2 : AttackerBossLv1;
+        if (boss != null)
+        {
+            if (boss is BossLv2AIController) return AttackerBossLv2;
+            if (boss is BossLv3AIController) return AttackerBossLv3;
+            return AttackerBossLv1;
+        }
 
         if (root.GetComponentInChildren<EnemyRangedAttack>(true) != null) return AttackerRanged;
         return AttackerMelee;

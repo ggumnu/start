@@ -99,6 +99,13 @@ public class SugarStackEffect : IPassiveItemEffect, IRemovablePassiveEffect
         if (owner == null) { Unsubscribe(); return; }
         if (enemy == null || enemy.IsDead) return;
 
+        // [63번 미사일] 미사일 명중으로는 슈가 중첩이 쌓이지 않습니다(형빈 확정 - 추가 피해도 Projectile에서 빠짐).
+        if (Projectile.CurrentHitProjectile != null && Projectile.CurrentHitProjectile.IsMissile) return;
+
+        // [3레벨 보스] 피해 감소막이 있는 동안(충전 포함)은 슈가 중첩이 쌓이지 않습니다(형빈 확정 - 막이 피해는 받아도 중첩은 막음).
+        var reduction = enemy.GetComponent<BossDamageReduction>();
+        if (reduction != null && reduction.BlocksSugarStacks) return;
+
         try
         {
             var stack = EnemySugarStack.GetOrAdd(enemy.gameObject);

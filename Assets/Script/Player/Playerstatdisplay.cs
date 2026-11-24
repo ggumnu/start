@@ -21,13 +21,17 @@ using UnityEngine.UI;
 // "아이콘-숫자 사이 간격(iconToValueSpacing)"만 조절하도록 했습니다 - 항목을 몇 개
 // 켜두느냐에 따라 자동으로 줄이 늘거나 줄어듭니다.
 //
-// [스킬 스탯 묶음 - 수류탄/해킹툴 등]
-// statEntries 각 항목의 "Is Skill Stat" 체크박스가 켜진 스탯은 일반 스탯과 섞이지 않고 따로
-// 묶입니다. 일반 스탯을 먼저 위 규칙대로 왼쪽부터 배치하고, 스킬 스탯은 일반 스탯의 마지막
-// 열이 꽉 찼든 아니든 항상 그 오른쪽 새 열부터 배치합니다(스킬 스탯이 rowsPerColumn개를 넘으면
-// 스킬 묶음 안에서 다시 오른쪽 열로 넘어갑니다). 두 묶음 사이 간격은 일반 열 간격
-// (columnSpacing)과 같습니다. 각 묶음 안의 순서는 statEntries 목록 순서를 따르고, 모든 열의
-// 윗줄은 가장 긴 열의 윗줄에 맞춰집니다. PlayerStats 쪽은 이 구분과 무관합니다(화면 배치만).
+// [수류탄/해킹툴 스탯 - 형빈 확정]
+// 예전엔 "Is Skill Stat" 스탯을 오른쪽 별도 열에 묶었지만, 플레이어가 보이는 스탯을 고를 수 있게 되면서 따로 떨어진 열이
+// 거슬려 일반 스탯 뒤에 같은 열로 이어서 놓습니다(statEntries 순서 그대로). Is Skill Stat 칸은 남아 있지만 배치에 쓰지 않습니다.
+//
+// [플레이어 HUD 설정 - 설정 창 HUD 탭]
+// 화면에 보이는 스탯 = statEntries에서 체크된 것 중 플레이어가 숨기지 않은 것(HUDUserSettings.IsStatHidden).
+// 흰 창/아이콘·숫자 불투명도, 흰 숫자, 전투 중 자동 반투명은 HUDUserSettings 값을 따릅니다(규칙은 그 파일 맨 위).
+// - 아이콘·숫자 불투명도 0% = 스탯 창이 없는 것으로 보고 흰 창/접기 버튼까지 통째로 숨깁니다.
+// - 전투 중 = 지금 방이 일반방/보스방이고 아직 클리어 전(공용 부품 HUDCombatTracker - 인벤토리 HUD와 같은 판정). 들어가고 나올 때
+//   combatFadeDuration초 동안 부드럽게 바뀝니다(실제 시간 기준).
+// - 패널 구조/배치/흰 창/그림자는 설정 창 견본과 같은 공용 부품 StatPanelRenderer.cs(StatPanelView)가 그립니다.
 //
 // [Play 모드 라이브 트윅]
 // PlayerItemInfoDisplay.cs와 동일한 이유로, 매 프레임 값을 다시 읽어 적용합니다.
@@ -54,6 +58,19 @@ using UnityEngine.UI;
 // 버튼 모양/시간/커브는 인스펙터의 "접어보기" 묶음에서 조절합니다. 패널 크기(panelRect.sizeDelta)는 원래
 // 0이었는데, 빠지는 거리와 버튼 위치(패널 위쪽 가운데)를 정하기 위해 Reflow()가 실제 내용 크기로 채웁니다
 // (줄들은 왼쪽 아래 기준으로 놓이므로 크기를 채워도 배치는 그대로입니다).
+//
+// [배경 - 형빈 확정, 테스터 피드백]
+// 스탯 전체 뒤에 블루 아카이브 스타일 창(UIPatternBox.SetupPanel - 불투명 흰 둥근 사각형 + 왼쪽 위/오른쪽 아래 삼각 무늬 + 옅은
+// 그림자, 값은 PopupStyle)을 깔아 게임 화면 위에서도 글자가 묻히지 않게 합니다. 검은 반투명 창은 아이템 설명칸과 겹치고
+// 오른쪽 흰 인벤토리와 균형이 안 맞아 흰 창으로 바꿨습니다. 흰 창 위라서 숫자는 창 글자 색(PopupStyle.panelTextColor, 남색),
+// 아이콘에는 오른쪽 아래로 옅은 그림자(UI Shadow)를 붙입니다.
+// - 크기 = 지금 보이는 줄/열 + 사방 여백(backgroundPadding). 켜진 스탯이 줄면 그 프레임에 같이 줄고, 접어보기 버튼은
+//   패널(= 배경) 위쪽 가운데에 붙어 있으므로 자동으로 가운데에 맞춰집니다.
+// - 배경은 바깥으로 커집니다(아이콘/숫자 위치는 배경이 없던 때와 같음). 그래서 패널 위치 = 여백 - backgroundPadding.
+// - 패널 폭은 마지막 열의 "실제로 쓰는 폭"까지만 셉니다(열 간격이 음수면 숫자 칸의 겹치는 부분을 빼서 오른쪽이 휑하지 않게).
+// - 켜진 스탯이 하나도 없으면 배경과 접어보기 버튼까지 패널 전체를 숨깁니다.
+// - 진하기는 설정 창의 "창 불투명도"(HUDUserSettings)를 따릅니다(아이템 설명칸/접기 버튼은 별개). 무늬/그림자까지 함께 옅어지도록
+//   배경 오브젝트의 CanvasGroup 알파로 적용합니다.
 //
 // [수치 변화 연출]
 // 화면에 보이는 숫자가 바뀌는 순간, 그 줄의 숫자만 잠깐 커지면서 색이 바뀌었다가(flashPopDuration) 원래 크기/색으로
@@ -100,8 +117,8 @@ public class PlayerStatDisplay : MonoBehaviour
         [Tooltip("아이콘에 커서를 올렸을 때 뜨는 플로팅박스의 설명문입니다. 여러 줄로 적을 수 있고, " +
                  "박스 최대 폭을 넘으면 자동으로 줄바꿈됩니다.")]
         [TextArea(2, 6)] public string tooltipDescription = "";
-        [Tooltip("체크하면 이 스탯은 일반 스탯과 섞이지 않고, 일반 스탯 열들의 오른쪽에 따로 묶여서 " +
-                 "표시됩니다(수류탄/해킹툴 같은 스킬 스탯용).")]
+        [Tooltip("(지금은 배치에 쓰지 않음) 예전엔 체크한 스탯을 오른쪽 별도 열에 묶었지만, 이제 모든 스탯이 목록 순서대로 " +
+                 "같은 열에 이어서 놓입니다.")]
         public bool isSkillStat = false;
         [Tooltip("체크하면 숫자가 작아질수록 좋은 스탯으로 취급합니다(수치 변화 연출 색: 작아지면 노랑, 커지면 빨강). " +
                  "장전 시간/연사 간격/수류탄 자해 데미지는 처음 한 번 자동으로 체크됩니다.")]
@@ -144,6 +161,30 @@ public class PlayerStatDisplay : MonoBehaviour
     [Header("패널 위치 (화면 좌측 하단 모서리 기준 여백, px)")]
     public float panelMarginX = 40f;
     public float panelMarginY = 40f;
+
+    [Header("배경 (스탯 전체 뒤의 흰 창 - 모양/색/무늬/그림자는 Resources/PopupStyle의 창 값)")]
+    [Tooltip("체크하면 스탯 전체 뒤에 흰 창(왼쪽 위/오른쪽 아래 삼각 무늬)을 깝니다. 진하기는 설정 창 HUD 탭의 '창 불투명도'입니다.")]
+    public bool showBackground = true;
+    [Tooltip("스탯 내용과 배경 가장자리 사이 여백(px, 사방 같음)입니다. 배경은 바깥으로 커지므로 스탯 위치는 그대로입니다.")]
+    [Min(0f)] public float backgroundPadding = 12f;
+
+    [Header("흰 배경용 글자 / 아이콘 그림자")]
+    [Tooltip("체크하면 숫자 색으로 아래 Value Text Color 대신 창 글자 색(PopupStyle의 Panel Text Color, 하늘색 버튼 글자와 같은 남색)을 씁니다.")]
+    public bool useStyleTextColor = true;
+    [Tooltip("체크하면 스탯 아이콘 오른쪽 아래에 옅은 그림자를 띄웁니다.")]
+    public bool showIconShadow = true;
+    [Tooltip("아이콘 그림자 색입니다(투명도 A가 진하기).")]
+    public Color iconShadowColor = new Color(0f, 0f, 0f, 0.35f);
+    [Tooltip("아이콘 그림자 위치(px)입니다. x+ = 오른쪽, y- = 아래.")]
+    public Vector2 iconShadowOffset = new Vector2(3f, -3f);
+    [Tooltip("숫자가 흰색일 때(설정 창 '숫자를 흰색으로') 숫자 뒤에 까는 그림자 색입니다.")]
+    public Color whiteValueShadowColor = new Color(0f, 0f, 0f, 0.6f);
+    [Tooltip("흰 숫자 그림자 위치(px)입니다.")]
+    public Vector2 whiteValueShadowOffset = new Vector2(2f, -2f);
+
+    [Header("전투 중 자동 반투명 (켜고 끄기/값은 설정 창 HUD 탭)")]
+    [Tooltip("전투 방에 들어가거나 클리어될 때 불투명도가 바뀌는 시간(초, 실제 시간 기준)입니다.")]
+    [Min(0f)] public float combatFadeDuration = 0.3f;
 
     [Header("아이콘 / 글자 크기")]
     public float iconSize = 40f;
@@ -224,13 +265,9 @@ public class PlayerStatDisplay : MonoBehaviour
     [Header("접어보기 (패널 위쪽 버튼 - 누르면 화면 아래로 접힘)")]
     public CollapsibleHUDSettings collapse = new CollapsibleHUDSettings();
 
-    private class RowRefs
+    // 줄 구조(아이콘/숫자/숫자 그림자)는 공용 부품 StatPanelRow, 여기엔 이 스크립트만 쓰는 상태를 덧붙입니다.
+    private class RowRefs : StatPanelRow
     {
-        public RectTransform rowRect;
-        public RectTransform iconRect;
-        public Image iconImage;
-        public RectTransform valueRect;
-        public TextMeshProUGUI valueText;
         public StatEntry entry;
 
         // [수치 변화 연출] 상태
@@ -249,12 +286,16 @@ public class PlayerStatDisplay : MonoBehaviour
         public Color flashColor;
     }
 
+    private StatPanelView view;
     private GameObject panelRoot;
     private RectTransform panelRect;
     private readonly List<RowRefs> activeRows = new List<RowRefs>();
     private bool built = false;
     private string lastSignature = "";
     private CollapsibleHUDPanel collapser;
+
+    // [전투 중 자동 반투명] 지금 방/전투 전환 진행값(0 = 평소, 1 = 전투) - 공용 부품
+    private readonly HUDCombatTracker combat = new HUDCombatTracker();
 
     // 설명 플로팅박스 (처음 호버될 때 한 번만 만듭니다)
     private const int RoundedTexSize = 96;
@@ -317,8 +358,14 @@ public class PlayerStatDisplay : MonoBehaviour
         UpdateTooltip();
     }
 
+    void OnEnable()
+    {
+        combat.Subscribe();
+    }
+
     void OnDisable()
     {
+        combat.Unsubscribe();
         HideTooltip();
     }
 
@@ -346,20 +393,14 @@ public class PlayerStatDisplay : MonoBehaviour
         return true;
     }
 
-    // 패널 루트 오브젝트 자체는 한 번만 만듭니다 (배경 이미지 없이, 줄들을 담는
-    // 빈 컨테이너 역할만 합니다 - 기획에 배경 패널 요구사항이 없었습니다).
+    // 패널 루트 오브젝트 자체는 한 번만 만듭니다(줄들을 담는 컨테이너 + 맨 뒤의 배경 - 파일 상단 [배경]).
     private void EnsureBuilt()
     {
         if (built) return;
 
-        panelRoot = new GameObject("PlayerStatDisplay_Panel");
-        panelRoot.transform.SetParent(hudManager.CanvasRoot, false);
-
-        panelRect = panelRoot.AddComponent<RectTransform>();
-        panelRect.anchorMin = new Vector2(0f, 0f);
-        panelRect.anchorMax = new Vector2(0f, 0f);
-        panelRect.pivot = new Vector2(0f, 0f);
-        panelRect.sizeDelta = Vector2.zero;
+        view = StatPanelView.Create(hudManager.CanvasRoot, "PlayerStatDisplay_Panel");
+        panelRoot = view.gameObject;
+        panelRect = view.panelRect;
 
         built = true;
     }
@@ -374,17 +415,20 @@ public class PlayerStatDisplay : MonoBehaviour
         if (signature == lastSignature) return;
         lastSignature = signature;
 
-        foreach (var row in activeRows)
-        {
-            if (row.rowRect != null) Destroy(row.rowRect.gameObject);
-        }
+        foreach (var row in activeRows) StatPanelView.DestroyRow(row);
         activeRows.Clear();
 
         foreach (var entry in statEntries)
         {
-            if (!entry.enabled) continue;
+            if (!IsShown(entry)) continue;
             activeRows.Add(CreateRow(entry));
         }
+    }
+
+    // 화면에 보일 스탯 = 인스펙터에서 체크했고, 플레이어가 설정 창에서 숨기지 않은 것. 설정 창 견본도 같은 규칙을 씁니다.
+    public static bool IsShown(StatEntry entry)
+    {
+        return entry != null && entry.enabled && !HUDUserSettings.IsStatHidden(entry.statType);
     }
 
     private string BuildSignature()
@@ -392,7 +436,7 @@ public class PlayerStatDisplay : MonoBehaviour
         var sb = new System.Text.StringBuilder();
         foreach (var entry in statEntries)
         {
-            if (!entry.enabled) continue;
+            if (!IsShown(entry)) continue;
             sb.Append((int)entry.statType).Append(',');
         }
         return sb.ToString();
@@ -400,44 +444,10 @@ public class PlayerStatDisplay : MonoBehaviour
 
     private RowRefs CreateRow(StatEntry entry)
     {
-        var rowGO = new GameObject("Row_" + entry.statType);
-        rowGO.transform.SetParent(panelRoot.transform, false);
-        var rowRect = rowGO.AddComponent<RectTransform>();
-        rowRect.anchorMin = new Vector2(0f, 0f);
-        rowRect.anchorMax = new Vector2(0f, 0f);
-        rowRect.pivot = new Vector2(0f, 0f);
-
-        var iconGO = new GameObject("Icon");
-        iconGO.transform.SetParent(rowRect, false);
-        var iconRect = iconGO.AddComponent<RectTransform>();
-        iconRect.anchorMin = new Vector2(0f, 0f);
-        iconRect.anchorMax = new Vector2(0f, 0f);
-        iconRect.pivot = new Vector2(0f, 0f);
-        var iconImage = iconGO.AddComponent<Image>();
-        iconImage.preserveAspect = true;
-
-        var valueGO = new GameObject("Value");
-        valueGO.transform.SetParent(rowRect, false);
-        var valueRect = valueGO.AddComponent<RectTransform>();
-        valueRect.anchorMin = new Vector2(0f, 0f);
-        valueRect.anchorMax = new Vector2(0f, 0f);
-        // [수치 변화 연출] 커질 때 왼쪽 끝/세로 가운데 기준으로 커지도록 기준점을 왼쪽 가운데로 둡니다
-        // (위치는 Reflow()에서 이 기준점에 맞춰 놓으므로 평소 모습은 예전과 같습니다).
-        valueRect.pivot = new Vector2(0f, 0.5f);
-        // [TMP] 옛 방식 Text는 화면 배율에 따라 흐릿하게 보여서 TextMeshPro로 교체했습니다(HUDText 참고).
-        // 예전엔 세로 Truncate였지만 TMP의 Truncate는 글자를 잘라내므로, 줄 높이와 상관없이 항상 보이는 Overflow를 씁니다.
-        var valueText = HUDText.AddTo(valueGO, TextAnchor.MiddleLeft);
-
-        return new RowRefs
-        {
-            rowRect = rowRect,
-            iconRect = iconRect,
-            iconImage = iconImage,
-            valueRect = valueRect,
-            valueText = valueText,
-            entry = entry,
-            createdTime = Time.unscaledTime,
-        };
+        var row = view.CreateRow<RowRefs>("Row_" + entry.statType);
+        row.entry = entry;
+        row.createdTime = Time.unscaledTime;
+        return row;
     }
 
     // 아이콘/색/폰트 크기/실시간 스탯 수치 - 매 프레임 다시 밀어넣어서 Play 도중 인스펙터
@@ -446,17 +456,7 @@ public class PlayerStatDisplay : MonoBehaviour
     {
         foreach (var row in activeRows)
         {
-            if (row.entry.icon != null)
-            {
-                row.iconImage.sprite = row.entry.icon;
-                row.iconImage.color = Color.white;
-            }
-            else
-            {
-                row.iconImage.sprite = null;
-                row.iconImage.color = fallbackIconColor;
-            }
-            row.iconRect.sizeDelta = new Vector2(iconSize, iconSize);
+            StatPanelView.ApplyIcon(row, row.entry.icon, fallbackIconColor, iconSize);
 
             float value = GetStatValue(playerStats, row.entry.statType);
             // 화면 표시 배율/단위(총알 크기 x100, 확률 스탯 x100 + "%" 등)는 StatDisplayFormat 한 곳에서
@@ -465,74 +465,98 @@ public class PlayerStatDisplay : MonoBehaviour
             DetectValueChange(row, text, value);
             row.valueText.text = text;
             row.valueText.fontSize = GetFittedFontSize(row, text);
-            row.valueRect.sizeDelta = new Vector2(valueTextWidth, iconSize);
             ApplyFlash(row);
         }
     }
 
-    // 일반 스탯을 목록 순서대로 왼쪽 열의 맨 위 줄부터 아래로 놓고(Element 0이 가장 왼쪽 위), 한
-    // 열이 rowsPerColumn개로 차면 오른쪽 열로 넘어갑니다. 스킬 스탯(isSkillStat)은 일반 스탯의
-    // 마지막 열 다음 새 열부터 같은 규칙으로 놓습니다(파일 상단 [스킬 스탯 묶음] 참고). 패널
-    // 전체는 계속 화면 좌측 하단 모서리 기준 여백에 붙어 있고, 모든 열의 윗줄은 가장 긴 열의
-    // 윗줄에 맞춰집니다.
+    // 보이는 스탯을 목록 순서대로 왼쪽 열 맨 위부터 놓고(열이 차면 오른쪽 열), 흰 창/불투명도/그림자를 적용합니다.
+    // 배치/그리기는 설정 창 견본과 같은 공용 부품(StatPanelView)이 합니다. 패널은 화면 좌측 하단 여백에 붙어 있습니다.
     private void Reflow()
     {
-        panelRect.anchoredPosition = new Vector2(panelMarginX, panelMarginY);
+        // 켜진 스탯이 없거나 아이콘·숫자 불투명도가 0%면 흰 창/접어보기 버튼(패널 자식)까지 통째로 숨깁니다(형빈 확정).
+        bool visible = activeRows.Count > 0 && !HUDUserSettings.HidesWholePanel;
+        if (panelRoot.activeSelf != visible) panelRoot.SetActive(visible);
 
-        float rowHeight = Mathf.Max(iconSize, fontSize + 4f);
-        float columnWidth = iconSize + iconToValueSpacing + valueTextWidth;
-        int perColumn = Mathf.Max(1, rowsPerColumn);
+        float pad = CurrentBackgroundPadding();
+        panelRect.anchoredPosition = new Vector2(panelMarginX - pad, panelMarginY - pad);
+        view.Layout(activeRows, BuildLayout());
+        view.ApplyLook(activeRows, BuildLook());
+    }
 
-        int generalCount = 0;
-        int skillCount = 0;
-        foreach (var row in activeRows)
+    // 설정 창 견본(SettingsHUDTab)도 이 값으로 그립니다(프리팹의 이 컴포넌트에서 읽음 - 실제 HUD와 같은 모양).
+    public StatPanelLayout BuildLayout()
+    {
+        return new StatPanelLayout
         {
-            if (row.entry != null && row.entry.isSkillStat) skillCount++;
-            else generalCount++;
-        }
+            iconSize = iconSize,
+            fontSize = fontSize,
+            valueTextWidth = valueTextWidth,
+            iconToValueSpacing = iconToValueSpacing,
+            rowSpacing = rowSpacing,
+            rowsPerColumn = rowsPerColumn,
+            columnSpacing = columnSpacing,
+            padding = CurrentBackgroundPadding(),
+        };
+    }
 
-        // 일반 묶음이 차지하는 열 수 - 스킬 묶음은 그 다음 열부터 시작합니다.
-        int generalColumns = (generalCount + perColumn - 1) / perColumn;
+    // 지금 적용할 모양입니다. 전투 상태 전환은 combatFadeDuration초 동안 평소 값 -> 전투 값으로 섞습니다.
+    private StatPanelLook BuildLook()
+    {
+        float combatBlend = combat.UpdateBlend(combatFadeDuration);
 
-        // 가장 긴 열의 줄 수 - 이 열의 윗줄 높이가 모든 열의 윗줄 기준이 됩니다.
-        int tallest = Mathf.Max(Mathf.Min(perColumn, generalCount), Mathf.Min(perColumn, skillCount));
-        int topSlot = tallest - 1;
+        HUDUserSettings.GetOpacities(false, out float normalWindow, out float normalContent);
+        HUDUserSettings.GetOpacities(true, out float combatWindow, out float combatContent);
+        return BuildLook(Mathf.Lerp(normalWindow, combatWindow, combatBlend), Mathf.Lerp(normalContent, combatContent, combatBlend),
+                         CurrentWhiteWeight());
+    }
 
-        int generalIndex = 0;
-        int skillIndex = 0;
-        for (int i = 0; i < activeRows.Count; i++)
+    // 흰 숫자 정도(0 = 평소 색, 1 = 흰색)입니다. 전투/비전투 체크가 다르면 전투 상태 전환과 함께 부드럽게 바뀝니다.
+    private float CurrentWhiteWeight()
+    {
+        float normal = HUDUserSettings.GetWhiteText(false) ? 1f : 0f;
+        float combatWhite = HUDUserSettings.GetWhiteText(true) ? 1f : 0f;
+        return Mathf.Lerp(normal, combatWhite, combat.Blend);
+    }
+
+    // 주어진 불투명도/흰 숫자 정도로 모양을 만듭니다(설정 창 견본은 전투/비전투 값을 직접 넣어 부름).
+    public StatPanelLook BuildLook(float windowAlpha, float contentAlpha, float whiteWeight)
+    {
+        Color shadowColor = whiteValueShadowColor;
+        shadowColor.a *= Mathf.Clamp01(whiteWeight);
+        return new StatPanelLook
         {
-            var row = activeRows[i];
-            bool isSkill = row.entry != null && row.entry.isSkillStat;
+            showBackground = showBackground,
+            backgroundAlpha = windowAlpha,
+            contentAlpha = contentAlpha,
+            showIconShadow = showIconShadow,
+            iconShadowColor = iconShadowColor,
+            iconShadowOffset = iconShadowOffset,
+            showValueShadow = whiteWeight > 0f,
+            valueShadowColor = shadowColor,
+            valueShadowOffset = whiteValueShadowOffset,
+        };
+    }
 
-            int orderInGroup = isSkill ? skillIndex++ : generalIndex++;
-            int column = (isSkill ? generalColumns : 0) + orderInGroup / perColumn;
-            int indexInColumn = orderInGroup % perColumn;
+    public float CurrentBackgroundPadding()
+    {
+        return showBackground ? Mathf.Max(0f, backgroundPadding) : 0f;
+    }
 
-            float x = column * (columnWidth + columnSpacing);
-            float y = (topSlot - indexInColumn) * (rowHeight + rowSpacing);
-
-            row.rowRect.anchoredPosition = new Vector2(x, y);
-            row.rowRect.sizeDelta = new Vector2(columnWidth, rowHeight);
-
-            row.iconRect.anchoredPosition = new Vector2(0f, (rowHeight - iconSize) * 0.5f);
-            // 숫자 칸 기준점이 왼쪽 가운데라 줄 높이의 가운데에 둡니다(예전 왼쪽 아래 기준 위치와 같은 자리).
-            row.valueRect.anchoredPosition = new Vector2(iconSize + iconToValueSpacing, rowHeight * 0.5f);
-        }
-
-        // [접어보기] 패널 크기를 실제 내용 크기로 채웁니다(빠지는 거리/버튼 위치 계산용 - 배치에는 영향 없음).
-        int skillColumns = (skillCount + perColumn - 1) / perColumn;
-        int totalColumns = generalColumns + skillColumns;
-        float contentWidth = totalColumns > 0 ? totalColumns * columnWidth + (totalColumns - 1) * columnSpacing : 0f;
-        float contentHeight = tallest > 0 ? tallest * rowHeight + (tallest - 1) * rowSpacing : 0f;
-        panelRect.sizeDelta = new Vector2(contentWidth, contentHeight);
+    // 숫자의 평소 색입니다(수치 변화 연출은 이 색에서 출발해 이 색으로 돌아옴). whiteWeight = 흰 숫자 정도(0~1).
+    public Color GetValueTextColor(float whiteWeight)
+    {
+        Color normal = useStyleTextColor ? PopupStyle.Get().panelTextColor : valueTextColor;
+        return Color.Lerp(normal, Color.white, Mathf.Clamp01(whiteWeight));
     }
 
     // [접어보기] 원래 위치(좌측 하단 여백)를 넘겨 접힘 이동량(아래 방향)이 더해진 위치로 둡니다.
     private void ApplyCollapse()
     {
         if (collapser == null) collapser = new CollapsibleHUDPanel("StatPanel", HUDCollapseDirection.Down);
-        collapser.Tick(collapse, panelRect, panelRect.sizeDelta, panelMarginY, new Vector2(panelMarginX, panelMarginY));
+        // 배경 여백만큼 패널이 바깥으로 커졌으므로 기준 위치/화면 끝 여백도 그만큼 뺍니다(다 접히면 버튼만 화면 끝에 남음).
+        float pad = CurrentBackgroundPadding();
+        collapser.Tick(collapse, panelRect, panelRect.sizeDelta, panelMarginY - pad,
+                       new Vector2(panelMarginX - pad, panelMarginY - pad));
     }
 
     // ------------------------------------------------------------------
@@ -869,7 +893,8 @@ public class PlayerStatDisplay : MonoBehaviour
     private void ApplyFlash(RowRefs row)
     {
         float scale = 1f;
-        Color color = valueTextColor;
+        Color baseColor = GetValueTextColor(CurrentWhiteWeight());
+        Color color = baseColor;
 
         if (row.flashStartTime >= 0f)
         {
@@ -887,7 +912,7 @@ public class PlayerStatDisplay : MonoBehaviour
                 float t = pop > 0f ? elapsed / pop : 1f;
                 float eased = 1f - (1f - t) * (1f - t);
                 scale = Mathf.Lerp(1f, flashPeakScale, eased);
-                color = Color.Lerp(valueTextColor, row.flashColor, eased);
+                color = Color.Lerp(baseColor, row.flashColor, eased);
             }
             else
             {
@@ -895,7 +920,7 @@ public class PlayerStatDisplay : MonoBehaviour
                 float t = ret > 0f ? (elapsed - pop) / ret : 1f;
                 float eased = t * t * (3f - 2f * t);
                 scale = Mathf.Lerp(flashPeakScale, 1f, eased);
-                color = Color.Lerp(row.flashColor, valueTextColor, eased);
+                color = Color.Lerp(row.flashColor, baseColor, eased);
             }
         }
 

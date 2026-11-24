@@ -68,5 +68,7 @@ MonoBehaviour:
   normalEnemyMaxCount: 4
   normalEnemyCountWeights: []
   normalEnemyPool: []
+  backgroundMaterial: {fileID: 0}
+  lightingProfile: {fileID: 0}
   allowMultiCellRooms: 0
   maxGenerationAttempts: 100

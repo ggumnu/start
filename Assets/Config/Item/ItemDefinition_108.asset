@@ -1,0 +1,119 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_108
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 108
+  displayName: "\uC624\uB798\uB41C \uCD95\uC81C \uC778\uD615"
+  description: "\uBAA8\uBAA8\uC774\uAC00 \uB3D9\uC0DD\uACFC \uAC19\uC774 \uCC98\uC74C\uC73C\uB85C
+    \uAD6C\uC785\uD55C \uD734\uB300\uC6A9 \uAC8C\uC784\uAE30.\r\n\uBAA8\uBAA8\uC774\uC758
+    '\uAC8C\uC784 \uBB3C\uB4E4\uC774\uAE30 \uC791\uC804'\uC740, \n\uADF8\uB807\uAC8C
+    \uC131\uACF5\uC801\uC73C\uB85C \uC644\uC218\uB41C \uAC83 \uAC19\uB2E4\u2026\u2026"
+  icon: {fileID: 21300000, guid: fab96e4c559cf1341a717dceac0cd46c, type: 3}
+  weight: 60
+  rarity: 2
+  category: 1
+  confirmBeforeReplace: 0
+  incompatibleItemIds: []
+  tags: []
+  activeCost: 5
+  activeEffect:
+    rid: 6629407983595421696
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 2
+    variantId: 
+  - category: 8
+    variantId: Schale
+  statModifiers: []
+  specialEffects: []
+  specialEffectDescription: "[\uD544\uC694 \uCF54\uC2A4\uD2B8 5]\n\n\uD574\uB2F9
+    \uC790\uB9AC\uC5D0 5\uCD08 \uB3D9\uC548 \uD3ED\uC8FD \uBC1C\uC0AC \uC7A5\uCE58\uB97C
+    \uC124\uCE58\uD55C\uB2E4\n\uD3ED\uC8FD \uBC1C\uC0AC \uC7A5\uCE58\uB294 \uB9E4\uCD08\uB9C8\uB2E4
+    \uAC00\uC7A5 \uAC00\uAE4C\uC6B4 \uC801\uC5D0\uAC8C \n\uD3ED\uC8FD\uD0C4\uC744
+    \uBC1C\uC0AC\uD55C\uB2E4\n\n\uD3ED\uC8FD \uBC1C\uC0AC \uC7A5\uCE58\uB294 \uD50C\uB808\uC774\uC5B4\uC758
+    \uC218\uB958\uD0C4\uC744 \n\uC18C\uBAA8\uD558\uC9C0 \uC54A\uB294\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6629407983595421696
+      type: {class: FireworkTurretActiveEffect, ns: , asm: Assembly-CSharp}
+      data:
+        turretModel: {fileID: 8542779940636133442, guid: 31f8ce317617b7a4195f42dffdb3c5eb, type: 3}
+        modelScale: 1
+        modelRotationOffset: {x: 0, y: 0, z: 0}
+        spawnForwardDistance: 1
+        lifetime: 10
+        firstFireDelay: 0.5
+        volleyInterval: 2
+        appearDuration: 0.4
+        vanishDuration: 0.5
+        muzzlePartName: Object042
+        firePointNames:
+        - FirePoint1
+        - FirePoint2
+        - FirePoint3
+        - FirePoint4
+        shotsPerVolley: 4
+        shotInterval: 0.08
+        damageRatio: 0.25
+        radiusRatio: 0.25
+        selfDamage: 0.5
+        flightTime: 0.7
+        arcHeight: 1.2
+        scatterRadius: 0.35
+        turnSpeed: 540
+        pitchSpeed: 360
+        minPitch: -5
+        maxPitch: 80
+        kickDistance: 0.05
+        kickRecoverSpeed: 14
+        nodAngle: 12
+        nodRiseTime: 0.06
+        nodFallTime: 0.3
+        firework:
+          colors:
+          - {r: 1, g: 0.37, b: 0.66, a: 1}
+          - {r: 1, g: 0.88, b: 0.3, a: 1}
+          - {r: 0.35, g: 0.85, b: 1, a: 1}
+          - {r: 0.55, g: 1, b: 0.35, a: 1}
+          - {r: 0.72, g: 0.48, b: 1, a: 1}
+          shellSize: 0.14
+          showLandingMarker: 1
+          trailMaterial: {fileID: 2100000, guid: b220cb9dce7bbf4408779e5f07786bc7, type: 2}
+          trailTime: 0.25
+          trailWidthRatio: 0.8
+          burstHeight: 0.4
+          sparkTemplate: {fileID: 4503612902121041701, guid: 5a936c83b1746f14f9100db745e94f04, type: 3}
+          sparkCount: 40
+          sparkLifetime: 0.9
+          bloomRadiusMultiplier: 2.5
+          sparkSizeMultiplier: 1
+          sparkGravity: 0.35
+          whiteMix: 0.35
+          glitterEnabled: 1
+          glitterCount: 24
+          glitterDelay: 0.35
+          glitterLifetime: 0.5
+          glitterSizeMultiplier: 0.5
+          glitterColor: {r: 1, g: 0.95, b: 0.75, a: 1}
+          flashPrefab: {fileID: 271054424957760564, guid: 1468eeb0963ddad41909c04ad8af0aee, type: 3}
+          flashScalePerRadius: 2
+          tintFlash: 1
+          flashLifetime: 1.5

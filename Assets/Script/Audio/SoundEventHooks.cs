@@ -165,7 +165,8 @@ public class SoundEventHooks : MonoBehaviour
         RoomInstance room = thrower != null ? thrower.ExplodingRoom : null;
         if (room == null) room = RoomScope.RoomOf(position);
         if (!RoomScope.IsPlayerInRoom(room)) return;
-        GameAudio.Play(SfxId.GrenadeExplode);
+        // [108번] 폭죽탄 폭발이면 폭죽 소리로 냅니다(PlayerGrenadeThrower.IsExplodingFirework).
+        GameAudio.Play(thrower != null && thrower.IsExplodingFirework ? SfxId.Firework108Burst : SfxId.GrenadeExplode);
     }
 
     private void HandleHackDeployed(Vector3 position, float radius, IReadOnlyList<EnemyHealth> enemies)

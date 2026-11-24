@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb76f5f07d320ed4691775ae1912d7b4, type: 3}
+  m_Name: EnemyDefinition_DroneSpike_ChainDash_lv3
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDefinition
+  variantId: 
+  weight: 3
+  prefab: {fileID: 7776610045248769580, guid: ce124708fb5348a44804dfe90768d1fe, type: 3}
+  maxHealth: 230
+  moveSpeed: 0.75
+  moveAcceleration: 999
+  detectRange: 8
+  attackPower: 1
+  attackConfig:
+    rid: 6346787204024762433
+  references:
+    version: 2
+    RefIds:
+    - rid: 6346787204024762433
+      type: {class: ChainDashAttackConfig, ns: , asm: Assembly-CSharp}
+      data:
+        attackRange: 5
+        initialTelegraphDuration: 1
+        chainDashCount: 2
+        chainTelegraphDuration: 0.5
+        dashSpeed: 4
+        dashDuration: 0.5
+        postDashCooldown: 3
+        dashDamage: 2
+        firstDashChargeVfx:
+          prefab: {fileID: 6441873369525384307, guid: debddf23a0a58a7418d3d2520fea6891, type: 3}
+          offset: {x: 0, y: 0, z: 0}
+          scale: 1
+          lifetime: 2

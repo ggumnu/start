@@ -19,16 +19,85 @@ MonoBehaviour:
   panelSize: {x: 620, y: 320}
   titleFontSize: 30
   labelFontSize: 24
-  textColor: {r: 1, g: 1, b: 1, a: 1}
   canvasSortingOrder: 150
   dimColor: {r: 0, g: 0, b: 0, a: 0.5}
   sliderWidth: 320
   sliderHeight: 14
   knobSize: 30
-  trackColor: {r: 1, g: 1, b: 1, a: 0.2}
+  sliderTrackColor: {r: 0.8627451, g: 0.9019608, b: 0.93333334, a: 1}
   fillColor: {r: 0.56078434, g: 0.8862745, b: 0.99215686, a: 1}
   knobColor: {r: 1, g: 1, b: 1, a: 1}
   rowSpacing: 70
   buttonSize: {x: 140, y: 46}
   buttonBottomMargin: 24
   buttonFontSize: 22
+  soundTabLabel: "\uC18C\uB9AC"
+  hudTabLabel: HUD
+  tabSize: {x: 200, y: 64}
+  tabHiddenWidth: 50
+  tabPopOut: 28
+  tabTopMargin: 40
+  tabSpacing: 12
+  tabFontSize: 28
+  tabMoveDuration: 0.15
+  hudPanelSize: {x: 1280, y: 940}
+  hudPanelVisibleHeight: 860
+  hudScrollTop: 66
+  hudScrollSpeed: 70
+  hudScrollBarWidth: 8
+  hudSectionGap: 70
+  hudPanelOffset: {x: 40, y: 0}
+  hudSideMargin: 50
+  hudSectionFontSize: 24
+  hudLabelFontSize: 21
+  visibleStatsLabel: "\uBCF4\uC774\uB294 \uC2A4\uD0EF"
+  statOpacitySectionLabel: "\uC2A4\uD0EF \uBD88\uD22C\uBA85\uB3C4"
+  windowOpacityLabel: "\uCC3D \uBD88\uD22C\uBA85\uB3C4"
+  whiteTextLabel: "\uC22B\uC790\uB97C \uD770\uC0C9\uC73C\uB85C"
+  contentOpacityLabel: "\uC544\uC774\uCF58\xB7\uC22B\uC790 \uBD88\uD22C\uBA85\uB3C4"
+  combatFadeLabel: "\uC804\uD22C \uC911 \uC790\uB3D9 \uBC18\uD22C\uBA85"
+  combatModeBackgroundLabel: "\uBC30\uACBD \uCC3D\uB9CC"
+  combatModeAllLabel: "\uC804\uCCB4"
+  combatOpacityLabel: "\uC804\uD22C \uC911 \uBD88\uD22C\uBA85\uB3C4"
+  combatPreviewLabel: "\uC804\uD22C \uD654\uBA74"
+  normalPreviewLabel: "\uBE44\uC804\uD22C \uD654\uBA74"
+  inventoryOpacitySectionLabel: "\uC778\uBCA4\uD1A0\uB9AC \uBD88\uD22C\uBA85\uB3C4"
+  inventoryWindowOpacityLabel: "\uCC3D \uBD88\uD22C\uBA85\uB3C4"
+  slotSubFrameOpacityLabel: "\uC2AC\uB86F \uBCF4\uC870\uD2C0 \uBD88\uD22C\uBA85\uB3C4"
+  slotIconOpacityLabel: "\uC2AC\uB86F \uC544\uC774\uCF58 \uBD88\uD22C\uBA85\uB3C4"
+  passiveIconOpacityLabel: "\uD328\uC2DC\uBE0C \uC544\uC774\uCF58 \uBD88\uD22C\uBA85\uB3C4"
+  inventoryCombatModeBackgroundLabel: "\uCC3D\uB9CC"
+  previewOffSuffix: " (\uAEBC\uC9D0)"
+  hudStatColumns: 5
+  hudStatRowHeight: 44
+  hudCheckboxSize: 26
+  hudStatIconSize: 34
+  hudStatNameFontSize: 19
+  hudControlRowSpacing: 54
+  hudSliderLabelWidth: 200
+  hudModeBackgroundButtonSize: {x: 120, y: 32}
+  hudModeAllButtonSize: {x: 90, y: 32}
+  hudModeButtonFontSize: 17
+  hudModeUnselectedColor: {r: 0.9137255, g: 0.9411765, b: 0.9607843, a: 1}
+  hudSliderCapMarkColor: {r: 0.6666667, g: 0.7254902, b: 0.78431374, a: 1}
+  playerHUDPrefab: {fileID: 4028203156877693131, guid: 5a1b819dee9d43249b7d7f5ca8ed5d05, type: 3}
+  combatPreviewBackground: {fileID: 21300000, guid: e035afae111f0774692ce46b6b4594d3, type: 3}
+  normalPreviewBackground: {fileID: 21300000, guid: e035afae111f0774692ce46b6b4594d3, type: 3}
+  previewCornerRadius: 18
+  previewInnerMargin: 22
+  previewMaxScale: 1
+  previewBoxHeight: 340
+  previewGroupGap: 24
+  previewInventoryGap: 20
+  previewSlotIcons:
+  - {fileID: 21300000, guid: fa775484831f0d84da6f675a5bde7f1c, type: 3}
+  - {fileID: 21300000, guid: 461919660f34bd5429b5bd13be365ff4, type: 3}
+  - {fileID: 21300000, guid: a4fb7471a89b92943a479b0db99aa73b, type: 3}
+  previewPassiveIcons:
+  - {fileID: 21300000, guid: 9d0beab13316c1846bc2fa9663592b0e, type: 3}
+  - {fileID: 21300000, guid: 059df4d1a3d259c45a1a1a6a9e9e318a, type: 3}
+  - {fileID: 21300000, guid: 681ece99a0a2b194ab496317075fed97, type: 3}
+  - {fileID: 21300000, guid: 82963d807e8a42d44a356b0033033eff, type: 3}
+  - {fileID: 21300000, guid: 971ad458448587b4fa4817443a47174c, type: 3}
+  - {fileID: 21300000, guid: 578159594dd8a8d4db27904c540b4b8e, type: 3}
+  - {fileID: 21300000, guid: 5c1b8b3be7a98f345bf228107a3af975, type: 3}

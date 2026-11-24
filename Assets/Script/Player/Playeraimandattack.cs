@@ -27,6 +27,15 @@ using UnityEngine;
 //   자동 조준 중에도 캐릭터는 마우스가 아니라 지금처럼 "이동 방향"을 바라보며, 조준선
 //   (AimTrajectoryIndicator)은 우클릭 조준 때만 보입니다(IsAiming은 우클릭 여부만 알려줍니다).
 //   Auto Aim On Fire를 끄면 예전처럼 비조준 상태에서 바로 쏩니다(허리쏘기).
+// - [누르고 있기 연속 사격] 좌클릭을 누르고 있으면 공격속도 대기시간이 끝날 때마다 다음 발을 쏩니다(형빈 확정, 테스터 피드백).
+//   발사 판정은 클릭과 똑같이 PlayerShooting.TryFire가 하므로 연타 최고 속도와 같습니다. 규칙(형빈 확정):
+//   - 110번 충전이 있으면 누르고 있기 = 충전이 우선입니다(아이작 혈사포와 같은 동작).
+//   - 탄약이 떨어져 자동 장전이 끝난 뒤에도 계속 누르고 있으면 이어서 쏩니다.
+//   - 누른 순간이 HUD 버튼/미니맵 위였거나 수류탄/해킹 모드였으면 이어서 쏘지 않습니다.
+//   - 누르는 도중 팝업/중단 화면이 열리면 떠 있는 동안만 쉬고, 닫힌 뒤에도 계속 누르고 있으면 이어서 쏩니다(형빈 확정).
+//     (ESC 중단 화면은 떠 있는 동안 이 컴포넌트를 꺼 두므로 원래 이렇게 동작합니다 - 다른 팝업도 같게 맞춤.)
+//   - 연출(입장 컷씬/헬기/결과 화면/로딩)이 시작되거나, 사망하거나, 총 모드가 아니게 되면 끊기고 다시 눌러야 합니다.
+//   - 탄약 0일 때의 빈 탄창 소리 + 장전은 새로 누를 때만 합니다(획득 연출 중 누르고 있으면 소리가 매 프레임 반복되는 것 방지).
 // - 이 스크립트는 방향(회전)과 입력 감지만 담당하고, 실제 탄약/쿨다운/장전 판정은
 //   PlayerShooting.TryFire()가 처리합니다.
 [RequireComponent(typeof(PlayerMovement))]
@@ -95,6 +104,10 @@ public class PlayerAimAndAttack : MonoBehaviour
     private float aimReadyTimer = 0f;    // AimBlend가 기준값에 도달한 뒤 흐른 시간
     private bool animatorHasAimBlend;
 
+    // [누르고 있기 연속 사격] 이번 좌클릭 누름이 정상적인 사격으로 시작됐는지입니다. 떼거나 끊길 조건이 되면 false.
+    private bool holdFireArmed = false;
+    private PlayerHealth health;
+
     void Awake()
     {
         if (mainCamera == null) mainCamera = Camera.main;
@@ -102,6 +115,7 @@ public class PlayerAimAndAttack : MonoBehaviour
         playerMovement = GetComponent<PlayerMovement>();
         playerShooting = GetComponent<PlayerShooting>();
         weaponMode = GetComponent<PlayerWeaponMode>();
+        health = GetComponent<PlayerHealth>();
         animatorHasAimBlend = HasFloatParameter(animator, aimBlendAnimatorParam);
     }
 
@@ -250,6 +264,7 @@ public class PlayerAimAndAttack : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0)) // 왼쪽 클릭
         {
+            holdFireArmed = false; // 아래 막는 조건을 모두 지나야 누르고 있기 사격이 켜집니다
             // [무기 모드] 총 모드(1키)가 아니면 좌클릭은 수류탄 투척/해킹툴 전개용이라 총을
             // 쏘지 않습니다. 마지막 수류탄/해킹툴을 쓴 그 프레임에 총 모드로 자동 복귀하는
             // 경우에도, 같은 클릭으로 총까지 나가지 않도록 BlocksGunFireThisFrame이 그 프레임만큼
@@ -259,6 +274,8 @@ public class PlayerAimAndAttack : MonoBehaviour
 
             // [HUD 접어보기] HUD 접기 버튼 위에서 누른 클릭은 버튼 조작용이라 총을 쏘지 않습니다.
             if (HUDClickBlocker.BlocksLeftClick) return;
+
+            holdFireArmed = true;
 
             // [110번 장신구 - 충전 사격] 110번이 있고 지금 쏠 수 있으면, 누르는 순간 쏘지 않고 충전을 시작합니다(뗄 때 발사 -
             // UpdateChargeShot). 충전을 시작하지 못하면(탄약 0 등) 아래 평소 처리를 그대로 합니다.
@@ -271,7 +288,56 @@ public class PlayerAimAndAttack : MonoBehaviour
             }
 
             HandleClickFire();
+            return;
         }
+
+        HandleHoldFire();
+    }
+
+    // [누르고 있기 연속 사격] 누른 뒤 다음 프레임부터 매 프레임 부릅니다(규칙은 맨 위 [동작 방식] 주석).
+    void HandleHoldFire()
+    {
+        if (!holdFireArmed) return;
+        if (!Input.GetMouseButton(0) || ShouldBreakHoldFire())
+        {
+            holdFireArmed = false;
+            return;
+        }
+
+        // 연사 도중 조준 자세가 풀리지 않게, 누르고 있는 동안은 자동 조준 자세를 유지합니다(장전 중 포함 - 장전이 끝나면 바로 이어 쏨).
+        if (autoAimOnFire && !manualAiming) autoAimTimer = shotAimHoldTime;
+
+        // 커서가 HUD 버튼/미니맵 위를 지나거나 팝업이 떠 있는 동안은 쏘지 않고 기다립니다(끊지는 않음 - 형빈 확정).
+        if (HUDClickBlocker.BlocksLeftClick) return;
+        if (PlayerItemPickupPresenter.BlocksActions) return; // 획득 연출이 끝나면 이어서 쏨
+        if (Time.timeScale <= 0f) return;
+        if (pendingShot) return; // 자동 조준 발사 대기 중이면 그 발사가 먼저
+
+        PlayerChargeShot charge = GetChargeShot();
+        if (charge != null && charge.IsCharging) return; // 110번 충전 중 - UpdateChargeShot이 처리
+
+        // 지금 바로 쏠 수 있을 때만(장전/연사 중 아님, 공격속도 대기 끝, 탄약 1발 이상). 탄약 0이면 자동 장전을 기다립니다.
+        if (playerShooting == null || !playerShooting.CanBeginChargeShot) return;
+
+        // [110번] 누르고 있는 동안 쏠 수 있게 되면(장전 끝 등) 충전을 시작합니다 - 충전이 우선(형빈 확정).
+        if (charge != null && charge.TryBeginCharge())
+        {
+            if (autoAimOnFire && !manualAiming) autoAimTimer = shotAimHoldTime;
+            return;
+        }
+
+        HandleClickFire();
+    }
+
+    // 누르고 있기 사격을 끊고 다시 눌러야 하는 상황입니다(팝업/HUD 위 커서는 끊지 않고 쉬기만 함 - HandleHoldFire).
+    bool ShouldBreakHoldFire()
+    {
+        if (weaponMode == null) weaponMode = GetComponent<PlayerWeaponMode>();
+        if (weaponMode != null && weaponMode.BlocksGunFireThisFrame) return true;
+        if (health != null && health.IsDead) return true;
+        if (LoadingScreen.BlocksPlayerInput) return true;
+        if (IntroCutscene.BlocksInput || HeliExtraction.BlocksInput || GameClearUI.BlocksInput) return true;
+        return false;
     }
 
     // 평소 좌클릭 발사 처리입니다(자동 조준 대기 또는 즉시 발사). 110번 충전을 0발에서 뗐을 때도 이 처리를 씁니다.

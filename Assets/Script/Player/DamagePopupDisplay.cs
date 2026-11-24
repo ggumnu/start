@@ -17,6 +17,10 @@ using UnityEngine.UI;
 // 공격력과 비교하는 것은 총알 피해뿐입니다. 지속 피해(EnemyHealth.IsDotDamageInProgress)와 아이템 효과 부가 피해(IsForcedWeakDamageInProgress -
 // 4번 폭발, 29번, 68번 충돌, 81번 연소, 87번 아군 공격, 94번 후광, 수류탄, 해킹툴, 118번 포격)는 항상 Weak입니다(보호막에 들어간 피해는
 // 보호막 규칙 = Resist). 설계 배경은 Docs/설계노트.md [피해 숫자].
+// [3레벨 보스] 피해 감소막으로 줄어든 피해는 어떤 피해든 항상 Resist(EnemyHealth.IsReducedDamageInProgress), 감소막 생성 연출(무적) 중에 맞으면
+// 숫자 없이 빨간 폭발 배경 + 흰 "MISS"(EnemyHealth.OnAnyEnemyMissed) - 형빈 확정.
+// [3레벨 보스 그로기 비콘] 적이 아닌 대상(수류탄/해킹 비콘이 총알을 막음)에도 같은 "MISS"를 띄울 수 있습니다(ShowMissOn - 대상 Transform을 따라감).
+// [63번 미사일] 미사일 명중 피해는 "공격력 x 미사일 피해 배율(50%)"을 기준으로 비교합니다(EnemyHealth.DamageReferenceScale, 형빈 확정).
 public class DamagePopupDisplay : MonoBehaviour
 {
     [Header("글자 모양")]
@@ -46,6 +50,11 @@ public class DamagePopupDisplay : MonoBehaviour
     public string resistLabel = "Resist";
     public Color resistLabelColor = new Color(0.55f, 0.84f, 1f, 1f);
     public Color resistLabelOutlineColor = new Color(0.12f, 0.32f, 0.78f, 1f);
+
+    [Header("MISS (3레벨 보스 감소막 생성 중 - 숫자 없이 폭발 배경 + 글자)")]
+    public string missText = "MISS";
+    public Color missTextColor = Color.white;
+    public Color missOutlineColor = new Color(0.42f, 0.05f, 0.06f, 1f);
 
     [Header("Weak / Resist 글자")]
     [Tooltip("Weak/Resist 글자 크기 = 숫자 글자 크기 x 이 값.")]
@@ -145,7 +154,8 @@ public class DamagePopupDisplay : MonoBehaviour
         public TextMeshProUGUI text;
         public bool active;
         public float age;
-        public EnemyHealth enemy;      // 따라다닐 적(파괴되면 null)
+        public EnemyHealth enemy;      // 따라다닐 적(파괴되면 null, 적이 아닌 대상이면 비어 있음)
+        public Transform follow;       // 따라다닐 대상(적이면 적의 Transform, 비콘 MISS면 비콘)
         public float headHeight;       // 적 pivot 기준 머리 높이(월드 단위)
         public Vector3 lastEnemyPos;   // 적이 사라진 뒤 고정할 마지막 위치
         public float bodyHeight;       // 적 pivot 기준 몸통 가운데 높이(월드 단위) - 포물선 시작점
@@ -171,7 +181,7 @@ public class DamagePopupDisplay : MonoBehaviour
         public TextMeshProUGUI labelText;
     }
 
-    private enum HitStyle { Normal, Weak, Resist }
+    private enum HitStyle { Normal, Weak, Resist, Miss }
 
     private PlayerStats playerStats;
 
@@ -184,8 +194,8 @@ public class DamagePopupDisplay : MonoBehaviour
 
     // 연속 피격 펼치기: 적마다 마지막으로 맞은 시간과 몇 번째 연속 피격인지.
     private struct SpreadState { public float lastTime; public int index; }
-    private readonly Dictionary<EnemyHealth, SpreadState> spreadStates = new Dictionary<EnemyHealth, SpreadState>();
-    private readonly List<EnemyHealth> spreadPruneBuffer = new List<EnemyHealth>();
+    private readonly Dictionary<Transform, SpreadState> spreadStates = new Dictionary<Transform, SpreadState>();
+    private readonly List<Transform> spreadPruneBuffer = new List<Transform>();
     private int[] spreadOrder;
     private const int SpreadPruneThreshold = 64;
     private Canvas canvas;
@@ -199,16 +209,30 @@ public class DamagePopupDisplay : MonoBehaviour
         EnsureBuilt();
     }
 
+    // [3레벨 보스 그로기 비콘] 적이 아닌 대상에 MISS를 띄울 때 쓰는 켜져 있는 HUD입니다.
+    private static DamagePopupDisplay activeInstance;
+
+    // 적이 아닌 대상(그로기 비콘 등) 위에 숫자 없이 "MISS"를 띄웁니다. HUD가 없으면 아무것도 하지 않습니다.
+    public static void ShowMissOn(Transform target)
+    {
+        if (target == null || activeInstance == null) return;
+        activeInstance.ShowPopupCore(target, null, 1f, false, false, HitStyle.Miss);
+    }
+
     void OnEnable()
     {
+        activeInstance = this;
         EnemyHealth.OnAnyEnemyDamaged += HandleEnemyDamaged;
         EnemyHealth.OnAnyEnemyShieldDamaged += HandleShieldDamaged;
+        EnemyHealth.OnAnyEnemyMissed += HandleEnemyMissed;
     }
 
     void OnDisable()
     {
+        if (activeInstance == this) activeInstance = null;
         EnemyHealth.OnAnyEnemyDamaged -= HandleEnemyDamaged;
         EnemyHealth.OnAnyEnemyShieldDamaged -= HandleShieldDamaged;
+        EnemyHealth.OnAnyEnemyMissed -= HandleEnemyMissed;
         for (int i = 0; i < popups.Count; i++) Deactivate(popups[i]);
         spreadStates.Clear();
     }
@@ -233,7 +257,7 @@ public class DamagePopupDisplay : MonoBehaviour
             // [98번] "섬멸" 글자는 적이 완전히 사라질 때까지 유지하고, 사라진 뒤 짧게 옅어집니다.
             if (p.isLabel)
             {
-                bool enemyGone = p.enemy == null || !p.enemy.gameObject.activeInHierarchy;
+                bool enemyGone = p.follow == null || !p.follow.gameObject.activeInHierarchy;
                 if (enemyGone && p.labelFadeElapsed < 0f) p.labelFadeElapsed = 0f;
                 if (p.labelFadeElapsed >= 0f) p.labelFadeElapsed += dt;
 
@@ -259,12 +283,20 @@ public class DamagePopupDisplay : MonoBehaviour
 
     private void HandleEnemyDamaged(EnemyHealth enemy, float amount)
     {
-        ShowPopup(enemy, amount, false, EnemyHealth.IsDotDamageInProgress || EnemyHealth.IsForcedWeakDamageInProgress);
+        // [3레벨 보스] 감소막으로 줄어든 피해는 지속/부가 피해여도 Resist.
+        HitStyle? forced = EnemyHealth.IsReducedDamageInProgress ? HitStyle.Resist : (HitStyle?)null;
+        ShowPopup(enemy, amount, false, EnemyHealth.IsDotDamageInProgress || EnemyHealth.IsForcedWeakDamageInProgress, forced);
     }
 
     private void HandleShieldDamaged(EnemyHealth enemy, float amount)
     {
         ShowPopup(enemy, amount, true, false);
+    }
+
+    // [3레벨 보스] 감소막 생성 연출(무적) 중 피격 - 숫자 없이 "MISS"(크기는 보통 1배).
+    private void HandleEnemyMissed(EnemyHealth enemy)
+    {
+        ShowPopup(enemy, 1f, false, false, HitStyle.Miss);
     }
 
     // 현재 공격력(PlayerStats.Damage). 플레이어를 못 찾으면 false.
@@ -277,7 +309,8 @@ public class DamagePopupDisplay : MonoBehaviour
             if (health != null) playerStats = health.GetComponent<PlayerStats>();
         }
         if (playerStats == null) return false;
-        attack = playerStats.Damage;
+        // [63번 미사일] 미사일 피해는 "공격력 x 미사일 피해 배율"과 비교합니다(EnemyHealth.DamageReferenceScale - 평소 1).
+        attack = playerStats.Damage * EnemyHealth.DamageReferenceScale;
         return true;
     }
 
@@ -306,7 +339,7 @@ public class DamagePopupDisplay : MonoBehaviour
     }
 
     // 이번 숫자의 처음 속도입니다. 펼치기를 켜면 같은 적의 연속 피격마다 부채꼴 안의 다른 각도를 씁니다.
-    private Vector2 ResolveLaunchVelocity(EnemyHealth enemy)
+    private Vector2 ResolveLaunchVelocity(Transform enemy)
     {
         if (!spreadConsecutiveHits || spreadSteps < 2)
         {
@@ -381,10 +414,17 @@ public class DamagePopupDisplay : MonoBehaviour
         drawOrderBuffer.Clear();
     }
 
-    private void ShowPopup(EnemyHealth enemy, float amount, bool isShield, bool alwaysWeak)
+    private void ShowPopup(EnemyHealth enemy, float amount, bool isShield, bool alwaysWeak, HitStyle? forcedStyle = null)
     {
         if (enemy == null || amount <= 0f) return;
         if (AllyFaction.IsAlly(enemy.gameObject)) return; // [87번] 아군이 맞을 때는 피해 숫자를 띄우지 않습니다.
+        ShowPopupCore(enemy.transform, enemy, amount, isShield, alwaysWeak, forcedStyle);
+    }
+
+    // target = 따라갈 대상, enemy = 그 대상이 적이면 그 적(적이 아니면 null - 98번 섬멸 확인 등 적 전용 처리를 건너뜀).
+    private void ShowPopupCore(Transform target, EnemyHealth enemy, float amount, bool isShield, bool alwaysWeak, HitStyle? forcedStyle)
+    {
+        if (target == null || amount <= 0f) return;
         EnsureBuilt();
 
         int shown = Mathf.Max(1, Mathf.RoundToInt(amount));
@@ -393,18 +433,20 @@ public class DamagePopupDisplay : MonoBehaviour
         p.active = true;
         p.age = 0f;
         p.enemy = enemy;
-        MeasureHeights(enemy, out p.headHeight, out p.bodyHeight);
-        p.lastEnemyPos = enemy.transform.position;
-        p.velocity = ResolveLaunchVelocity(enemy);
+        p.follow = target;
+        MeasureHeights(target, out p.headHeight, out p.bodyHeight);
+        p.lastEnemyPos = target.position;
+        p.velocity = ResolveLaunchVelocity(target);
         p.peakTime = Mathf.Max(0f, p.velocity.y) / Mathf.Max(1f, launchGravity);
         p.isShield = isShield;
-        p.style = ResolveStyle(amount, isShield, alwaysWeak);
+        p.style = forcedStyle ?? ResolveStyle(amount, isShield, alwaysWeak);
+        bool isMiss = p.style == HitStyle.Miss;
         p.spawnOrder = spawnCounter++;
 
         // [98번] 즉시 처치(섬멸)면 숫자 대신 설정의 글자를 띄웁니다.
-        var execute = !isShield && enemy.WasExecuted ? enemy.ExecuteSettings : null;
+        var execute = !isShield && !isMiss && enemy != null && enemy.WasExecuted ? enemy.ExecuteSettings : null;
         p.isLabel = execute != null;
-        p.sizeScale = p.isLabel ? 1f : ResolveSizeScale(amount);
+        p.sizeScale = p.isLabel || isMiss ? 1f : ResolveSizeScale(amount);
         if (p.isLabel)
         {
             p.labelTextColor = execute.popupTextColor;
@@ -417,7 +459,7 @@ public class DamagePopupDisplay : MonoBehaviour
         }
         else
         {
-            p.text.text = shown.ToString();
+            p.text.text = isMiss ? missText : shown.ToString();
         }
 
         // 폭발 배경(보통/Weak)과 Weak/Resist 글자. 섬멸 글자에는 붙이지 않습니다.
@@ -431,7 +473,7 @@ public class DamagePopupDisplay : MonoBehaviour
             p.burstRect.anchoredPosition = burstOffset;
             p.burstRect.localRotation = Quaternion.Euler(0f, 0f, Random.Range(-burstRandomRotation, burstRandomRotation));
         }
-        bool showLabel = !p.isLabel && p.style != HitStyle.Normal;
+        bool showLabel = !p.isLabel && p.style != HitStyle.Normal && p.style != HitStyle.Miss;
         p.labelText.gameObject.SetActive(showLabel);
         if (showLabel)
         {
@@ -449,9 +491,9 @@ public class DamagePopupDisplay : MonoBehaviour
     }
 
     // 적 pivot(transform.position) 기준으로 Collider(없으면 Renderer) 최상단(머리)과 가운데(몸통)가 얼마나 위인지 잽니다.
-    private void MeasureHeights(EnemyHealth enemy, out float head, out float body)
+    private void MeasureHeights(Transform enemy, out float head, out float body)
     {
-        float baseY = enemy.transform.position.y;
+        float baseY = enemy.position.y;
         float top = float.NegativeInfinity, bottom = float.PositiveInfinity;
 
         var colliders = enemy.GetComponentsInChildren<Collider>();
@@ -481,7 +523,7 @@ public class DamagePopupDisplay : MonoBehaviour
     private void UpdatePopup(Popup p, float dt)
     {
         // 적이 살아있는 동안만 위치를 갱신하고, 사라지면 마지막 위치에 고정합니다.
-        if (p.enemy != null) p.lastEnemyPos = p.enemy.transform.position;
+        if (p.follow != null) p.lastEnemyPos = p.follow.position;
 
         // 섬멸 글자는 머리 위 고정, 숫자는 몸통 가운데에서 포물선 시작.
         Vector3 world = p.isLabel ? p.lastEnemyPos + Vector3.up * (p.headHeight + headroom)
@@ -562,6 +604,9 @@ public class DamagePopupDisplay : MonoBehaviour
                 break;
             case HitStyle.Resist:
                 text = resistTextColor; outline = resistOutlineColor; label = resistLabelColor; labelOutline = resistLabelOutlineColor;
+                break;
+            case HitStyle.Miss:
+                text = missTextColor; outline = missOutlineColor; label = missTextColor; labelOutline = missOutlineColor;
                 break;
             default:
                 text = normalTextColor; outline = normalOutlineColor; label = normalTextColor; labelOutline = normalOutlineColor;
@@ -647,6 +692,7 @@ public class DamagePopupDisplay : MonoBehaviour
     {
         p.active = false;
         p.enemy = null;
+        p.follow = null;
         p.isLabel = false;
         if (p.go != null) p.go.SetActive(false);
     }

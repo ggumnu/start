@@ -5,6 +5,8 @@ using UnityEngine;
 // 중심부 빛 / 외곽 빛 / 나선 고리 / 번개 / 꼬리 다섯 요소, 크기 단위는 "총알 지름"(총알 자식이라 총알 크기를 따라감). HDR 색이라 URP Bloom 필요.
 // 주의: 빌드에서 분홍색(셰이더 누락)이면 설정의 Additive/Ring Material 칸에 URP Particles/Unlit 재질을 넣을 것.
 // 설계 배경(충전 수에 따른 세기, 23번 무지개 색 규칙)은 Docs/설계노트.md [110번 강화 총알 외형].
+// [3레벨 보스 그로기 비콘 부스터] AttachBooster: 움직임을 따라가는 꼬리(TrailRenderer) 대신 진행 반대쪽(-Z)으로 고정된 꼬리를 그립니다
+// (비콘 밑에 위(+Z)를 향해 붙여 아래로 뿜는 로켓 불꽃처럼 - 비콘이 내려와도 꼬리는 아래쪽).
 public class ChargedBulletVisual : MonoBehaviour
 {
     [System.Serializable]
@@ -98,6 +100,9 @@ public class ChargedBulletVisual : MonoBehaviour
         [Min(0.01f)] public float trailTime = 0.18f;
         [Min(0.01f)] public float trailWidth = 1.8f;
 
+        // 설정 복사본(참조 칸 - 재질/프리팹은 같은 것을 가리킴). 원본을 건드리지 않고 일부만 바꿔 쓸 때 사용합니다.
+        public Settings Clone() => (Settings)MemberwiseClone();
+
         // 1레벨 보스 전방위 탄환(하늘색)에 맞춘 기본값 - 색만 하늘색 계열이고 크기/세기는 110번 기본값과 같습니다.
         public static Settings CreateCyan()
         {
@@ -145,6 +150,8 @@ public class ChargedBulletVisual : MonoBehaviour
     private readonly List<LineRenderer> bolts = new List<LineRenderer>();
     private float boltTimer;
     private float spinAngle;
+    private bool fixedTail;          // [비콘 부스터] 따라가는 꼬리 대신 고정 꼬리
+    private float fixedTailLength;   // 고정 꼬리 길이(총알 지름 단위)
 
     public int ChargeCount => chargeCount;
 
@@ -195,6 +202,33 @@ public class ChargedBulletVisual : MonoBehaviour
         return visual;
     }
 
+    // [3레벨 보스 그로기 비콘 부스터] host(+Z = 불꽃 반대쪽, 즉 위)에 강화 외형을 붙이되, 꼬리는 따라가는 꼬리 대신 -Z 쪽으로
+    // tailLength(총알 지름 단위)만큼 고정해 그립니다. 실패하면 붙인 것을 지우고 null.
+    public static ChargedBulletVisual AttachBooster(GameObject host, int charges, Settings visualSettings, float tailLength)
+    {
+        if (host == null || visualSettings == null || charges <= 0) return null;
+        if (host.GetComponent<ChargedBulletVisual>() != null) return null;
+
+        var visual = host.AddComponent<ChargedBulletVisual>();
+        visual.settings = visualSettings;
+        visual.chargeCount = charges;
+        visual.isSplit = false;
+        visual.fixedTail = true;
+        visual.fixedTailLength = Mathf.Max(0f, tailLength);
+        try
+        {
+            visual.Build();
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"ChargedBulletVisual: 비콘 부스터 외형 생성 중 오류가 발생해 부스터 없이 진행합니다: {e}");
+            if (visual.visualRoot != null) Destroy(visual.visualRoot.gameObject);
+            Destroy(visual);
+            return null;
+        }
+        return visual;
+    }
+
     // [5번 분열 연동] parent가 강화 총알이면 child(분열탄)에도 같은 강화 외형을 붙입니다(형빈 확정).
     public static void CopyToSplit(Projectile parent, Projectile child)
     {
@@ -213,8 +247,9 @@ public class ChargedBulletVisual : MonoBehaviour
         visualRoot.SetParent(transform, false);
         AlignRoot();
 
-        // 꼬리는 총알이 사라져도 자연스럽게 옅어지도록 따로 만듭니다(BulletTrail과 같은 이유).
-        ChargedTrailFollower.Spawn(transform, s, intensity);
+        // 꼬리는 총알이 사라져도 자연스럽게 옅어지도록 따로 만듭니다(BulletTrail과 같은 이유). 비콘 부스터는 고정 꼬리.
+        if (fixedTail) CreateFixedTail(s);
+        else ChargedTrailFollower.Spawn(transform, s, intensity);
 
         if (s.overridePrefab != null)
         {
@@ -369,6 +404,30 @@ public class ChargedBulletVisual : MonoBehaviour
             }
             bolt.widthMultiplier = s.lightningWidth * worldScale;
         }
+    }
+
+    // [비콘 부스터] 따라가는 꼬리와 같은 색/굵기/모양의 꼬리를 -Z 쪽으로 고정해 그립니다(visualRoot 기준 - 총알 지름 단위).
+    void CreateFixedTail(Settings s)
+    {
+        if (fixedTailLength <= 0f) return;
+        var go = new GameObject("FixedTail");
+        go.transform.SetParent(visualRoot, false);
+        var lr = go.AddComponent<LineRenderer>();
+        lr.useWorldSpace = false;
+        lr.positionCount = 2;
+        lr.SetPosition(0, Vector3.zero);
+        lr.SetPosition(1, new Vector3(0f, 0f, -fixedTailLength));
+        lr.alignment = LineAlignment.View;
+        lr.numCapVertices = 2;
+        lr.widthMultiplier = s.trailWidth * Mathf.Max(transform.lossyScale.x, 0.0001f);
+        lr.widthCurve = new AnimationCurve(new Keyframe(0f, 1f), new Keyframe(1f, 0.15f));
+        var gradient = new Gradient();
+        gradient.SetKeys(
+            new[] { new GradientColorKey(s.trailHeadColor, 0f), new GradientColorKey(s.trailTailColor, 1f) },
+            new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0.7f, 0.4f), new GradientAlphaKey(0f, 1f) });
+        lr.colorGradient = gradient;
+        ConfigureRenderer(lr, GetSolidAdditiveMaterial(s));
+        SetColor(lr, Color.white * (s.trailIntensity * intensity));
     }
 
     Color ResolveCoreColor(Color fallback)

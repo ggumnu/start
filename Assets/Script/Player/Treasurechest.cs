@@ -103,6 +103,10 @@ public class TreasureChest : MonoBehaviour, IBasicItemContainer, IMinimapMultiMa
     private bool isOpened = false;
     private System.Action contentResolver;
 
+    // [3레벨 보스 지원 드론 보급 상자] 켜면 열 때 "보물상자가 열렸다" 신호(ContainerOpenEvents - 117/97/27/48번 등)를 보내지 않습니다.
+    // 보급 상자는 정당한 보물상자가 아니라 기믹용 보급품이라 상자 관련 아이템이 반응하지 않게 합니다(형빈 확정).
+    [HideInInspector] public bool suppressOpenEvents;
+
     private bool playerInRange = false;
     private Transform playerTransform;
     private PlayerHealth playerHealth;
@@ -163,6 +167,12 @@ public class TreasureChest : MonoBehaviour, IBasicItemContainer, IMinimapMultiMa
     {
         if (isOpened) return;
         isOpened = true;
+
+        if (suppressOpenEvents)
+        {
+            contentResolver?.Invoke(); // 보급 상자: 신호 없이 내용물만(48번 무장도 건드리지 않음)
+            return;
+        }
 
         ContainerOpenEvents.RaiseOpened();
         contentResolver?.Invoke();

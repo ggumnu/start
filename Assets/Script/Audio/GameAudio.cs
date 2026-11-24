@@ -8,7 +8,8 @@ using UnityEngine.SceneManagement;
 // 반복 소리(81번 연소 등)는 PlayLoop/StopLoop - 방 소속 반복 소리는 다른 방에 들어가면 자동으로 꺼짐(방 범위 규칙).
 // 게임이 멈춘 동안(ESC - Time.timeScale 0) 반복 소리는 일시 정지하고, 한 번 소리(UI 등)는 그대로 납니다.
 // 이미 있는 게임 알림에 소리를 다는 일은 SoundEventHooks(같은 오브젝트에 자동으로 붙음)가 맡습니다.
-// [BGM] SoundLibrary의 곡 하나를 씬과 상관없이 계속 반복합니다(반복 구간 지원). 게임이 멈춘 동안은 작게, 보스방 입장 때는
+// [BGM] SoundLibrary의 곡 하나를 씬과 상관없이 계속 반복합니다(반복 구간 지원). 게임이 멈춘 동안은 작게(단, 설정 창이 열려 있으면
+// 원래 크기 - 줄어든 소리로 볼륨을 맞추면 게임으로 돌아왔을 때 커지는 문제 때문, 형빈 확정), 보스방 입장 때는
 // PlayBossAlert로 경고음 -> BGM 끊김 -> 경고음이 끝나면 곡 처음부터 서서히 커짐.
 // [인트로] bgmIntroClip이 있으면 게임을 켠 뒤 처음 한 번만 인트로를 틀고, 오디오 시계(PlayScheduled)로 끝나는 순간에 맞춰
 // 반복 곡을 이어 붙입니다. 시작 순간 게임이 잠깐 멈칫해서 인트로가 늦게 시작되면, 실제 시작 시각을 재서 반복 곡 예약을 고칩니다.
@@ -543,7 +544,8 @@ public class GameAudio : MonoBehaviour
     private void ApplyBgmVolume(bool gamePaused)
     {
         if (library == null) return;
-        float pauseScale = gamePaused ? library.bgmPausedVolumeRatio : 1f;
+        // 설정 창에서는 실제 게임 크기로 들려야 볼륨을 제대로 맞출 수 있으므로 줄이지 않습니다(바로 바뀜 - ESC와 같은 방식).
+        float pauseScale = gamePaused && !SettingsUI.IsOpen ? library.bgmPausedVolumeRatio : 1f;
         float volume = Mathf.Clamp01(library.bgmVolume * UserBgmVolume * bgmLevel * pauseScale);
         if (bgmSource != null) bgmSource.volume = volume;
         if (bgmIntroSource != null) bgmIntroSource.volume = volume;

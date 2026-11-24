@@ -16,6 +16,8 @@ using UnityEngine;
 // - 118번을 잃으면(48번 등) 그 뒤로 맞히는 총알은 포격을 만들지 않습니다(이미 시작된 포격은 그대로 진행).
 //
 // [구현] Projectile.OnPlayerBulletHitEnemyDetailed(맞힌 총알 + 맞은 적)를 받아 ArtilleryStrike.Create를 부릅니다.
+// [3레벨 보스 그로기 비콘 - 형빈 확정] 비콘(어느 종류든)에 맞은 총알도 그 자리에 포격합니다(Projectile.OnPlayerBulletHitBeacon) -
+// 포격은 수류탄 폭발과 같으므로 수류탄 비콘을 해제할 수 있습니다.
 //
 // [아이템 에셋 설정]
 // ItemDefinition: Item Id = 118, Category = Passive, Special Effects에 ArtilleryStrikeEffect 하나. Stat Modifiers는 비워둡니다.
@@ -47,6 +49,7 @@ public class ArtilleryStrikeEffect : IPassiveItemEffect, IRemovablePassiveEffect
         if (settings == null) settings = new ArtilleryStrike.Settings();
 
         Projectile.OnPlayerBulletHitEnemyDetailed += OnBulletHit;
+        Projectile.OnPlayerBulletHitBeacon += OnBulletHitBeacon;
         subscribed = true;
     }
 
@@ -61,10 +64,16 @@ public class ArtilleryStrikeEffect : IPassiveItemEffect, IRemovablePassiveEffect
     private void Unsubscribe()
     {
         Projectile.OnPlayerBulletHitEnemyDetailed -= OnBulletHit;
+        Projectile.OnPlayerBulletHitBeacon -= OnBulletHitBeacon;
         subscribed = false;
     }
 
-    private void OnBulletHit(Projectile projectile, EnemyHealth enemy)
+    private void OnBulletHitBeacon(Projectile projectile, GroggyBeacon beacon) => StrikeAt(projectile);
+
+    private void OnBulletHit(Projectile projectile, EnemyHealth enemy) => StrikeAt(projectile);
+
+    // 맞힌 총알 자리에 포격 하나(적/비콘 공통).
+    private void StrikeAt(Projectile projectile)
     {
         if (!subscribed) return;
         // 플레이어가 사라졌는데(이전 플레이 등) 구독이 남아 있으면 정리만 합니다.

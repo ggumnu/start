@@ -6,6 +6,11 @@ using UnityEngine.UI;
 // 값은 GameAudio.UserBgmVolume/UserSfxVolume(PlayerPrefs 저장)에 바로 반영되고, 닫을 때 디스크에 기록합니다.
 // 다른 팝업처럼 마우스 좌표를 직접 비교하고, 뒤 화면의 uGUI 버튼은 전체 화면 막(raycast)이 막습니다. 창 문구/크기는 SettingsUISettings.
 // 창/[닫기]는 공용 부품 UIPatternBox(흰 창 + 모서리 무늬, 하늘색 평행사변형 버튼 - 떼는 순간 클릭), 글자 색은 PopupStyle.
+//
+// [탭 - 형빈 확정] 창 왼쪽에 책갈피 탭 [소리]/[HUD]. 탭은 창보다 먼저(뒤에) 그려서 오른쪽 부분이 창에 가려지고, 고른 탭만 왼쪽으로
+// 튀어나옵니다(둘 다 하늘색). 클릭은 창 밖으로 보이는 부분에서만 받습니다. 처음 보이는 탭 = 마지막으로 본 탭(게임을 끄면 소리 탭부터).
+// - 소리 탭: BGM/효과음 볼륨(예전 내용 그대로).
+// - HUD 탭: 스탯 창 설정 + 전투/비전투 견본(SettingsHUDTab). 창 크기는 탭마다 다릅니다(SettingsUISettings의 panelSize / hudPanelSize).
 public class SettingsUI : MonoBehaviour
 {
     private static SettingsUI instance;
@@ -14,6 +19,7 @@ public class SettingsUI : MonoBehaviour
     private static void ResetStatics()
     {
         instance = null;
+        lastTab = SoundTab;
     }
 
     public static bool IsOpen => instance != null && instance.isOpen;
@@ -53,6 +59,24 @@ public class SettingsUI : MonoBehaviour
         public TextMeshProUGUI valueText;
     }
 
+    private class TabView
+    {
+        public RectTransform rect;
+        public UIPatternBox box;
+        public TextMeshProUGUI label;
+        public float pop; // 0 = 들어감, 1 = 튀어나옴(고른 탭)
+    }
+
+    private const int SoundTab = 0;
+    private const int HudTab = 1;
+
+    // 마지막으로 본 탭(게임을 켜 있는 동안만 기억 - 형빈 확정)
+    private static int lastTab = SoundTab;
+
+    private int currentTab = SoundTab;
+    private TabView[] tabs;
+    private SettingsHUDTab hudTab;
+
     private bool isOpen;
     private int minSortingOrder = int.MinValue;
     private bool showDim = true;
@@ -83,6 +107,7 @@ public class SettingsUI : MonoBehaviour
     void OnDestroy()
     {
         if (instance == this) instance = null;
+        if (hudTab != null) hudTab.Dispose();
     }
 
     private void Show()
@@ -92,6 +117,14 @@ public class SettingsUI : MonoBehaviour
         openedFrame = Time.frameCount;
         draggingSlider = -1;
         closeBox.ResetPress();
+        currentTab = lastTab;
+        hudTab.CancelDrag();
+        hudTab.ResetScroll();
+        foreach (var tab in tabs)
+        {
+            tab.box.ResetPress();
+        }
+        for (int i = 0; i < tabs.Length; i++) tabs[i].pop = i == currentTab ? 1f : 0f; // 열 때는 애니메이션 없이
         canvasGO.SetActive(true);
         ApplyLayout();
     }
@@ -102,8 +135,21 @@ public class SettingsUI : MonoBehaviour
         isOpen = false;
         closedFrame = Time.frameCount;
         draggingSlider = -1;
+        hudTab.CancelDrag();
         GameAudio.SaveUserVolumes();
+        HUDUserSettings.Save();
         canvasGO.SetActive(false);
+    }
+
+    private void SwitchTab(int tab)
+    {
+        if (tab == currentTab) return;
+        currentTab = tab;
+        lastTab = tab;
+        draggingSlider = -1;
+        hudTab.CancelDrag();
+        hudTab.ResetScroll();
+        ApplyLayout();
     }
 
     void Update()
@@ -112,11 +158,20 @@ public class SettingsUI : MonoBehaviour
 
         ApplyLayout();
 
+        bool soundTab = currentTab == SoundTab;
+        bool busy = draggingSlider >= 0 || hudTab.IsDragging;
         bool overClose = IsPointerOver(closeRect);
-        bool overBgm = IsPointerOverSlider(bgmSlider);
-        bool overSfx = IsPointerOverSlider(sfxSlider);
-        bool clickClose = closeBox.TickButton(overClose && draggingSlider < 0, true);
-        UISound.TrackHover(ref lastHoveredButton, UISound.HoveredId(0, overBgm, overSfx, overClose), Time.frameCount == openedFrame);
+        bool overBgm = soundTab && IsPointerOverSlider(bgmSlider);
+        bool overSfx = soundTab && IsPointerOverSlider(sfxSlider);
+        // 탭은 창 밖으로 보이는 부분만 판정합니다(창 뒤에 숨은 부분을 눌러도 반응하지 않게).
+        bool overPanel = IsPointerOver(panelRect);
+        bool overSoundTab = !overPanel && IsPointerOver(tabs[SoundTab].rect);
+        bool overHudTab = !overPanel && !overSoundTab && IsPointerOver(tabs[HudTab].rect);
+        bool clickClose = closeBox.TickButton(overClose && !busy, true);
+        bool clickSoundTab = tabs[SoundTab].box.TickButton(overSoundTab && !busy, true);
+        bool clickHudTab = tabs[HudTab].box.TickButton(overHudTab && !busy, true);
+        UISound.TrackHover(ref lastHoveredButton, UISound.HoveredId(0, overBgm, overSfx, overClose, overSoundTab, overHudTab),
+                           Time.frameCount == openedFrame);
 
         if (Time.frameCount == openedFrame) return;
 
@@ -134,15 +189,29 @@ public class SettingsUI : MonoBehaviour
             }
             return;
         }
+        if (hudTab.IsDragging)
+        {
+            hudTab.Tick();
+            return;
+        }
 
         if (Input.GetKeyDown(KeyCode.Escape)) { UISound.Cancel(); Close(); return; }
 
         if (clickClose) { UISound.Cancel(); Close(); return; }
+        if (clickSoundTab) { UISound.Confirm(); SwitchTab(SoundTab); return; }
+        if (clickHudTab) { UISound.Confirm(); SwitchTab(HudTab); return; }
 
-        if (Input.GetMouseButtonDown(0))
+        if (soundTab)
         {
-            if (overBgm) { draggingSlider = 0; SetValue(0, ValueFromPointer(bgmSlider)); return; }
-            if (overSfx) { draggingSlider = 1; SetValue(1, ValueFromPointer(sfxSlider)); return; }
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (overBgm) { draggingSlider = 0; SetValue(0, ValueFromPointer(bgmSlider)); return; }
+                if (overSfx) { draggingSlider = 1; SetValue(1, ValueFromPointer(sfxSlider)); return; }
+            }
+        }
+        else
+        {
+            hudTab.Tick();
         }
     }
 
@@ -203,6 +272,19 @@ public class SettingsUI : MonoBehaviour
         dimImage = dimGO.AddComponent<Image>();
         dimImage.raycastTarget = true;
 
+        // 탭은 창보다 먼저 만들어 창 뒤에 그려지게 합니다(책갈피처럼 오른쪽이 창에 가려짐).
+        tabs = new TabView[2];
+        for (int i = 0; i < tabs.Length; i++)
+        {
+            var tabGO = new GameObject(i == SoundTab ? "Tab_Sound" : "Tab_HUD");
+            tabGO.transform.SetParent(canvasGO.transform, false);
+            var tab = new TabView();
+            tab.rect = tabGO.AddComponent<RectTransform>();
+            tab.box = UIPatternBox.AddTo(tabGO);
+            tab.label = CreateText(tab.rect, "Label", TextAnchor.MiddleCenter);
+            tabs[i] = tab;
+        }
+
         var panelGO = new GameObject("Panel");
         panelGO.transform.SetParent(canvasGO.transform, false);
         panelRect = panelGO.AddComponent<RectTransform>();
@@ -214,6 +296,7 @@ public class SettingsUI : MonoBehaviour
 
         bgmSlider = CreateSlider(panelRect, "BgmRow");
         sfxSlider = CreateSlider(panelRect, "SfxRow");
+        hudTab = new SettingsHUDTab(panelRect);
 
         var closeGO = new GameObject("CloseButton");
         closeGO.transform.SetParent(panelRect, false);
@@ -287,10 +370,16 @@ public class SettingsUI : MonoBehaviour
         }
         dimImage.color = showDim ? set.dimColor : Color.clear;
 
-        Vector2 size = new Vector2(Mathf.Max(300f, set.panelSize.x), Mathf.Max(200f, set.panelSize.y));
+        bool soundTab = currentTab == SoundTab;
+        Vector2 size = soundTab
+            ? new Vector2(Mathf.Max(300f, set.panelSize.x), Mathf.Max(200f, set.panelSize.y))
+            // HUD 탭은 높이 고정 - 넘치는 내용은 탭 안에서 세로 스크롤(SettingsHUDTab)
+            : new Vector2(Mathf.Max(600f, set.hudPanelSize.x), Mathf.Clamp(set.hudPanelVisibleHeight, 400f, 1070f));
         panelRect.sizeDelta = size;
-        panelRect.anchoredPosition = Vector2.zero;
+        panelRect.anchoredPosition = soundTab ? Vector2.zero : set.hudPanelOffset;
         panelBox.SetupPanel(style);
+
+        LayoutTabs(set, style, size);
 
         var titleRect = titleText.rectTransform;
         titleRect.anchorMin = titleRect.anchorMax = new Vector2(0.5f, 1f);
@@ -301,9 +390,19 @@ public class SettingsUI : MonoBehaviour
         titleText.fontSize = set.titleFontSize;
         titleText.color = style.panelTextColor;
 
-        float firstRowY = -(20f + set.titleFontSize + 16f + 40f);
-        LayoutSlider(bgmSlider, set, set.bgmLabel, GameAudio.UserBgmVolume, size.x, firstRowY, style);
-        LayoutSlider(sfxSlider, set, set.sfxLabel, GameAudio.UserSfxVolume, size.x, firstRowY - set.rowSpacing, style);
+        if (bgmSlider.row.gameObject.activeSelf != soundTab) bgmSlider.row.gameObject.SetActive(soundTab);
+        if (sfxSlider.row.gameObject.activeSelf != soundTab) sfxSlider.row.gameObject.SetActive(soundTab);
+        hudTab.SetVisible(!soundTab);
+        if (soundTab)
+        {
+            float firstRowY = -(20f + set.titleFontSize + 16f + 40f);
+            LayoutSlider(bgmSlider, set, set.bgmLabel, GameAudio.UserBgmVolume, size.x, firstRowY, style);
+            LayoutSlider(sfxSlider, set, set.sfxLabel, GameAudio.UserSfxVolume, size.x, firstRowY - set.rowSpacing, style);
+        }
+        else
+        {
+            hudTab.Layout(size);
+        }
 
         closeRect.sizeDelta = set.buttonSize;
         closeRect.anchoredPosition = new Vector2(0f, set.buttonBottomMargin);
@@ -311,6 +410,39 @@ public class SettingsUI : MonoBehaviour
         closeText.text = set.closeLabel;
         closeText.fontSize = set.buttonFontSize;
         closeText.color = closeBox.GetLabelColor(true);
+    }
+
+    // 책갈피 탭: 창 왼쪽 끝 뒤에 tabHiddenWidth만큼 숨고, 고른 탭은 tabPopOut만큼 더 튀어나옵니다(실제 시간 기준으로 부드럽게).
+    private void LayoutTabs(SettingsUISettings set, PopupStyle style, Vector2 panelSize)
+    {
+        float step = set.tabMoveDuration > 0f ? Time.unscaledDeltaTime / set.tabMoveDuration : 1f;
+        Vector2 panelPos = panelRect.anchoredPosition;
+        float panelLeft = panelPos.x - panelSize.x * 0.5f;
+        float panelTop = panelPos.y + panelSize.y * 0.5f;
+
+        for (int i = 0; i < tabs.Length; i++)
+        {
+            var tab = tabs[i];
+            tab.pop = Mathf.MoveTowards(tab.pop, i == currentTab ? 1f : 0f, step);
+            float eased = tab.pop * tab.pop * (3f - 2f * tab.pop);
+
+            tab.rect.anchorMin = tab.rect.anchorMax = new Vector2(0.5f, 0.5f);
+            tab.rect.pivot = new Vector2(1f, 1f); // 오른쪽 위 기준(오른쪽 끝이 창 뒤에 숨음)
+            tab.rect.sizeDelta = set.tabSize;
+            tab.rect.anchoredPosition = new Vector2(panelLeft + set.tabHiddenWidth - set.tabPopOut * eased,
+                                                    panelTop - set.tabTopMargin - i * (set.tabSize.y + set.tabSpacing));
+            tab.box.SetupButton(style, UIButtonKind.Normal); // 색은 Update의 TickButton이 호버에 따라 정함
+
+            // 글자는 창 밖으로 보이는 부분의 가운데에
+            var labelRect = tab.label.rectTransform;
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = Vector2.zero;
+            labelRect.offsetMax = new Vector2(-set.tabHiddenWidth, 0f);
+            tab.label.text = i == SoundTab ? set.soundTabLabel : set.hudTabLabel;
+            tab.label.fontSize = set.tabFontSize;
+            tab.label.color = tab.box.GetLabelColor(true);
+        }
     }
 
     // 한 줄 = [이름][슬라이더][00%] - 가운데 정렬.

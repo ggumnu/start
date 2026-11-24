@@ -513,6 +513,41 @@ public class PlayerShooting : MonoBehaviour
         OnProjectileSpawned?.Invoke(projectile);
     }
 
+    // [63번 유도 미사일] 미사일 한 발을 플레이어 총알로 만듭니다(같은 총알 프리팹 + Projectile 미사일 모드). 일반 총알처럼
+    // OnProjectileSpawned를 보내 총알 아이템 효과가 붙지만, OnShotFired(반동/총소리)/탄약 소모/OnAmmoConsumed는 없습니다(사격이 아님).
+    // 순서: Launch(꼬리 없음) -> 미사일 모드(훅이 IsMissile/EffectScale을 읽도록 먼저) -> 분열이면 MarkAsSplit -> 훅 -> 미사일 규칙 재적용
+    // (99/120번 관통 등 훅이 켠 것을 끔). 23번 랜덤 추가 피해는 효과 배율(effectScale)만큼 줄여 굴립니다(5번 분열탄과 같은 규칙).
+    // 피해/사거리/속도/크기와 목표는 HomingMissile이 정합니다. 미사일의 연기/유도는 돌려받은 총알에 HomingMissile이 붙입니다.
+    public Projectile SpawnMissileProjectile(Vector3 position, Vector3 direction, float damage, float speed, float size,
+                                             EnemyHealth target, float effectScale, float damageReferenceScale,
+                                             int generation = 0, EnemyHealth enemyToIgnore = null,
+                                             Action<Projectile> beforeHooks = null)
+    {
+        if (projectilePrefab == null) return null;
+        if (direction.sqrMagnitude < 0.0001f) direction = transform.forward;
+
+        GameObject bulletObj = Instantiate(projectilePrefab, position, Quaternion.LookRotation(direction));
+        Projectile projectile = bulletObj.GetComponent<Projectile>();
+        if (projectile == null)
+        {
+            Destroy(bulletObj);
+            return null;
+        }
+
+        BulletDamageRoll? damageRoll = null;
+        if (RandomBulletDamageOverride.TryRoll(effectScale, out BulletDamageRoll roll)) damageRoll = roll;
+
+        // 사거리는 쓰지 않으므로(미사일은 최대 비행 시간으로 사라짐) 충분히 큰 값을 넣습니다.
+        projectile.Launch(direction, damage, 1000f, speed, size, damageRoll, false);
+        projectile.ConfigureAsMissile(target, effectScale, damageReferenceScale);
+        if (generation > 0) projectile.MarkAsSplit(generation, effectScale, enemyToIgnore);
+
+        beforeHooks?.Invoke(projectile);
+        OnProjectileSpawned?.Invoke(projectile);
+        projectile.EnforceMissileRules();
+        return projectile;
+    }
+
     // [5번 패시브 - 분열탄 생성]
     // 원본 탄환과 같은 프리팹으로 탄환 하나를 만들고, 스탯이 아니라 호출한 쪽(5번 아이템)이
     // 정한 값으로 발사합니다. 생성 후에는 원본 발사와 똑같이 OnProjectileSpawned를 발생시켜서,

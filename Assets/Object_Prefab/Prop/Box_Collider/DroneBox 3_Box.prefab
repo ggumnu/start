@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 5575248813818997020}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071067, y: -0, z: -0, w: 0.70710695}
-  m_LocalPosition: {x: 0, y: -0.20556223, z: 0.20556161}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -73,6 +73,7 @@ MonoBehaviour:
   iconFixedEulerAngles: {x: 50, y: -45, z: 0}
   iconScale: {x: 0.07, y: 0.07, z: 0.07}
   iconHeight: 0.9
+  suppressOpenEvents: 0
 --- !u!114 &1640166855566920774
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -87,6 +88,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ChestLidOpener
   lid: {fileID: 8201872537774016606}
   hingeSide: 0
+  rotateWithChest: 1
   hingeOffset: {x: 0, y: 0, z: 0}
   openAngle: 110
   openDuration: 0.5

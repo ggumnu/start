@@ -29,6 +29,8 @@
 // - 다른 방(꺼져 있는 방)의 적은 비활성 상태라 찾지 않습니다 - 사실상 지금 방의 적만 대상입니다.
 // - 다른 효과가 이미 이 적중의 소멸을 취소했다면(관통 등 - 현재는 없음) 69번은 끼어들지 않습니다.
 // - 잃으면(48번 교체 등) 그 뒤로 쏘는 총알부터 적용되지 않습니다(이미 날아가는 총알은 그대로 - 35번 등과 같은 관례).
+// - [3레벨 보스 그로기 비콘 - 형빈 확정] 총알 비콘도 튕길 대상입니다(가장 가까운 적 또는 총알 비콘). 이 총알이 이미 반응한 비콘은 빼서
+//   같은 비콘을 두 번 세지 않습니다. 비콘(어느 종류든)에 맞아도 적에게 맞은 것처럼 튕깁니다.
 //
 // [아이템 에셋 설정]
 // ItemDefinition: Item Id = 69, Category = Passive, Special Effects에 EnemyChainBounceEffect 하나. Stat Modifiers는 비워둡니다.
@@ -92,6 +94,9 @@ public class EnemyChainBounceEffect : IPassiveItemEffect, IRemovablePassiveEffec
         // 다른 효과가 이미 소멸을 취소했다면 끼어들지 않습니다(위 [구현] 주석 참고).
         if (despawnEvent.CancelDespawn) return;
 
+        // [63번 미사일] 미사일은 딱 한 번만 튕깁니다(사거리 제한이 없어서, 형빈 확정).
+        if (projectile.IsMissile && projectile.EnemyBounceCount >= 1) return;
+
         EnemyHealth hitEnemy = despawnEvent.HitObject != null ? despawnEvent.HitObject.GetComponent<EnemyHealth>() : null;
 
         // 튕긴 뒤의 피해가 하한 미만이면 튕기지 않고 소멸합니다. 35번이 붙은 총알은 적 튕김으로 피해가 줄지 않으므로 검사하지 않습니다.
@@ -102,10 +107,16 @@ public class EnemyChainBounceEffect : IPassiveItemEffect, IRemovablePassiveEffec
         }
 
         Vector3 origin = despawnEvent.Position;
-        EnemyHealth target = FindNearestEnemy(origin, hitEnemy);
+        Component target = FindNearestEnemy(origin, hitEnemy);
+        GroggyBeacon beacon = GroggyBeacon.FindNearest(origin, GroggyBeacon.BeaconType.Bullet, b => !projectile.HasReactedToBeacon(b));
+        if (beacon != null && (target == null || FlatSqr(beacon.AimPoint - origin) < FlatSqr(target.transform.position - origin)))
+        {
+            target = beacon;
+        }
         if (target == null) return; // 다른 적이 없으면 그대로 소멸
 
-        Vector3 toTarget = target.transform.position - origin;
+        Vector3 targetPos = target is GroggyBeacon tb ? tb.AimPoint : target.transform.position;
+        Vector3 toTarget = targetPos - origin;
         toTarget.y = 0f; // 총알은 항상 수평으로만 움직입니다(35번과 동일).
         if (toTarget.sqrMagnitude < 0.0001f)
         {
@@ -117,6 +128,15 @@ public class EnemyChainBounceEffect : IPassiveItemEffect, IRemovablePassiveEffec
 
         despawnEvent.CancelDespawn = true;
         projectile.RedirectFromEnemy(toTarget.normalized, rangeMultiplier, hitEnemy);
+
+        // [63번 미사일] 튕긴 뒤에는 그 적을 향해 유도합니다(곧바로 무장 - 방금 맞은 적은 목표가 아니라 다시 맞지 않음).
+        if (projectile.IsMissile) projectile.SetMissileTargetObject(target);
+    }
+
+    private static float FlatSqr(Vector3 v)
+    {
+        v.y = 0f;
+        return v.sqrMagnitude;
     }
 
     // origin에서 가장 가까운 살아있는 적을 찾습니다(excluded 제외, 수평 거리 기준). 꺼져 있는 방의 적은 비활성이라 제외됩니다.

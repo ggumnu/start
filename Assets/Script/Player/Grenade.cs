@@ -70,6 +70,12 @@ using UnityEngine;
 // - 77번 유도는 이 수류탄의 방에 있는 적만 쫓습니다(숨은 수류탄이 플레이어가 있는 방으로 굴러가지 않도록).
 // - 다음 레벨로 넘어가 그 방이 사라졌으면 조용히 없앱니다.
 // - 방을 판단할 수 없으면(테스트 씬 등) 예전과 똑같이 동작합니다.
+//
+// [108번 - 폭죽탄]
+// 108번 포대(FireworkTurret)가 쏘는 폭죽탄도 이 수류탄입니다(PlayerGrenadeThrower.SpawnFireworkShell). 던지기 전에 PrepareAsFirework로 표시해 두면
+// 겉모습만 달라집니다: 일반 수류탄 꼬리 대신 폭죽 색 꼬리, 터질 때 수류탄 폭발 이펙트 대신 폭죽 이펙트(FireworkShell.cs), 폭발음도 폭죽 소리.
+// 그 밖의 비행/착탄/피해/자해/77·81·92·115번/57·66번/특수방 해제/방 전환 규칙은 모두 일반 수류탄과 같습니다. 92번 분열탄과 115번 크레모어도
+// 폭죽탄 겉모습을 물려받습니다(분열탄은 색을 새로 뽑음). 57번 수류탄 외형(색/폭발 대체)은 폭죽탄에는 쓰지 않습니다(형빈 확정 - 폭죽 우선).
 public class Grenade : MonoBehaviour
 {
     private const int MarkerSegments = 64;
@@ -101,6 +107,12 @@ public class Grenade : MonoBehaviour
     private bool launched;
     private bool exploded;
 
+    // [3레벨 보스 레이저] 지난 프레임 위치(이번 프레임 이동 경로 확인용)와, 레이저에 닿아 터질 때의 폭발 중심(바닥 높이).
+    private Vector3 bossLaserCheckPos;
+    private bool bossLaserCheckStarted;
+    private bool hasBossLaserExplosionPoint;
+    private Vector3 bossLaserExplosionPoint;
+
     // [81번 소이탄] 던지는 순간 정해집니다(발광/폭발 피해 감소/불타는 구역이 한 세트). null이면 일반 수류탄입니다.
     private IncendiaryGrenadeOverride.Settings incendiarySettings;
 
@@ -120,6 +132,10 @@ public class Grenade : MonoBehaviour
     private float claymoreRoomCheckTimer;
     private ClaymoreGlow claymoreGlow;
 
+    // [108번 폭죽탄] 던지기 전에 PrepareAsFirework로 정해집니다. null이면 일반 수류탄입니다.
+    private FireworkStyle fireworkStyle;
+    private Color fireworkColor = Color.white;
+
     // [방 전환] 던지는 순간 플레이어가 있던 방(null이면 방을 판단할 수 없음 = 예전처럼 동작)과 지금 보이는지 여부입니다.
     private RoomInstance ownerRoom;
     private bool roomVisible = true;
@@ -132,6 +148,8 @@ public class Grenade : MonoBehaviour
     private float homingElapsed;
     private GrenadeHomingOverride.Settings homingSettings;
     private EnemyHealth homingTarget;
+    // [3레벨 보스 그로기 비콘 - 형빈 확정] 77번 유도는 적과 수류탄 비콘 중 가까운 쪽으로 굴러갑니다(비콘이면 이쪽, homingTarget은 비움).
+    private GroggyBeacon homingBeacon;
     private float targetSearchTimer;
 
     // 착탄 지점 표시용 오브젝트와, 이 수류탄 전용으로 만든 메시/머티리얼(폭발 시 함께 정리)
@@ -144,6 +162,16 @@ public class Grenade : MonoBehaviour
     public float Radius => radius;
     public bool IsSplitChild => isSplitChild;
     public bool IsClaymore => claymoreSettings != null;
+    public bool IsFirework => fireworkStyle != null;
+    public FireworkStyle FireworkStyle => fireworkStyle;
+    public Color FireworkColor => fireworkColor;
+
+    // [108번] 이 수류탄을 폭죽탄으로 표시합니다. Launch보다 먼저 불러야 합니다(꼬리/착탄 원을 Launch에서 정함).
+    public void PrepareAsFirework(FireworkStyle style, Color color)
+    {
+        fireworkStyle = style;
+        fireworkColor = color;
+    }
     public RoomInstance ClaymoreRoom => claymoreRoom;
 
     // [92번 분열탄] Launch 전에 불러서 이 수류탄을 분열탄으로 표시합니다. 분열탄은 다시 분열하지 않고, 소이탄 여부는 등록소를 다시
@@ -210,7 +238,9 @@ public class Grenade : MonoBehaviour
 
         // [탄환 꼬리] 던지는 위치가 정해진 뒤 꼬리를 붙입니다(기본 흰색 - Resources/BulletTrailSettings의 수류탄 템플릿).
         // 수류탄이 터져 사라지면 꼬리는 스스로 사라집니다(BulletTrail.cs 참고).
-        BulletTrail.Attach(gameObject, BulletTrailKind.Grenade);
+        // [108번 폭죽탄] 일반 수류탄 꼬리 대신 폭죽 색 꼬리를 붙입니다.
+        if (fireworkStyle != null) FireworkShell.AttachTrail(gameObject, fireworkStyle, fireworkColor);
+        else BulletTrail.Attach(gameObject, BulletTrailKind.Grenade);
 
         // [81번 소이탄] 던지는 순간 보유 중이면 이 수류탄은 소이탄입니다 - 수류탄 주변 빨간 발광을 붙입니다(Item81effect.cs 참고).
         // [92번 분열탄] 분열탄은 원래 수류탄이 던져진 순간 정해진 소이탄 여부를 그대로 물려받습니다(PrepareAsSplitChild).
@@ -218,7 +248,7 @@ public class Grenade : MonoBehaviour
         else incendiarySettings = IncendiaryGrenadeOverride.TryGetActive(out var incendiary) ? incendiary : null;
         if (incendiarySettings != null) IncendiaryGrenadeGlow.Attach(gameObject, incendiarySettings);
 
-        if (owner != null && owner.showLandingMarker && radius > 0f)
+        if (owner != null && owner.showLandingMarker && radius > 0f && (fireworkStyle == null || fireworkStyle.showLandingMarker))
         {
             CreateLandingMarker();
         }
@@ -350,6 +380,26 @@ public class Grenade : MonoBehaviour
         }
     }
 
+    // [3레벨 보스 레이저] 이동(Update)이 끝난 뒤, 지난 프레임 위치 -> 지금 위치가 조사 중인 레이저에 걸렸으면 그 자리에서 터집니다.
+    // 날아가는 중/77번 유도 중/설치된 115번 크레모어/108번 폭죽탄/92번 분열탄 모두 같습니다(종류/상태와 상관없이 - 형빈 확정).
+    // 판정은 위에서 내려다본 평면 기준이라 높이 떠서 넘어가는 수류탄도 막힙니다. 폭발 자체(피해/알림/분열 등)는 평소 Explode와 같습니다.
+    void LateUpdate()
+    {
+        if (!launched || exploded) return;
+
+        Vector3 now = transform.position;
+        Vector3 from = bossLaserCheckStarted ? bossLaserCheckPos : now;
+        bossLaserCheckPos = now;
+        bossLaserCheckStarted = true;
+
+        if (!BossLaserBlockers.AnyActive) return;
+        if (!BossLaserBlockers.TryGetFirstHit(from, now, 0f, out Vector3 hit)) return;
+
+        bossLaserExplosionPoint = new Vector3(hit.x, end.y, hit.z);
+        hasBossLaserExplosionPoint = true;
+        Explode();
+    }
+
     // [77번] 유도 단계를 시작합니다. 수류탄을 착지점 바닥 높이(+ 띄움 높이)에 놓습니다.
     void BeginHoming(GrenadeHomingOverride.Settings settings)
     {
@@ -357,6 +407,7 @@ public class Grenade : MonoBehaviour
         homingSettings = settings;
         homingElapsed = 0f;
         homingTarget = null;
+        homingBeacon = null;
         targetSearchTimer = 0f;
 
         Vector3 pos = end;
@@ -371,18 +422,35 @@ public class Grenade : MonoBehaviour
 
         // 가장 가까운 적을 일정 간격으로 다시 찾고, 쫓던 적이 죽었거나 사라졌으면 바로 다시 찾습니다.
         targetSearchTimer -= Time.deltaTime;
-        if (targetSearchTimer <= 0f || homingTarget == null || homingTarget.IsDead || !homingTarget.isActiveAndEnabled)
+        bool enemyLost = homingTarget == null || homingTarget.IsDead || !homingTarget.isActiveAndEnabled;
+        bool beaconLost = homingBeacon == null || !homingBeacon.IsTargetable;
+        if (targetSearchTimer <= 0f || (enemyLost && beaconLost))
         {
             homingTarget = FindNearestEnemy();
+            homingBeacon = null;
+            GroggyBeacon beacon = FindNearestGrenadeBeacon();
+            if (beacon != null)
+            {
+                Vector3 toBeacon = beacon.AimPoint - transform.position;
+                toBeacon.y = 0f;
+                Vector3 toEnemy = homingTarget != null ? homingTarget.transform.position - transform.position : Vector3.zero;
+                toEnemy.y = 0f;
+                if (homingTarget == null || toBeacon.sqrMagnitude < toEnemy.sqrMagnitude)
+                {
+                    homingBeacon = beacon;
+                    homingTarget = null;
+                }
+            }
             targetSearchTimer = TargetSearchInterval;
         }
 
-        if (homingTarget != null)
+        if (homingTarget != null || homingBeacon != null)
         {
             float speed = 0f;
             if (owner != null && owner.stats != null) speed = Mathf.Max(0f, owner.stats.MoveSpeed) * homingSettings.speedMultiplier;
 
-            Vector3 toTarget = homingTarget.transform.position - transform.position;
+            Vector3 targetPos = homingBeacon != null ? homingBeacon.AimPoint : homingTarget.transform.position;
+            Vector3 toTarget = targetPos - transform.position;
             toTarget.y = 0f;
             float distance = toTarget.magnitude;
             float step = Mathf.Min(speed * Time.deltaTime, distance); // 적 위에 도착하면 그 자리에서 따라붙음
@@ -402,6 +470,19 @@ public class Grenade : MonoBehaviour
         {
             Explode();
         }
+    }
+
+    // [3레벨 보스 그로기 비콘] 노릴 수 있는 수류탄 비콘 중 가장 가까운 것입니다(적 찾기와 같은 방 규칙). 없으면 null.
+    GroggyBeacon FindNearestGrenadeBeacon()
+    {
+        return GroggyBeacon.FindNearest(transform.position, GroggyBeacon.BeaconType.Grenade, b =>
+        {
+            if (claymoreSettings != null && claymoreRoom != null)
+                return ReferenceEquals(ClaymoreOverride.RoomOf(b.transform.position), claymoreRoom);
+            if (claymoreSettings == null && ownerRoom != null)
+                return ReferenceEquals(RoomScope.RoomOf(b.transform.position), ownerRoom);
+            return true;
+        });
     }
 
     // 살아 있는(활성화된) 적 중 수평 거리가 가장 가까운 적입니다(보스 포함). 없으면 null.
@@ -518,6 +599,8 @@ public class Grenade : MonoBehaviour
     // 지금 수류탄 아래의 바닥 점(착지점 높이)입니다. 유도 중이 아니면 착지점 그대로입니다.
     Vector3 CurrentGroundPoint()
     {
+        // [3레벨 보스 레이저] 레이저에 닿아 터지면 닿은 자리 아래 바닥이 폭발 중심입니다.
+        if (hasBossLaserExplosionPoint) return bossLaserExplosionPoint;
         if (!homing) return end;
         return new Vector3(transform.position.x, end.y, transform.position.z);
     }
@@ -668,9 +751,15 @@ public class Grenade : MonoBehaviour
         DamageOwner(center, explosionSelfDamage);
 
         // [115번] 크레모어는 설치된 뒤에만 터지므로 이펙트 위치 = 지금 크레모어 위치(설치 자리, 77번이면 유도로 옮겨 간 자리)입니다.
-        Vector3 vfxPosition = claymoreSettings != null ? transform.position : center;
+        // [3레벨 보스 레이저] 날아가는 도중 레이저에 닿은 크레모어(설치 전)는 닿은 자리(center)에서 이펙트.
+        Vector3 vfxPosition = (claymoreSettings != null && claymoreInstalled) ? transform.position : center;
         // [방 전환] 특수방 잠금 해제가 폭발 위치가 아닌 "이 수류탄의 방" 기준으로 판정하도록 방을 함께 넘깁니다.
-        if (owner != null) owner.NotifyExploded(center, radius, vfxPosition, ownerRoom);
+        // [108번 폭죽탄] 폭발 이펙트/폭발음만 폭죽 것으로 바뀌고, 아이템용 폭발 알림(66번/57번 토끼/특수방 해제)은 똑같이 보냅니다.
+        if (owner != null)
+        {
+            if (fireworkStyle != null) owner.NotifyFireworkExploded(center, radius, vfxPosition, ownerRoom, fireworkStyle, fireworkColor);
+            else owner.NotifyExploded(center, radius, vfxPosition, ownerRoom);
+        }
 
         // [81번 소이탄] 폭발 이펙트/66번 해킹/57번 토끼/특수방 잠금 해제(NotifyExploded) 뒤에 그 자리에 불타는 구역을 남깁니다.
         // 불 구역 피해는 비율을 곱하기 전의 수류탄 피해(던진 순간 값)를 기준으로 합니다.
@@ -735,7 +824,8 @@ public class Grenade : MonoBehaviour
             owner.SpawnSplitGrenade(origin, target, flightTime, s.arcHeight,
                                     childEnemyDamage, childSelfDamage, childRadius,
                                     explosionHeight, enemyTag, s.modelScale, incendiarySettings,
-                                    claymoreSettings, claymoreRoom); // [115번] 크레모어면 분열 크레모어로
+                                    claymoreSettings, claymoreRoom, // [115번] 크레모어면 분열 크레모어로
+                                    fireworkStyle); // [108번] 폭죽탄이면 분열탄도 폭죽탄으로
         }
     }
 

@@ -78,4 +78,9 @@ public enum SfxId
     [InspectorName("액티브 93번(직전 음식 재현)")] Active93 = 105,
     [InspectorName("액티브 106번(상자 도박)")] Active106 = 106,
     [InspectorName("액티브 112번(투명)")] Active112 = 107,
+
+    [InspectorName("63번 미사일 발사")] Missile63Launch = 110,
+    [InspectorName("63번 미사일 명중/폭발")] Missile63Hit = 111,
+    [InspectorName("108번 폭죽탄 발사")] Firework108Launch = 112,
+    [InspectorName("108번 폭죽탄 폭발")] Firework108Burst = 113,
 }

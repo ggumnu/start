@@ -24,7 +24,7 @@ MonoBehaviour:
   confirmBeforeReplace: 0
   incompatibleItemIds: []
   tags: []
-  activeCost: 8
+  activeCost: 7
   activeEffect:
     rid: 5535533560695095363
   trinketEffect:
@@ -40,7 +40,7 @@ MonoBehaviour:
     variantId: Schale
   statModifiers: []
   specialEffects: []
-  specialEffectDescription: "[\uD544\uC694 \uCF54\uC2A4\uD2B8 8]\n\n\uB9C8\uC9C0\uB9C9\uC73C\uB85C
+  specialEffectDescription: "[\uD544\uC694 \uCF54\uC2A4\uD2B8 7]\n\n\uB9C8\uC9C0\uB9C9\uC73C\uB85C
     \uC18C\uBAA8\uD588\uB358 \uC74C\uC2DD \uC544\uC774\uD15C\uACFC \n\uB3D9\uC77C\uD55C
     \uD6A8\uACFC\uB97C \uBC1C\uD718\uD55C\uB2E4\r\n\uC18C\uBAA8\uD55C \uC74C\uC2DD\uC774
     \uC5C6\uC744 \uACBD\uC6B0 \uBC1C\uD718\uD560 \uC218 \uC5C6\uB2E4"

@@ -15,6 +15,8 @@ using UnityEngine.UI;
 //
 // [첫 창 - 흰 창]
 // - 칸 배경/칸 틀/칸 배치는 화면 오른쪽 슬롯 HUD(PlayerSlotItemDisplay)의 값을 그대로 가져와 키워서 보여줍니다.
+//   슬롯 HUD 배경이 흰 창(Background Sprite) + 보조틀(Button Sprite - 장신구/일회용/음식 + Q/E)로 나뉘었으므로 여기서도 보조틀을
+//   같은 크기로 겹쳐 그립니다(형빈 확정). 설정 창의 HUD 불투명도는 적용하지 않고 항상 선명하게 그립니다.
 // - 지연 소모 대기 중인 아이템도 여기서는 선명하게 보입니다.
 // - 아이콘에 커서를 올리면 아이템 설명칸이 뜹니다(ItemTooltipDisplay가 TryGetHoveredItem을 읽음).
 // - 아이콘을 클릭하면 선택(반투명 + 작아짐), 다시 클릭하면 선택 해제. 여러 개를 고를 수 있습니다.
@@ -136,6 +138,7 @@ public class SlotItemDropUI : MonoBehaviour
     private TextMeshProUGUI titleText;
     private RectTransform slotPanelRect;
     private Image slotPanelImage;
+    private Image slotSubFrameImage; // 보조틀(슬롯 HUD의 Button Sprite) - 칸들 아래, 버리기 창에선 흰 전체틀 대신 이것만 보임
     private readonly SlotView[] slotViews = new SlotView[CategoryCount * SlotsPerCategory];
     private ButtonView dropButton;
     private ButtonView cancelButton;
@@ -681,6 +684,16 @@ public class SlotItemDropUI : MonoBehaviour
         slotPanelImage = panelGO.AddComponent<Image>();
         slotPanelImage.raycastTarget = false;
 
+        var subFrameGO = new GameObject("SubFrame");
+        subFrameGO.transform.SetParent(slotPanelRect, false);
+        var subFrameRect = subFrameGO.AddComponent<RectTransform>();
+        subFrameRect.anchorMin = Vector2.zero;
+        subFrameRect.anchorMax = Vector2.one;
+        subFrameRect.offsetMin = Vector2.zero;
+        subFrameRect.offsetMax = Vector2.zero;
+        slotSubFrameImage = subFrameGO.AddComponent<Image>();
+        slotSubFrameImage.raycastTarget = false;
+
         for (int i = 0; i < slotViews.Length; i++) slotViews[i] = BuildSlot(slotPanelRect, i);
 
         dropButton = CreateButton(mainRect, "DropButton");
@@ -845,15 +858,30 @@ public class SlotItemDropUI : MonoBehaviour
         slotPanelRect.anchoredPosition = new Vector2(0f, s.slotPanelOffsetY);
         slotPanelRect.localScale = new Vector3(s.slotPanelScale, s.slotPanelScale, 1f);
 
-        if (background != null)
+        // 버리기 창은 보조틀(Button Sprite)만 그리고 흰 전체틀(Background Sprite)은 숨깁니다.
+        // 보조틀 그림이 비어 있을 때만 칸이 허공에 뜨지 않도록 전체틀을 대신 그립니다.
+        Sprite subFrame = slotHud != null ? slotHud.buttonSprite : null;
+        bool showPanel = subFrame == null;
+        if (slotPanelImage.enabled != showPanel) slotPanelImage.enabled = showPanel;
+        if (showPanel)
         {
-            slotPanelImage.sprite = background;
-            slotPanelImage.color = Color.white;
+            if (background != null)
+            {
+                slotPanelImage.sprite = background;
+                slotPanelImage.color = Color.white;
+            }
+            else
+            {
+                slotPanelImage.sprite = null;
+                slotPanelImage.color = panelColor;
+            }
         }
-        else
+
+        if (slotSubFrameImage.enabled != (subFrame != null)) slotSubFrameImage.enabled = subFrame != null;
+        if (subFrame != null)
         {
-            slotPanelImage.sprite = null;
-            slotPanelImage.color = panelColor;
+            slotSubFrameImage.sprite = subFrame;
+            slotSubFrameImage.color = Color.white;
         }
 
         float groupWidth = SlotsPerCategory * slotSize + (SlotsPerCategory - 1) * slotSpacing;

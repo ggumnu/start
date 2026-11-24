@@ -38,6 +38,16 @@ using UnityEngine.UI;
 // 위치/크기/간격/색은 인스펙터 값에만 의존하는 가벼운 계산이라 다른 HUD들과 동일하게 매
 // 프레임 다시 적용합니다(Play 도중 값을 바꾸면 즉시 반영).
 //
+// [그림 두 장 - 형빈 확정] 배경 그림을 흰 창(Background Sprite = UI_PlayerSlotItem_OnlyFrame)과 보조틀(Button Sprite =
+// UI_PlayerSlotItem_OnlyButton - 장신구/일회용/음식 + Q/E)로 나눴습니다. 두 그림은 크기가 같아 패널 전체에 겹쳐 그립니다
+// (흰 창 -> 보조틀 -> 칸 틀 -> 아이콘 순). Button Sprite가 비어 있으면 보조틀 없이 예전처럼 배경 한 장만 그립니다.
+//
+// [불투명도 - 설정 창 HUD 탭, 형빈 확정] (값은 HUDUserSettings)
+// - 흰 창 = "인벤토리 창 불투명도"(패시브 인벤토리와 함께), 보조틀 + 칸 틀 = "슬롯 보조틀 불투명도", 아이콘 = "슬롯 아이콘 불투명도".
+// - 슬롯 아이콘이 0%면 패널을 창/접기 버튼까지 통째로 숨기고, 숨긴 동안은 아이콘 설명(툴팁)도 뜨지 않습니다.
+// - 전투 중 자동 반투명(인벤토리용) - 들어가고 나올 때 combatFadeDuration초 동안 부드럽게 바뀝니다(HUDCombatTracker).
+// - 패널을 그리는 부분은 아래 SlotPanelView로 떼어 설정 창 견본(SettingsHUDTab)도 같은 코드로 그립니다.
+//
 // [접어보기]
 // 패널 왼쪽 세로 가운데의 버튼(또는 PlayerHUDManager의 전체 접기 키, 기본 Tab)으로 패널을 화면 오른쪽 밖으로
 // 접었다 펼 수 있습니다. 버튼 생성/애니메이션/클릭 판정은 공용 클래스 CollapsibleHUDPanel이 맡고, 이 스크립트는
@@ -65,6 +75,9 @@ public class PlayerSlotItemDisplay : MonoBehaviour
     [Tooltip("배경으로 쓸 UI 스프라이트입니다. 비워두면 아래 Panel Color(검은 반투명)로 대체 표시됩니다.")]
     public Sprite backgroundSprite;
     public Color panelColor = new Color(0f, 0f, 0f, 0.6f);
+    [Tooltip("흰 창 위에 겹쳐 그릴 보조틀 그림입니다(장신구/일회용/음식 + Q/E - UI_PlayerSlotItem_OnlyButton). 배경 그림과 같은 크기로 " +
+             "패널 전체에 그려지고, 설정 창의 '슬롯 보조틀 불투명도'를 따릅니다. 비워두면 그리지 않습니다.")]
+    public Sprite buttonSprite;
     [Tooltip("패널 왼쪽 끝에서 첫 번째 칸까지의 여백입니다.")]
     public float paddingLeft = 12f;
     [Tooltip("패널 위쪽 끝에서 칸이 놓인 줄의 위쪽 끝까지의 거리입니다. 값을 키우면 칸이 아래로 내려갑니다.")]
@@ -104,30 +117,23 @@ public class PlayerSlotItemDisplay : MonoBehaviour
     [Tooltip("칸이 풀리거나 다시 잠길 때 커지거나/작아지는 연출 시간(초)입니다. 0이면 바로 바뀝니다.")]
     public float lockTransitionDuration = 0.25f;
 
+    [Header("전투 중 자동 반투명 (켜고 끄기/값은 설정 창 HUD 탭)")]
+    [Tooltip("전투 방에 들어가거나 클리어될 때 불투명도가 바뀌는 시간(초, 실제 시간 기준)입니다.")]
+    [Min(0f)] public float combatFadeDuration = 0.3f;
+
     [Header("접어보기 (패널 왼쪽 버튼 - 누르면 화면 오른쪽으로 접힘)")]
     public CollapsibleHUDSettings collapse = new CollapsibleHUDSettings();
 
-    // 종류 순서는 화면 왼쪽부터 장신구 -> 일회용 -> 음식입니다.
-    private const int CategoryTrinket = 0;
-    private const int CategoryDisposable = 1;
-    private const int CategoryFood = 2;
-    private const int CategoryCount = 3;
-    private const int SlotsPerCategory = 2;
+    // 종류 순서는 화면 왼쪽부터 장신구 -> 일회용 -> 음식입니다(SlotPanelView와 같은 순서).
+    public const int CategoryTrinket = 0;
+    public const int CategoryDisposable = 1;
+    public const int CategoryFood = 2;
+    public const int CategoryCount = 3;
+    public const int SlotsPerCategory = 2;
 
-    private class SlotView
-    {
-        public RectTransform frameRect;
-        public Image frame;
-        public RectTransform iconRect;
-        public Image icon;
-        public float lockAmount;   // 0 = 풀림(평소), 1 = 잠김(작고 반투명). 연출 중에는 그 사이 값
-        public bool lockInitialized; // 처음 그릴 때는 연출 없이 바로 맞춤
-    }
-
-    private GameObject panelRoot;
+    private SlotPanelView view;
     private RectTransform panelRect;
-    private Image panelImage;
-    private readonly SlotView[] slots = new SlotView[CategoryCount * SlotsPerCategory];
+    private readonly HUDCombatTracker combat = new HUDCombatTracker();
 
     private bool built = false;
     private CollapsibleHUDPanel collapser;
@@ -135,6 +141,16 @@ public class PlayerSlotItemDisplay : MonoBehaviour
     // 씬에 아직 없는 컴포넌트를 찾느라 매 프레임 씬 전체를 뒤지지 않도록 재시도 간격을 둡니다.
     private const float RefSearchInterval = 0.5f;
     private float refSearchTimer = 0f;
+
+    void OnEnable()
+    {
+        combat.Subscribe();
+    }
+
+    void OnDisable()
+    {
+        combat.Unsubscribe();
+    }
 
     void OnDestroy()
     {
@@ -155,7 +171,18 @@ public class PlayerSlotItemDisplay : MonoBehaviour
         EnsureBuilt();
         if (!built) return;
 
-        ApplyPanelLayout();
+        // [불투명도] 슬롯 아이콘 0%면 창/접기 버튼까지 통째로 숨깁니다(형빈 확정).
+        bool visible = !HUDUserSettings.HidesSlotPanel;
+        if (view.gameObject.activeSelf != visible) view.gameObject.SetActive(visible);
+
+        float blend = combat.UpdateBlend(combatFadeDuration);
+        HUDUserSettings.GetInventoryOpacities(false, out float nWindow, out float nSub, out float nSlot, out float nPassive);
+        HUDUserSettings.GetInventoryOpacities(true, out float cWindow, out float cSub, out float cSlot, out float cPassive);
+        float windowAlpha = Mathf.Lerp(nWindow, cWindow, blend);
+        float subAlpha = Mathf.Lerp(nSub, cSub, blend);
+        float iconAlpha = Mathf.Lerp(nSlot, cSlot, blend);
+
+        ApplyPanelLayout(windowAlpha, subAlpha);
         ApplyCollapse();
 
         for (int category = 0; category < CategoryCount; category++)
@@ -163,9 +190,9 @@ public class PlayerSlotItemDisplay : MonoBehaviour
             for (int k = 0; k < SlotsPerCategory; k++)
             {
                 GetSlotContent(category, k, out ItemDefinition item, out bool pending);
-                var slot = slots[category * SlotsPerCategory + k];
-                UpdateLock(slot, IsSlotLocked(category, k, item));
-                ApplySlotVisual(slot, item, pending);
+                int index = category * SlotsPerCategory + k;
+                UpdateLock(view.slots[index], IsSlotLocked(category, k, item));
+                view.ApplySlot(this, index, item != null, item != null ? item.icon : null, pending, subAlpha, iconAlpha);
             }
         }
     }
@@ -258,7 +285,7 @@ public class PlayerSlotItemDisplay : MonoBehaviour
     }
 
     // 잠김 정도를 목표(잠김 1 / 풀림 0)로 lockTransitionDuration 동안 옮깁니다. 일시정지 중에도 HUD는 실제 시간 기준으로 움직입니다.
-    private void UpdateLock(SlotView slot, bool locked)
+    private void UpdateLock(SlotPanelView.Slot slot, bool locked)
     {
         float target = locked ? 1f : 0f;
         if (!slot.lockInitialized || lockTransitionDuration <= 0f)
@@ -274,8 +301,16 @@ public class PlayerSlotItemDisplay : MonoBehaviour
     // 있는지" 확인할 때 씁니다. 아이템이 있는 칸만 대상이며, 이 프로젝트의 다른 HUD와
     // 동일하게 유니티 이벤트 시스템 대신 매 프레임 마우스 화면 좌표와 칸 사각형을 직접
     // 비교합니다. 읽기 전용이며 이 스크립트의 내부 로직에는 영향을 주지 않습니다.
+    // 패널을 숨긴 동안(슬롯 아이콘 0%)은 항상 없음.
     public bool TryGetHoveredSlotItem(out ItemDefinition item, out RectTransform iconRect)
     {
+        if (view == null || !view.gameObject.activeInHierarchy)
+        {
+            item = null;
+            iconRect = null;
+            return false;
+        }
+
         for (int category = 0; category < CategoryCount; category++)
         {
             for (int k = 0; k < SlotsPerCategory; k++)
@@ -283,7 +318,7 @@ public class PlayerSlotItemDisplay : MonoBehaviour
                 GetSlotContent(category, k, out ItemDefinition slotItem, out bool pending);
                 if (slotItem == null) continue;
 
-                var slot = slots[category * SlotsPerCategory + k];
+                var slot = view.slots[category * SlotsPerCategory + k];
                 if (RectTransformUtility.RectangleContainsScreenPoint(slot.iconRect, Input.mousePosition, null))
                 {
                     item = slotItem;
@@ -302,89 +337,14 @@ public class PlayerSlotItemDisplay : MonoBehaviour
     // 화면에 반영
     // ------------------------------------------------------------------
 
-    // 칸 틀은 항상 보이고, 아이템이 있으면 그 위(틀 안쪽)에 아이콘이 겹쳐집니다. 대기 중인
-    // 아이템은 아이콘만 pendingAlpha만큼 반투명해집니다. 잠긴 칸은 틀이 작고 반투명해집니다(연출 중에는 그 사이).
-    private void ApplySlotVisual(SlotView slot, ItemDefinition item, bool pending)
-    {
-        Color frameColor;
-        if (slotFrameSprite != null)
-        {
-            slot.frame.sprite = slotFrameSprite;
-            frameColor = Color.white;
-        }
-        else
-        {
-            slot.frame.sprite = null;
-            frameColor = slotFramePlaceholderColor;
-        }
-
-        // 잠김 연출: 부드럽게 시작하고 끝나도록(SmoothStep) 크기/불투명도를 섞습니다.
-        float t = Mathf.SmoothStep(0f, 1f, slot.lockAmount);
-        frameColor.a *= Mathf.Lerp(1f, lockedSlotAlpha, t);
-        slot.frame.color = frameColor;
-        float scale = Mathf.Lerp(1f, lockedSlotScale, t);
-        slot.frameRect.localScale = new Vector3(scale, scale, 1f);
-
-        bool hasItem = item != null;
-        if (slot.icon.enabled != hasItem) slot.icon.enabled = hasItem;
-        if (!hasItem) return;
-
-        Color color;
-        if (item.icon != null)
-        {
-            slot.icon.sprite = item.icon;
-            color = Color.white;
-        }
-        else
-        {
-            slot.icon.sprite = null;
-            color = missingItemIconColor;
-        }
-
-        if (pending) color.a *= pendingAlpha;
-        slot.icon.color = color;
-    }
-
-    // 패널 위치/크기와 여섯 칸의 위치/크기를 매 프레임 다시 계산합니다(라이브 트윅).
-    private void ApplyPanelLayout()
+    // 패널 위치(화면 우측 중앙 기준)를 정하고, 크기/그림/칸 배치는 SlotPanelView에 맡깁니다(매 프레임 - 라이브 트윅).
+    private void ApplyPanelLayout(float windowAlpha, float subAlpha)
     {
         panelRect.anchorMin = new Vector2(1f, 0.5f);
         panelRect.anchorMax = new Vector2(1f, 0.5f);
         panelRect.pivot = new Vector2(1f, 0.5f);
         panelRect.anchoredPosition = new Vector2(-marginX, verticalOffset);
-        panelRect.sizeDelta = new Vector2(panelWidth, panelHeight);
-
-        if (backgroundSprite != null)
-        {
-            panelImage.sprite = backgroundSprite;
-            panelImage.color = Color.white;
-        }
-        else
-        {
-            panelImage.sprite = null;
-            panelImage.color = panelColor;
-        }
-
-        float groupWidth = SlotsPerCategory * slotSize + (SlotsPerCategory - 1) * slotSpacing;
-
-        for (int category = 0; category < CategoryCount; category++)
-        {
-            for (int k = 0; k < SlotsPerCategory; k++)
-            {
-                var slot = slots[category * SlotsPerCategory + k];
-
-                float x = paddingLeft + category * (groupWidth + groupSpacing) + k * (slotSize + slotSpacing);
-
-                // 칸 중심을 기준점으로 둡니다(잠긴 칸이 가운데로 작아지도록). 위치는 예전(왼쪽 위 기준)과 같습니다.
-                slot.frameRect.pivot = new Vector2(0.5f, 0.5f);
-                slot.frameRect.sizeDelta = new Vector2(slotSize, slotSize);
-                slot.frameRect.anchoredPosition = new Vector2(x + slotSize * 0.5f, -slotRowTop - slotSize * 0.5f);
-
-                // 아이콘은 칸 틀의 자식으로, 틀 전체에서 itemIconInset만큼 안쪽을 채웁니다.
-                slot.iconRect.offsetMin = new Vector2(itemIconInset, itemIconInset);
-                slot.iconRect.offsetMax = new Vector2(-itemIconInset, -itemIconInset);
-            }
-        }
+        view.Layout(this, windowAlpha, subAlpha);
     }
 
     // ------------------------------------------------------------------
@@ -395,37 +355,76 @@ public class PlayerSlotItemDisplay : MonoBehaviour
     {
         if (built) return;
 
-        BuildPanel(hudManager.CanvasRoot);
+        view = SlotPanelView.Create(hudManager.CanvasRoot, "SlotItemPanel");
+        panelRect = view.panelRect;
         built = true;
     }
+}
 
-    private void BuildPanel(Transform canvasRoot)
+// [슬롯 인벤토리 그리기 - 실제 HUD(PlayerSlotItemDisplay)와 설정 창 견본(SettingsHUDTab)이 같이 씀]
+// 패널 = 흰 창(배경 그림) + 보조틀(같은 크기 그림, 패널 전체) + 칸 6개(칸 틀 + 그 안의 아이콘). 값은 PlayerSlotItemDisplay의 인스펙터 값.
+// 패널 위치(anchoredPosition)는 부르는 쪽이 정합니다. 칸 순서 = 장신구 1, 2, 일회용 1, 2, 음식 1, 2.
+public class SlotPanelView
+{
+    public class Slot
     {
-        panelRoot = new GameObject("SlotItemPanel");
-        panelRoot.transform.SetParent(canvasRoot, false);
-
-        panelRect = panelRoot.AddComponent<RectTransform>();
-        panelRect.anchorMin = new Vector2(1f, 0.5f);
-        panelRect.anchorMax = new Vector2(1f, 0.5f);
-        panelRect.pivot = new Vector2(1f, 0.5f);
-        panelRect.sizeDelta = new Vector2(panelWidth, panelHeight);
-
-        panelImage = panelRoot.AddComponent<Image>();
-        panelImage.color = panelColor;
-        panelImage.raycastTarget = false; // HUD가 마우스 입력을 가로채지 않도록
-
-        for (int category = 0; category < CategoryCount; category++)
-        {
-            for (int k = 0; k < SlotsPerCategory; k++)
-            {
-                slots[category * SlotsPerCategory + k] = BuildSlot(panelRoot.transform, category, k);
-            }
-        }
+        public RectTransform frameRect;
+        public Image frame;
+        public RectTransform iconRect;
+        public Image icon;
+        public float lockAmount;   // 0 = 풀림(평소), 1 = 잠김(작고 반투명). 연출 중에는 그 사이 값
+        public bool lockInitialized; // 처음 그릴 때는 연출 없이 바로 맞춤
     }
 
-    private SlotView BuildSlot(Transform parent, int category, int k)
+    public const int SlotCount = PlayerSlotItemDisplay.CategoryCount * PlayerSlotItemDisplay.SlotsPerCategory;
+
+    public RectTransform panelRect;
+    public Image panelImage;
+    public RectTransform buttonRect;
+    public Image buttonImage;
+    public readonly Slot[] slots = new Slot[SlotCount];
+
+    public GameObject gameObject => panelRect.gameObject;
+
+    public static SlotPanelView Create(Transform parent, string name)
     {
-        var slot = new SlotView();
+        var v = new SlotPanelView();
+
+        var panelRoot = new GameObject(name);
+        panelRoot.transform.SetParent(parent, false);
+
+        v.panelRect = panelRoot.AddComponent<RectTransform>();
+        v.panelRect.anchorMin = new Vector2(1f, 0.5f);
+        v.panelRect.anchorMax = new Vector2(1f, 0.5f);
+        v.panelRect.pivot = new Vector2(1f, 0.5f);
+
+        v.panelImage = panelRoot.AddComponent<Image>();
+        v.panelImage.raycastTarget = false; // HUD가 마우스 입력을 가로채지 않도록
+
+        // 보조틀 - 흰 창 바로 위, 칸들보다 먼저(뒤)
+        var buttonGO = new GameObject("SubFrame");
+        buttonGO.transform.SetParent(panelRoot.transform, false);
+        v.buttonRect = buttonGO.AddComponent<RectTransform>();
+        v.buttonRect.anchorMin = Vector2.zero;
+        v.buttonRect.anchorMax = Vector2.one;
+        v.buttonRect.offsetMin = Vector2.zero;
+        v.buttonRect.offsetMax = Vector2.zero;
+        v.buttonImage = buttonGO.AddComponent<Image>();
+        v.buttonImage.raycastTarget = false;
+
+        for (int category = 0; category < PlayerSlotItemDisplay.CategoryCount; category++)
+        {
+            for (int k = 0; k < PlayerSlotItemDisplay.SlotsPerCategory; k++)
+            {
+                v.slots[category * PlayerSlotItemDisplay.SlotsPerCategory + k] = BuildSlot(panelRoot.transform, category, k);
+            }
+        }
+        return v;
+    }
+
+    private static Slot BuildSlot(Transform parent, int category, int k)
+    {
+        var slot = new Slot();
 
         var frameGO = new GameObject($"Slot_{category}_{k}");
         frameGO.transform.SetParent(parent, false);
@@ -448,5 +447,100 @@ public class PlayerSlotItemDisplay : MonoBehaviour
         slot.icon.enabled = false;
 
         return slot;
+    }
+
+    // 패널 크기, 흰 창/보조틀 그림(불투명도 적용), 여섯 칸의 위치/크기. windowAlpha/subAlpha = 0~1.
+    public void Layout(PlayerSlotItemDisplay s, float windowAlpha, float subAlpha)
+    {
+        panelRect.sizeDelta = new Vector2(s.panelWidth, s.panelHeight);
+
+        Color bg;
+        if (s.backgroundSprite != null)
+        {
+            panelImage.sprite = s.backgroundSprite;
+            bg = Color.white;
+        }
+        else
+        {
+            panelImage.sprite = null;
+            bg = s.panelColor;
+        }
+        bg.a *= Mathf.Clamp01(windowAlpha);
+        panelImage.color = bg;
+
+        bool hasButton = s.buttonSprite != null;
+        if (buttonImage.enabled != hasButton) buttonImage.enabled = hasButton;
+        if (hasButton)
+        {
+            buttonImage.sprite = s.buttonSprite;
+            buttonImage.color = new Color(1f, 1f, 1f, Mathf.Clamp01(subAlpha));
+        }
+
+        int perCategory = PlayerSlotItemDisplay.SlotsPerCategory;
+        float groupWidth = perCategory * s.slotSize + (perCategory - 1) * s.slotSpacing;
+
+        for (int category = 0; category < PlayerSlotItemDisplay.CategoryCount; category++)
+        {
+            for (int k = 0; k < perCategory; k++)
+            {
+                var slot = slots[category * perCategory + k];
+
+                float x = s.paddingLeft + category * (groupWidth + s.groupSpacing) + k * (s.slotSize + s.slotSpacing);
+
+                // 칸 중심을 기준점으로 둡니다(잠긴 칸이 가운데로 작아지도록). 위치는 예전(왼쪽 위 기준)과 같습니다.
+                slot.frameRect.pivot = new Vector2(0.5f, 0.5f);
+                slot.frameRect.sizeDelta = new Vector2(s.slotSize, s.slotSize);
+                slot.frameRect.anchoredPosition = new Vector2(x + s.slotSize * 0.5f, -s.slotRowTop - s.slotSize * 0.5f);
+
+                // 아이콘은 칸 틀의 자식으로, 틀 전체에서 itemIconInset만큼 안쪽을 채웁니다.
+                slot.iconRect.offsetMin = new Vector2(s.itemIconInset, s.itemIconInset);
+                slot.iconRect.offsetMax = new Vector2(-s.itemIconInset, -s.itemIconInset);
+            }
+        }
+    }
+
+    // 칸 틀은 항상 보이고(보조틀 불투명도), 아이템이 있으면 그 위(틀 안쪽)에 아이콘이 겹쳐집니다(아이콘 불투명도). 대기 중인
+    // 아이템은 아이콘만 pendingAlpha만큼 반투명해집니다. 잠긴 칸은 틀이 작고 반투명해집니다(연출 중에는 그 사이 - slot.lockAmount).
+    // 아이콘이 틀의 자식이라 틀 색의 알파는 아이콘에 영향을 주지 않습니다(Image 색은 자식에게 곱해지지 않음).
+    public void ApplySlot(PlayerSlotItemDisplay s, int index, bool hasItem, Sprite iconSprite, bool pending, float subAlpha, float iconAlpha)
+    {
+        var slot = slots[index];
+
+        Color frameColor;
+        if (s.slotFrameSprite != null)
+        {
+            slot.frame.sprite = s.slotFrameSprite;
+            frameColor = Color.white;
+        }
+        else
+        {
+            slot.frame.sprite = null;
+            frameColor = s.slotFramePlaceholderColor;
+        }
+
+        float t = Mathf.SmoothStep(0f, 1f, slot.lockAmount);
+        frameColor.a *= Mathf.Lerp(1f, s.lockedSlotAlpha, t) * Mathf.Clamp01(subAlpha);
+        slot.frame.color = frameColor;
+        float scale = Mathf.Lerp(1f, s.lockedSlotScale, t);
+        slot.frameRect.localScale = new Vector3(scale, scale, 1f);
+
+        if (slot.icon.enabled != hasItem) slot.icon.enabled = hasItem;
+        if (!hasItem) return;
+
+        Color color;
+        if (iconSprite != null)
+        {
+            slot.icon.sprite = iconSprite;
+            color = Color.white;
+        }
+        else
+        {
+            slot.icon.sprite = null;
+            color = s.missingItemIconColor;
+        }
+
+        if (pending) color.a *= s.pendingAlpha;
+        color.a *= Mathf.Clamp01(iconAlpha);
+        slot.icon.color = color;
     }
 }

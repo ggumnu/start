@@ -381,6 +381,15 @@ MonoBehaviour:
     lowerIsBetterInitialized: 1
   panelMarginX: 35
   panelMarginY: 35
+  showBackground: 1
+  backgroundPadding: 12
+  useStyleTextColor: 1
+  showIconShadow: 1
+  iconShadowColor: {r: 0, g: 0, b: 0, a: 0.35}
+  iconShadowOffset: {x: 3, y: -3}
+  whiteValueShadowColor: {r: 0, g: 0, b: 0, a: 0.6}
+  whiteValueShadowOffset: {x: 2, y: -2}
+  combatFadeDuration: 0.3
   iconSize: 55
   fontSize: 25
   valueTextWidth: 100
@@ -716,7 +725,7 @@ MonoBehaviour:
   verticalOffset: -200
   panelWidth: 380
   panelHeight: 300
-  backgroundSprite: {fileID: 21300000, guid: 3caba37c0cbe668438f3e40b1ef678ce, type: 3}
+  backgroundSprite: {fileID: 21300000, guid: 055103c89d572804eac08e666a50d304, type: 3}
   panelColor: {r: 0, g: 0, b: 0, a: 0.6}
   paddingLeft: 12
   paddingRight: 12
@@ -727,6 +736,7 @@ MonoBehaviour:
   iconSpacingX: 8
   iconSpacingY: 8
   placeholderColor: {r: 1, g: 1, b: 1, a: 0.15}
+  combatFadeDuration: 0.3
   collapse:
     startCollapsed: 0
     duration: 0.3
@@ -837,8 +847,9 @@ MonoBehaviour:
   verticalOffset: 45
   panelWidth: 380
   panelHeight: 165
-  backgroundSprite: {fileID: 21300000, guid: 5bafb15703dc62c4cb6758a0c3a9e44e, type: 3}
+  backgroundSprite: {fileID: 21300000, guid: 5bf18c68f1eb285438bc998d2f445303, type: 3}
   panelColor: {r: 0, g: 0, b: 0, a: 0.6}
+  buttonSprite: {fileID: 21300000, guid: c55a6e03438774b419fb4508b4b5007a, type: 3}
   paddingLeft: 20
   slotRowTop: 90
   slotSize: 50
@@ -852,6 +863,7 @@ MonoBehaviour:
   lockedSlotScale: 0.75
   lockedSlotAlpha: 0.45
   lockTransitionDuration: 0.25
+  combatFadeDuration: 0.3
   collapse:
     startCollapsed: 0
     duration: 0.3
@@ -903,7 +915,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea26f25862c932743bf3daebe133cea1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossHealthBarDisplay
-  hudManager: {fileID: 6508955265461468378}
+  hudManager: {fileID: 0}
   offsetX: 0
   topMargin: 30
   defaultPortraitSprite: {fileID: 0}
@@ -929,6 +941,25 @@ MonoBehaviour:
   shieldBorderMatchesBar: 1
   shieldBorderThickness: 2
   shieldBorderColor: {r: 1, g: 1, b: 1, a: 1}
+  groggyGaugeDiameter: 80
+  groggyGaugeSpacing: -15
+  groggyGaugeOffset: {x: 0, y: 0}
+  groggyGaugeBorder: 5
+  groggyGaugeRingOuter: 1
+  groggyGaugeRingInner: 0.45
+  groggyGaugeBorderColor: {r: 1, g: 1, b: 1, a: 1}
+  groggyGaugeBackgroundColor: {r: 0.371, g: 0.371, b: 0.371, a: 1}
+  groggyGaugeHoleColor: {r: 0.32, g: 0.32, b: 0.32, a: 1}
+  groggyGaugeFillColor: {r: 1, g: 0.8, b: 0.1, a: 1}
+  groggyGaugeFillSpeed: 0.5
+  groggyGaugeTickCount: 8
+  groggyGaugeTickWidth: 3
+  groggyGaugeTickColor: {r: 0.32156864, g: 0.32156864, b: 0.32156864, a: 1}
+  groggyGaugePattern: 1
+  groggyGaugePatternSide: 30
+  groggyGaugePatternAlpha: 0.6
+  groggyGaugePatternColor: {r: 1, g: 1, b: 1, a: 1}
+  groggyGaugePatternSeed: 5
   nameOffset: {x: 0, y: 7}
   nameFontSize: 40
   nameOutlineThickness: 2
@@ -1031,6 +1062,9 @@ MonoBehaviour:
   resistLabel: Resist
   resistLabelColor: {r: 0.55, g: 0.84, b: 1, a: 1}
   resistLabelOutlineColor: {r: 0.12, g: 0.32, b: 0.78, a: 1}
+  missText: MISS
+  missTextColor: {r: 1, g: 1, b: 1, a: 1}
+  missOutlineColor: {r: 0.42, g: 0.05, b: 0.06, a: 1}
   labelFontScale: 0.55
   labelOffset: {x: -14, y: 24}
   labelOutlineThickness: 1.5

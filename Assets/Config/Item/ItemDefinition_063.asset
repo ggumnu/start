@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_063
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 63
+  displayName: "\uC2DC\uB85C\uCF54\uC758 \uB4DC\uB860"
+  description: "\uC2DC\uB85C\uCF54\uAC00 \uB298 \uD734\uB300\uD558\uACE0 \uB2E4\uB2C8\uB294
+    \uB4DC\uB860. \n\uC2DC\uB85C\uCF54 \uBCF8\uC778\uC740 \uC6B4\uB3D9\uD560 \uB54C
+    \uC4F0\uB294 \uCD2C\uC601\uC6A9 \uB4DC\uB860\uC774\uB77C\uACE0 \uC8FC\uC7A5\uD558\uC9C0\uB9CC,
+    \n\uCD2C\uC601\uACFC \uC0C1\uAD00\uC5C6\uB294 \uC5EC\uB7EC '\uBD80\uAC00 \uC7A5\uCE58'\uAC00
+    \uC7A5\uCC29\uB418\uC5B4 \uC788\uB2E4."
+  icon: {fileID: 21300000, guid: 4022d25ef3763a1479af82919246055e, type: 3}
+  weight: 40
+  rarity: 3
+  category: 0
+  confirmBeforeReplace: 0
+  incompatibleItemIds: []
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 2
+    variantId: 
+  - category: 8
+    variantId: Schale
+  statModifiers: []
+  specialEffects:
+  - rid: 6629407958477832263
+  specialEffectDescription: "\uD50C\uB808\uC774\uC5B4\uB97C \uBCF4\uC870\uD558\uB294
+    \uC2DC\uB85C\uCF54\uC758 \uB4DC\uB860\uC744 \uAC00\uB3D9\uD55C\uB2E4\n\n\uC2DC\uB85C\uCF54\uC758
+    \uB4DC\uB860\uC740 \uD50C\uB808\uC774\uC5B4\uB97C \uB530\uB77C\uB2E4\uB2C8\uBA70
+    \n\uC77C\uC815 \uC2DC\uAC04\uB9C8\uB2E4 \uBBF8\uC0AC\uC77C 4\uBC1C\uC744 \uBC1C\uC0AC\uD558\uC5EC
+    \n\uAC01 \uACF5\uACA9\uB825 50%\uC758 \uD53C\uD574\uB97C \uC785\uD78C\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6629407958477832263
+      type: {class: MissileDroneFamiliarEffect, ns: , asm: Assembly-CSharp}
+      data:
+        droneModel: {fileID: 1746585594863527146, guid: 22330152eea347e40b7343f8dbfc57ff, type: 3}
+        modelScale: 1.5
+        modelRotationOffset: {x: 0, y: 0, z: 0}
+        anchorOffset: {x: 0.25, y: 0.75, z: -0.25}
+        followSmoothTime: 0.12
+        maxFollowSpeed: 20
+        movingMaxDistance: 0.3
+        snapDistance: 3
+        turnSpeed: 540
+        leanAngle: 8
+        leanFullSpeed: 3
+        bobAmplitude: 0.03
+        bobPeriod: 1.4
+        appearDuration: 0.6
+        propellerNames:
+        - Object055
+        - Object056
+        propellerAxis: {x: 0, y: 0, z: 1}
+        propellerSpeed: 500
+        firePointLeftName: FirePoint_L
+        firePointRightName: FirePoint_R
+        fallbackSideOffset: 0.15
+        volleyInterval: 10
+        missilesPerVolley: 4
+        shotInterval: 0.1
+        damageMultiplier: 0.5
+        roomEntryFireDelay: 0.5
+        recoilPitch: 8
+        recoilBack: 0.04
+        recoilRecoverSpeed: 12
+        missileSize: 0.06
+        missileColor: {r: 0, g: 0.9921569, b: 1, a: 1}
+        missileSpeed: 4
+        straightDuration: 0.2
+        turnRate: 240
+        turnRateGrowth: 360
+        maxFlightTime: 4
+        hitRadius: 0.15
+        retargetOnTargetDeath: 1
+        smokePrefab: {fileID: 0}
+        smokeColorA: {r: 0.82, g: 0.82, b: 0.84, a: 1}
+        smokeColorB: {r: 1, g: 1, b: 1, a: 1}
+        smokeInterval: 0.01
+        smokeScale: 0.7
+        smokeLifetime: 0.8
+        hitVfxPrefab: {fileID: 2054803858064431036, guid: 500c1d6ddd48f2c4092af85e4e941eb2, type: 3}
+        hitVfxScale: 0.5
+        hitVfxLifetime: 1.5

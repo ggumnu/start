@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: EnemyDefinition_DroneSpike_Dash_lv1
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDefinition
   variantId: 
-  weight: 7
+  weight: 8
   prefab: {fileID: 7776610045248769580, guid: 196a13c522c3e514da28140f7f482a35, type: 3}
   maxHealth: 80
   moveSpeed: 0.5

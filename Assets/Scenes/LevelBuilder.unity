@@ -484,7 +484,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a304796cd45b3cc479990cbe71443db9, type: 2}
   - {fileID: 11400000, guid: 8c5100a3ff21b55428e3c88dc3af6f2b, type: 2}
   skipChoiceLevels: 1
-  gameClearLevel: 2
+  trimMaxHealthOnNextLevel: 0
+  gameClearLevel: 3
   nightLightRules: {fileID: 11400000, guid: 9601a08cdf221904ca8070ba2602ce24, type: 2}
   currentLevelNumber: 1
   currentPhase: 0
@@ -624,6 +625,10 @@ MonoBehaviour:
   - variantId: drone_elite_lv2
     bossPrefabs:
     - prefab: {fileID: 7776610045248769580, guid: 6d9b24e3be5fb1342926ad9021057fa9, type: 3}
+      weight: 1
+  - variantId: drone_elite_lv3
+    bossPrefabs:
+    - prefab: {fileID: 7776610045248769580, guid: d1aeb79399f0b0f42bb9387a7c537e04, type: 3}
       weight: 1
   bossSpawnFacingEulerAngles: {x: 50, y: -45, z: 0}
 --- !u!1 &1273770584

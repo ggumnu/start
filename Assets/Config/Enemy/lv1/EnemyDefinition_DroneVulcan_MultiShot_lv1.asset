@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: EnemyDefinition_DroneVulcan_MultiShot_lv1
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDefinition
   variantId: 
-  weight: 7
+  weight: 8
   prefab: {fileID: 852035135700197158, guid: 8207818efe4f74b4799b842e52975ede, type: 3}
   maxHealth: 80
   moveSpeed: 0.5

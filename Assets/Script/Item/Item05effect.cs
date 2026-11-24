@@ -120,6 +120,9 @@ public class SplitOnImpactEffect : IPassiveItemEffect, IRemovablePassiveEffect
         bool hitEnemy = despawnEvent.Reason == ProjectileDespawnReason.HitEnemy;
         if (!hitWall && !hitEnemy) return;
 
+        // [63번 미사일] 처음 쏜 미사일만 한 번 분열합니다(분열 미사일은 다시 분열하지 않음 - 사거리 제한이 없어서, 형빈 확정).
+        if (projectile.IsMissile && projectile.Generation >= 1) return;
+
         if (projectile.Generation >= maxGeneration) return;
         if (Projectile.LiveSplitCount + splitCount > maxLiveSplitProjectiles) return;
 
@@ -170,6 +173,15 @@ public class SplitOnImpactEffect : IPassiveItemEffect, IRemovablePassiveEffect
         float childSize = projectile.BulletSize * sizeRatio;
         float childEffectScale = projectile.EffectScale * effectRatio;
         int childGeneration = projectile.Generation + 1;
+
+        // [63번 미사일] 분열 미사일 8갈래 - 8방향으로 잠깐 직진한 뒤 각자 유도합니다(벽은 무시하므로 벽 방향도 뺄 필요 없음).
+        // 피해/효과 배율/크기는 일반 분열탄과 같은 규칙(부모의 50%)이고, 실제 생성은 HomingMissile이 합니다.
+        if (projectile.IsMissile)
+        {
+            HomingMissile.SpawnSplitMissiles(projectile, shooting, origin, baseDirection, count, childDamage, childSize,
+                                            childGeneration, childEffectScale, enemyToIgnore, maxLiveSplitProjectiles);
+            return;
+        }
 
         for (int i = 0; i < count; i++)
         {

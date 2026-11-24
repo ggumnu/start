@@ -1,0 +1,92 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_059
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 59
+  displayName: "\uC544\uD14C\uB098 3\uD638"
+  description: "\uC5B8\uC81C\uB098 \uD558\uB808\uC758 \uC8FC\uBCC0\uC744 \uB530\uB77C\uB2E4\uB2C8\uACE0
+    \uC788\uB294 \uAD6C\uCCB4\uD615 \uB4DC\uB860.\r\n\uC9C0\uD61C\uC758 \uC5EC\uC2E0\uC5D0\uAC8C\uC11C
+    \uB530\uC628 \uADF8 \uC774\uB984\uCC98\uB7FC \uC2A4\uC2A4\uB85C \uACBD\uD5D8\uD558\uACE0
+    \n\uD559\uC2B5\uD560 \uC218 \uC788\uB294 \uC778\uACF5\uC9C0\uB2A5\uC774 \uD0D1\uC7AC\uB418\uC5B4
+    \uC788\uC9C0\uB9CC, \n\uC885\uC885 \uC8FC\uC778\uC778 \uD558\uB808\uC758 \uC758\uB3C4\uC640\uB294
+    \uC815\uBC18\uB300\uB85C \uC791\uB3D9\uD558\uC5EC \n\uADF8\uB140\uC758 \uAE30\uB300\uB97C
+    \uBC30\uC2E0\uD558\uACE4 \uD55C\uB2E4"
+  icon: {fileID: 21300000, guid: 7fb9b79c01af8044fb447adade1827ff, type: 3}
+  weight: 80
+  rarity: 1
+  category: 0
+  confirmBeforeReplace: 0
+  incompatibleItemIds: []
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 2
+    variantId: 
+  - category: 8
+    variantId: Schale
+  statModifiers: []
+  specialEffects:
+  - rid: 6629407958477832260
+  specialEffectDescription: "\uD50C\uB808\uC774\uC5B4\uB97C \uBCF4\uC870\uD558\uB294
+    \uC544\uD14C\uB098 3\uD638\uB97C \uAC00\uB3D9\uD55C\uB2E4\n\n\uC544\uD14C\uB098
+    3\uD638\uB294 \uD50C\uB808\uC774\uC5B4\uB97C \uB530\uB77C\uB2E4\uB2C8\uBA70 \n\uC77C\uC815
+    \uC2DC\uAC04\uB9C8\uB2E4 \uADFC\uCC98\uC5D0 \uC801\uC774 \uC62C \uACBD\uC6B0
+    \n\uC790\uB3D9\uC73C\uB85C \uD574\uD0B9\uD234\uC744 \uC804\uAC1C\uD55C\uB2E4\n\n\uC544\uD14C\uB098
+    3\uD638\uB294 \uD50C\uB808\uC774\uC5B4\uC758 \uD574\uD0B9\uD234\uC744 \n\uC18C\uBAA8\uD558\uC9C0
+    \uC54A\uB294\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6629407958477832260
+      type: {class: HackDroneFamiliarEffect, ns: , asm: Assembly-CSharp}
+      data:
+        droneModel: {fileID: 919132149155446097, guid: b139197730c29c140a1d4ca433982f4e, type: 3}
+        modelScale: 1.5
+        modelRotationOffset: {x: -90, y: 0, z: 0}
+        idleDistance: 0.3
+        movingMaxDistance: 0.5
+        hoverHeight: 0.5
+        followSmoothTime: 0.15
+        maxFollowSpeed: 20
+        snapDistance: 2
+        turnSpeed: 540
+        leanAngle: 10
+        leanFullSpeed: 3
+        bobAmplitude: 0.03
+        bobPeriod: 1.4
+        appearDuration: 0.6
+        rangeMultiplier: 0.4
+        rangeOnlyForDetection: 1
+        cooldown: 15
+        checkInterval: 0.1
+        poseLiftHeight: 0.12
+        poseNoseUpAngle: 25
+        poseDuration: 0.8
+        shieldVfxPrefab: {fileID: 7314526620251459061, guid: ccf28ea29cf499744ac31bab90073aba, type: 3}
+        shieldVfxOffset: {x: 0, y: 0, z: 0}
+        shieldVfxScale: 0.1
+        shieldVfxLifetime: 2.5
+        shieldVfxFadeOutDuration: 0.5
+        cooldownColor: {r: 0.45, g: 0.45, b: 0.48, a: 1}
+        grayInDuration: 0.2
+        restoreDuration: 0.5

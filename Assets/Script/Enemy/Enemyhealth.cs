@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // 적 하나의 체력/피격/사망입니다. 최대 체력은 EnemyStats가 유일한 원본(Initialize에서 확정). 모든 피해는 TakeDamage 한 곳을 지납니다
-// (받는 피해 배율 -> [2레벨 보스 보호막 흡수] -> 98번 섬멸 판정 -> 체력 감소 -> 알림 -> 피격 색 -> 사망). 사망은 isDead로 한 번만 처리됩니다.
+// (받는 피해 배율 -> [3레벨 보스 피해 감소] -> [2레벨 보스 보호막 흡수] -> 98번 섬멸 판정 -> 체력 감소 -> 알림 -> 피격 색 -> 사망). 사망은 isDead로 한 번만 처리됩니다.
 // 주의: 이 컴포넌트를 지우면 안 됨(Projectile/RoomObjectives 등이 직접 의존). 처치 알림 구독자는 try/catch 필수(OnAnyEnemyKilled).
 // 설계 배경(Initialize 타이밍 버그, isDead 가드, 처치 알림 3종, 98번)은 Docs/설계노트.md [적 체력].
 public class EnemyHealth : MonoBehaviour
@@ -16,6 +16,8 @@ public class EnemyHealth : MonoBehaviour
     private bool wasExecuted = false;
     private ExecuteOverride.Settings executeSettings;
     public bool WasExecuted => wasExecuted;
+    // [3레벨 보스] 지금 맞는 총알이 추가 효과 없이 막혀야 하는지(피해 감소막 충전 중/막이 있는 동안 - 피해 대신 MISS). Projectile이 읽습니다.
+    public bool BlocksBulletEffects => !isDead && damageReduction != null && damageReduction.IsInvulnerable;
     public ExecuteOverride.Settings ExecuteSettings => executeSettings;
 
     [Header("피격 시 간단한 색상 피드백 (선택)")]
@@ -38,6 +40,7 @@ public class EnemyHealth : MonoBehaviour
     private Color originalEmission;
     private float fadeTimer = 0f; // 0이면 페이드 중이 아님
     private BossShield shield;    // [2레벨 보스] 있으면 피해를 먼저 흡수
+    private BossDamageReduction damageReduction; // [3레벨 보스] 있으면 충전 중 무적(MISS), 막이 있는 동안 피해 감소
 
     // 이 적이 죽었을 때(사망 위치) - 방 클리어 판정/보물상자 위치용. 적 한 마리당 정확히 한 번.
     public event Action<Vector3> OnDied;
@@ -55,6 +58,13 @@ public class EnemyHealth : MonoBehaviour
     // [2레벨 보스] 보호막(BossShield)이 피해를 흡수했을 때(흡수한 최종 피해량, 남은 보호막으로 자르지 않음) - Resist 피해 숫자용 알림 전용.
     // 이때는 OnAnyEnemyDamaged가 울리지 않고 체력/피격 색도 그대로입니다(보호막이 흰색으로 깜빡임).
     public static event Action<EnemyHealth, float> OnAnyEnemyShieldDamaged;
+
+    // [3레벨 보스] 피해 감소막 생성 연출(무적) 중에 피해가 막혔을 때 - 피해 숫자 대신 "MISS"용 알림 전용(체력/피격 색은 그대로).
+    public static event Action<EnemyHealth> OnAnyEnemyMissed;
+
+    // [피해 숫자 - 3레벨 보스] 지금 알리는 피해가 피해 감소막으로 줄어든 피해인지 - 피해 알림(OnAnyEnemyDamaged)을 받는 쪽이 그 순간에 읽습니다
+    // (DamagePopupDisplay: 줄어든 피해는 어떤 피해든 항상 Resist). 아래 IsDotDamageInProgress와 같은 방식.
+    public static bool IsReducedDamageInProgress { get; private set; }
 
     // 읽기 전용(값을 바꾸는 통로는 TakeDamage/Initialize뿐).
     public float CurrentHealth => currentHealth;
@@ -111,6 +121,7 @@ public class EnemyHealth : MonoBehaviour
     {
         // 모델(Renderer)이 자식에 있는 구조가 많아 GetComponentInChildren.
         shield = GetComponent<BossShield>();
+        damageReduction = GetComponent<BossDamageReduction>();
         rend = GetComponentInChildren<Renderer>();
         if (rend != null)
         {
@@ -216,6 +227,34 @@ public class EnemyHealth : MonoBehaviour
         finally { IsForcedWeakDamageInProgress = previous; }
     }
 
+    // [피해 숫자 - 63번 미사일] 피해 숫자가 "공격력 x 이 값"을 기준으로 보통/Weak/Resist를 정합니다(평소 1 = 공격력 그대로).
+    // 읽는 방식은 위와 같습니다(피해 알림을 받는 쪽이 그 순간에 읽음).
+    public static float DamageReferenceScale { get; private set; } = 1f;
+
+    // 기준 배율을 바꿔 주는 피해 입구입니다. 처리 자체는 TakeDamage와 완전히 같습니다(63번 미사일 = 공격력 50% 기준, 형빈 확정).
+    public void TakeDamageWithReferenceScale(float amount, float referenceScale)
+    {
+        float previous = DamageReferenceScale;
+        DamageReferenceScale = Mathf.Max(referenceScale, 0.0001f);
+        try { TakeDamage(amount); }
+        finally { DamageReferenceScale = previous; }
+    }
+
+    // 피격 깜빡임(피격 색으로 바꾼 뒤 Flash Fade Duration 동안 원래 색/덮어쓴 색으로 돌아감).
+    private void PlayHitFlash()
+    {
+        if (!flashOnHit || rend == null || !rendSupportsColor) return;
+        if (usesBaseColor) rend.material.SetColor("_BaseColor", hitColor);
+        if (usesColor) rend.material.SetColor("_Color", hitColor);
+
+        if (flashUsesEmission && usesEmission)
+        {
+            rend.material.SetColor("_EmissionColor", hitColor * flashEmissionBoost);
+        }
+
+        fadeTimer = flashFadeDuration; // 이 순간부터 서서히 원래 색으로 돌아감
+    }
+
     public void TakeDamage(float amount)
     {
         // 주의: 같은 프레임에 뒤늦게 들어온 피해(폭발 범위 등)로 Die가 두 번 불리면 방이 적이 남은 채 클리어됨 - 반드시 막을 것.
@@ -223,6 +262,18 @@ public class EnemyHealth : MonoBehaviour
 
         // [2레벨 보스] 보호막 충전 중에는 무적입니다(숫자도 없음).
         if (shield != null && shield.IsInvulnerable) return;
+
+        // [3레벨 보스] 피해 감소막 생성 연출 중에는 무적 - 피해 숫자 대신 "MISS"를 띄웁니다.
+        // [3레벨 보스 - 형빈 확정] 맞은 것처럼 보이게 피격 깜빡임은 냅니다(체력/섬멸/피해 알림은 없음).
+        if (damageReduction != null && damageReduction.IsInvulnerable)
+        {
+            if (amount > 0f)
+            {
+                OnAnyEnemyMissed?.Invoke(this);
+                PlayHitFlash();
+            }
+            return;
+        }
 
         // [87번 아군] 피해를 받은 뒤 무적 시간(기본 1초) 동안은 피해를 받지 않습니다. 아군에게는 플레이어 쪽 효과(받는 피해 배율 /
         // 98번 섬멸)가 적용되지 않습니다.
@@ -233,6 +284,10 @@ public class EnemyHealth : MonoBehaviour
         // 등록된 것이 없으면 배율 1이라 원래와 같습니다. 팝업(OnAnyEnemyDamaged)도 이 최종값으로 표시됩니다.
         if (amount > 0f && ally == null) amount *= EnemyDamageTakenModifier.Resolve(this);
 
+        // [3레벨 보스] 피해 감소막이 있으면 받는 피해를 줄입니다(41번 등 배율을 곱한 뒤). 기믹 해제 피해는 감소막이 스스로 제외합니다.
+        bool reduced = amount > 0f && damageReduction != null && damageReduction.IsReducing;
+        if (reduced) amount *= damageReduction.DamageTakenMultiplier;
+
         // [2레벨 보스] 보호막이 있으면 보호막이 전부 받습니다(깨뜨리고 남은 피해도 체력으로 넘기지 않음 - 형빈 확정). 섬멸/체력/피격 색은 건너뜀.
         if (amount > 0f && shield != null && shield.IsActive)
         {
@@ -242,7 +297,9 @@ public class EnemyHealth : MonoBehaviour
         }
 
         // [98번 즉시 처치] 피해를 빼기 직전의 체력이 기준(25%) 이하이면 이 피해로 처치합니다(이번 피해로 기준 이하가 되는 경우는 X).
-        if (amount > 0f && ally == null && !wasExecuted && ExecuteOverride.ShouldExecute(currentHealth, MaxHealth, out var execute))
+        // [3레벨 보스] 피해 감소막이 있는 동안은 걸리지 않습니다(기믹을 통째로 건너뛰지 않게 - 형빈 확정).
+        bool executeBlocked = damageReduction != null && damageReduction.BlocksExecute;
+        if (amount > 0f && ally == null && !executeBlocked && !wasExecuted && ExecuteOverride.ShouldExecute(currentHealth, MaxHealth, out var execute))
         {
             wasExecuted = true;
             executeSettings = execute;
@@ -252,20 +309,15 @@ public class EnemyHealth : MonoBehaviour
         if (wasExecuted && currentHealth > 0f) currentHealth = 0f;
 
         // 사망 처리(Die)보다 먼저 알려서 마무리 일격의 피해량도 표시되게 합니다.
-        if (amount > 0f) OnAnyEnemyDamaged?.Invoke(this, amount);
-
-        if (flashOnHit && rend != null && rendSupportsColor)
+        if (amount > 0f)
         {
-            if (usesBaseColor) rend.material.SetColor("_BaseColor", hitColor);
-            if (usesColor) rend.material.SetColor("_Color", hitColor);
-
-            if (flashUsesEmission && usesEmission)
-            {
-                rend.material.SetColor("_EmissionColor", hitColor * flashEmissionBoost);
-            }
-
-            fadeTimer = flashFadeDuration; // 이 순간부터 서서히 원래 색으로 돌아감
+            bool previousReduced = IsReducedDamageInProgress;
+            IsReducedDamageInProgress = reduced;
+            try { OnAnyEnemyDamaged?.Invoke(this, amount); }
+            finally { IsReducedDamageInProgress = previousReduced; }
         }
+
+        PlayHitFlash();
 
         // [87번 아군] 맞고도 살아 있으면 무적 시간을 시작합니다(그 동안 깜빡임).
         if (ally != null && amount > 0f && currentHealth > 0f) ally.BeginInvincibility();

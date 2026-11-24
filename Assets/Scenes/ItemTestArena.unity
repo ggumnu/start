@@ -158,9 +158,7 @@ MonoBehaviour:
   playerPrefab: {fileID: 6336945966448862673, guid: 75b57e43a600d8b4ab64323ea20ea64e, type: 3}
   testProfile: {fileID: 11400000, guid: 233bbfa165b3f8f41be257aff94f306d, type: 2}
   itemsToGrant:
-  - {fileID: 11400000, guid: 693dc2a8f93fdc045bbcb487d670878f, type: 2}
-  - {fileID: 11400000, guid: 5c1bffadbe55c284cbbaa9e9fe55f64e, type: 2}
-  - {fileID: 11400000, guid: f74a537487f3931498d96ec442d85527, type: 2}
+  - {fileID: 11400000, guid: f20d86b09cd46f143aec9be43b36b2ef, type: 2}
   dummyEnemies:
   - definition: {fileID: 11400000, guid: 3d7f54bfa5704ed419672368d3752be0, type: 2}
     position: {x: 0, y: 0, z: 0}
@@ -187,12 +185,12 @@ MonoBehaviour:
   displayStandIconScale: {x: 0.07, y: 0.07, z: 0.07}
   displayStandIconFixedEulerAngles: {x: 50, y: -45, z: 0}
   testChestItems:
-  - {fileID: 11400000, guid: 1242868cac92e574d983f626b758f06b, type: 2}
-  - {fileID: 11400000, guid: e678de7b99664f14a812775e10541ae3, type: 2}
-  - {fileID: 11400000, guid: b68a00fa9670faa42ae86ff140355b12, type: 2}
-  - {fileID: 11400000, guid: 3d8dbd9134e756942bae057fcc23e33a, type: 2}
-  - {fileID: 11400000, guid: 9233dacca90491d4cac4fc27901154d5, type: 2}
+  - {fileID: 11400000, guid: f7fcb08e850f1ad448360e06b065e094, type: 2}
+  - {fileID: 11400000, guid: 60b281337ee5e1f4c9afe42f0fcc9de1, type: 2}
+  - {fileID: 11400000, guid: 795a40f94d0651443a75b41f5e5e2996, type: 2}
   - {fileID: 11400000, guid: 1545603719f64f2449cc107c4896617d, type: 2}
+  - {fileID: 11400000, guid: a43622293587f1a40a6c107ddc336efa, type: 2}
+  - {fileID: 11400000, guid: d91d96b36251db54f941a3efee5056b3, type: 2}
   testChestRowOffset: {x: 0, y: 0, z: 3}
   testChestSpacing: 1
   testChestPrefab: {fileID: 0}

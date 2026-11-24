@@ -466,3 +466,27 @@ MonoBehaviour:
     volume: 1
     pitchRange: {x: 0.95, y: 1.05}
     minInterval: 0.03
+  - name: "63\uBC88 \uBBF8\uC0AC\uC77C \uBC1C\uC0AC"
+    id: 110
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+    minInterval: 0.03
+  - name: "63\uBC88 \uBBF8\uC0AC\uC77C \uBA85\uC911/\uD3ED\uBC1C"
+    id: 111
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+    minInterval: 0.03
+  - name: "108\uBC88 \uD3ED\uC8FD\uD0C4 \uBC1C\uC0AC"
+    id: 112
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+    minInterval: 0.03
+  - name: "108\uBC88 \uD3ED\uC8FD\uD0C4 \uD3ED\uBC1C"
+    id: 113
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+    minInterval: 0.03

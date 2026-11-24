@@ -4,7 +4,9 @@ using UnityEngine;
 
 // 해킹툴 전개(3키 모드 + 좌클릭, 1개 소모): deployDelay 뒤 그 순간 플레이어 위치 기준 원기둥 범위의 적에게 해킹 데미지 + 해킹(강력 제어 -
 // 규칙은 EnemyControlState) + 범위 안 적 총알 제거 + 이펙트. 사용 동작 중에는 연타/모드 전환이 미뤄짐(효과 발동 뒤엔 1/2번으로 끊기 가능).
-// 공용 처리 ApplyHackArea(66번 수류탄 해킹도 사용), 단일 대상 ApplyHackToEnemy(81번+66번), 아이템 훅 OnHackDeployed(직접 사용 때만).
+// 공용 처리 ApplyHackArea(66번 수류탄 해킹도 사용), 단일 대상 ApplyHackToEnemy(81번+66번), 아이템 훅 OnHackDeployed(직접 사용 + 59번 전개).
+// [59번 아테나 3호] DeployFromItem = 재화 소모 없이 "해킹툴 사용"으로 치는 전개(특수방 해제/효과음/2레벨 보스 보호막 추가 피해 O,
+// OnHackToolSpent X - 58번 보호막은 소모해야 생김, 형빈 확정). 범위 판정은 직접 사용과 같은 CollectEnemiesInRange.
 // [2레벨 보스] 해킹툴을 직접 써서 보호막에 맞히면 보호막에 최대 보호막의 일정 비율 추가 피해(BossShield.ApplyHackToolBonus).
 // 설계 배경은 Docs/설계노트.md [해킹툴].
 [RequireComponent(typeof(PlayerStats))]
@@ -91,6 +93,9 @@ public class PlayerHackTool : MonoBehaviour
     // [58번 때 추가] 클릭해서 해킹툴 1개가 실제로 소모된 순간(효과 발동 전) 울립니다. 58번은 이 순간 보호막을 줍니다
     // (형빈 확정 - 급할 때 보호막을 바로 얻도록 발동이 아니라 소모 순간 기준). 테스트용 "자원 무한"이어도 사용에 성공하면 울립니다.
     public event Action OnHackToolSpent;
+    // [3레벨 보스 그로기 비콘] 해킹 범위가 실제로 펼쳐진 모든 순간(직접 사용, 59번 전개, 66번 수류탄 해킹 - 모두 ApplyHackArea를 지남)에
+    // 중심/반경을 알립니다. OnHackDeployed는 66번에서 울리지 않아 따로 둡니다(기존 구독자 동작은 그대로).
+    public static event Action<Vector3, float> OnAnyHackAreaApplied;
 
     // ---- 다른 스크립트가 읽는 상태 ----
     public bool IsHackMode => weaponMode != null && weaponMode.IsHack;
@@ -223,6 +228,22 @@ public class PlayerHackTool : MonoBehaviour
         OnHackDeployed?.Invoke(center, radius, hacked);
     }
 
+    // [59번 아테나 3호] 아이템이 대신 전개하는 해킹툴입니다. 직접 사용(ApplyHackEffect)과 같은 범위/피해/이펙트에 OnHackDeployed까지
+    // 보내지만, 해킹툴을 소모하지 않고 OnHackToolSpent/사용 애니메이션/사용 동작(연타·무기 전환 잠금)도 없습니다.
+    // center = 전개 중심(59번은 그 순간의 플레이어 위치), radiusMultiplier = 해킹툴 범위에 곱할 배율(59번 기본 0.75 - 전개 이펙트 크기도
+    // 범위에 맞춰 같이 줄어듦). 해킹이 걸린 적 목록을 돌려줍니다.
+    public List<EnemyHealth> DeployFromItem(Vector3 center, float radiusMultiplier = 1f)
+    {
+        float radius = CurrentRadius * Mathf.Max(radiusMultiplier, 0f);
+        float damage = stats != null ? stats.HackDamage : 0f;
+
+        var hacked = ApplyHackArea(center, radius, Mathf.Max(effectHeight, 0.1f), damage,
+                                   deployVfxFollowPlayer ? transform : null, true);
+
+        OnHackDeployed?.Invoke(center, radius, hacked);
+        return hacked;
+    }
+
     // [공용 해킹 처리] 원기둥 안의 적에게 damage 피해(0이면 없음) -> 살아남은 적에게 해킹(지속시간 HackDuration) -> 같은 범위 적 총알 제거 ->
     // 전개 이펙트. 해킹이 걸린 적 목록을 돌려줍니다. OnHackDeployed는 보내지 않습니다. hackToolShieldBonus = 해킹툴 직접 사용(2레벨 보스 보호막 추가 피해).
     public List<EnemyHealth> ApplyHackArea(Vector3 center, float radius, float height, float damage, Transform deployVfxFollow,
@@ -265,6 +286,7 @@ public class PlayerHackTool : MonoBehaviour
         SpawnVfx(deployVfxPrefab, center + deployVfxOffset, deployVfxScale * GetRadiusVfxFactor(radius), deployVfxLifetime,
                  deployVfxFollow);
 
+        OnAnyHackAreaApplied?.Invoke(center, radius);
         return hacked;
     }
 
@@ -318,8 +340,8 @@ public class PlayerHackTool : MonoBehaviour
     }
 
     // center 중심 원기둥 안의 살아있는 적을 EnemyHealth 단위로 중복 없이 모읍니다
-    // (Grenade.DamageEnemies와 같은 기준).
-    List<EnemyHealth> CollectEnemiesInRange(Vector3 center, float radius, float height)
+    // (Grenade.DamageEnemies와 같은 기준). 59번이 "범위 안에 적이 있는지"를 같은 기준으로 보려고 공개합니다.
+    public List<EnemyHealth> CollectEnemiesInRange(Vector3 center, float radius, float height)
     {
         var result = new List<EnemyHealth>();
         if (radius <= 0f) return result;

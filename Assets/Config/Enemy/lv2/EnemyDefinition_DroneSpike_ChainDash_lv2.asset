@@ -15,7 +15,7 @@ MonoBehaviour:
   variantId: 
   weight: 2
   prefab: {fileID: 7776610045248769580, guid: ce124708fb5348a44804dfe90768d1fe, type: 3}
-  maxHealth: 200
+  maxHealth: 180
   moveSpeed: 0.75
   moveAcceleration: 999
   detectRange: 8

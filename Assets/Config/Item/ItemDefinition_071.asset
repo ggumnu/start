@@ -25,7 +25,7 @@ MonoBehaviour:
     \uAC10\uCD94\uAE30\uC5D0\uB3C4 \uC548\uC131\uB9DE\uCDA4\uC778 \uD328\uC154\uB108\uBE14\uD55C
     \uC544\uC774\uD15C."
   icon: {fileID: 21300000, guid: 4463a059cb2aad545b110da3f75d7e2a, type: 3}
-  weight: 40
+  weight: 20
   rarity: 3
   category: 0
   confirmBeforeReplace: 0

@@ -88,6 +88,9 @@ public class DistanceDamageEffect : IPassiveItemEffect, IRemovablePassiveEffect
 
     private void HandleProjectileSpawned(Projectile projectile)
     {
+        // [63번 미사일] 미사일 피해는 11번 거리 보정을 받지 않습니다(곡선으로 오래 날아 항상 큰 보너스가 되므로, 형빈 확정).
+        if (projectile != null && projectile.IsMissile) return;
+
         if (projectile == null) return;
 
         // 피해 감소가 있어도 스탯의 데미지 하한선 밑으로는 내려가지 않게 합니다.

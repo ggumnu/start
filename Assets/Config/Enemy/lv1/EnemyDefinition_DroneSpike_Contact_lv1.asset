@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: EnemyDefinition_DroneSpike_Contact_lv1
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDefinition
   variantId: 
-  weight: 10
+  weight: 15
   prefab: {fileID: 7776610045248769580, guid: 0707613acd158ea4980ed1711034cd5c, type: 3}
   maxHealth: 60
   moveSpeed: 1

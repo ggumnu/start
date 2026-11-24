@@ -136,8 +136,12 @@ public class CombatVfxSpawner : MonoBehaviour
     private float refSearchTimer = 0f;
     private PlayerShooting playerShooting;
 
+    // [3레벨 보스] 보스 기믹 해제/비콘 해제처럼 적 처치가 아닌 순간에도 같은 연쇄 폭파를 쓰려고 씬의 이 관리자를 기억합니다(PlayDeathExplosionAt).
+    private static CombatVfxSpawner activeInstance;
+
     void OnEnable()
     {
+        activeInstance = this;
         EnemyRangedAttack.OnAnyEnemyProjectileSpawned += HandleEnemyProjectileSpawned;
         EnemyProjectile.OnAnyEnemyBulletHitPlayer += HandleEnemyBulletHitPlayer;
         EnemyProjectile.OnAnyEnemyBulletHitWall += HandleEnemyBulletHitWall;
@@ -153,6 +157,7 @@ public class CombatVfxSpawner : MonoBehaviour
         EnemyProjectile.OnAnyEnemyBulletHitWall -= HandleEnemyBulletHitWall;
         EnemyMeleeContactTrigger.OnAnyMeleeHitPlayer -= HandleMeleeHitPlayer;
         EnemyHealth.OnAnyEnemyKilled -= HandleEnemyKilled;
+        if (activeInstance == this) activeInstance = null;
 
         if (playerShooting != null)
         {
@@ -269,14 +274,33 @@ public class CombatVfxSpawner : MonoBehaviour
         StartCoroutine(PlayDeathExplosions(position, enemyDeathExplosion));
     }
 
-    private IEnumerator PlayDeathExplosions(Vector3 center, EnemyDeathVfxSlot slot)
+    // [3레벨 보스] 플레이어 총알이 적에 맞은 이펙트(5번)를 원하는 위치에 냅니다(피해 감소막에 막힌 총알 - 소멸 알림 없이 사라지는 경우).
+    public static void PlayEnemyHitAt(Vector3 position, Vector3 direction)
+    {
+        CombatVfxSpawner spawner = activeInstance;
+        if (spawner == null || !spawner.isActiveAndEnabled) return;
+        spawner.SpawnEffect(spawner.enemyHitByPlayerBullet, position, direction);
+    }
+
+    // [3레벨 보스] 적 처치 폭발(8번)을 원하는 위치에 터뜨립니다. sizeScale = 흩어지는 범위와 이펙트 크기 배율(큰 보스용). 씬에 관리자나 폭발 이펙트가
+    // 없으면 아무 일도 하지 않고 false.
+    public static bool PlayDeathExplosionAt(Vector3 center, float sizeScale = 1f)
+    {
+        CombatVfxSpawner spawner = activeInstance;
+        if (spawner == null || !spawner.isActiveAndEnabled) return false;
+        if (spawner.enemyDeathExplosion == null || spawner.enemyDeathExplosion.prefab == null) return false;
+        spawner.StartCoroutine(spawner.PlayDeathExplosions(center, spawner.enemyDeathExplosion, Mathf.Max(0.01f, sizeScale)));
+        return true;
+    }
+
+    private IEnumerator PlayDeathExplosions(Vector3 center, EnemyDeathVfxSlot slot, float sizeScale = 1f)
     {
         int count = Mathf.Max(1, slot.burstCount);
 
         for (int i = 0; i < count; i++)
         {
-            Vector2 offsetXZ = Random.insideUnitCircle * slot.horizontalScatterRadius;
-            float offsetY = Random.Range(slot.verticalScatterRange.x, slot.verticalScatterRange.y);
+            Vector2 offsetXZ = Random.insideUnitCircle * (slot.horizontalScatterRadius * sizeScale);
+            float offsetY = Random.Range(slot.verticalScatterRange.x, slot.verticalScatterRange.y) * sizeScale;
             Vector3 spawnPos = center + new Vector3(offsetXZ.x, offsetY, offsetXZ.y);
 
             Quaternion rotation = slot.randomizeRotation
@@ -286,7 +310,7 @@ public class CombatVfxSpawner : MonoBehaviour
             GameObject instance = Instantiate(slot.prefab, spawnPos, rotation);
             // [방 전환] 플레이어가 다른 방에 들어가면 바로 지워지도록 등록합니다(RoomScope - 다른 방 위 허공에 남지 않게).
             RoomScope.DestroyWhenPlayerLeaves(instance);
-            ApplyScale(instance, slot.scaleMultiplier);
+            ApplyScale(instance, slot.scaleMultiplier * sizeScale);
             Destroy(instance, ComputeEffectDuration(instance));
 
             if (i < count - 1)

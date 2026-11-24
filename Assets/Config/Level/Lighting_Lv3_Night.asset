@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Lighting_Lv3_Night
   m_EditorClassIdentifier: Assembly-CSharp::LevelLightingProfile
   useColorTemperature: 1
-  colorTemperature: 11000
+  colorTemperature: 11256
   sunFilterColor: {r: 0.8, g: 0.88, b: 1, a: 1}
   environmentShadowTint: {r: 0.4292453, g: 0.54982746, b: 1, a: 1}
-  environmentBrightness: 0.72
+  environmentBrightness: 0.707
   characterShadowTint: {r: 0.72, g: 0.76, b: 0.9, a: 1}
   characterBrightness: 0.88
   isNight: 1

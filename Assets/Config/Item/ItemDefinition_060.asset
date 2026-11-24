@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472a33c586c188e4d914a501b116c3ba, type: 3}
+  m_Name: ItemDefinition_060
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
+  itemId: 60
+  displayName: "\uBAA9\uC695 \uBCF4\uC88C\uAD00"
+  description: "\uB300\uB7C9 \uBC1C\uC8FC\uB41C \uB7EC\uBC84\uB355\uC5D0 \uC218\uC5FC\uC744
+    \uBD99\uC5EC \uB9CC\uB4E0 \n\uBD89\uC740\uACA8\uC6B8 \uD559\uC6D0\uC758 \uC0C8\uB85C\uC6B4
+    \uAE30\uB150\uD488.\r\n\uCCB4\uB9AC\uB178\uB294 \uC5B4\uB9B0 \uC544\uC774\uB098
+    \uC4F8 \uBC95\uD55C \uBB3C\uAC74\uC774\uB77C\uBA70 \n\uC774 \uB7EC\uBC84\uB355\uC744
+    \uD0D0\uD0C1\uC9C0 \uC54A\uAC8C \uC5EC\uAE30\uB294 \uB4EF\uD558\uC9C0\uB9CC,\n\uBAA9\uC695\uD558\uB7EC
+    \uAC08 \uB54C\uB9C8\uB2E4 \uAF2D \uB300\uB3D9\uD55C\uB2E4\uACE0 \uD55C\uB2E4"
+  icon: {fileID: 21300000, guid: 76f763788d460554d8818264bec6151a, type: 3}
+  weight: 100
+  rarity: 0
+  category: 0
+  confirmBeforeReplace: 0
+  incompatibleItemIds: []
+  tags: []
+  activeCost: 1
+  activeEffect:
+    rid: -2
+  trinketEffect:
+    rid: -2
+  disposableEffect:
+    rid: -2
+  foodEffect:
+    rid: -2
+  appearanceContexts:
+  - category: 2
+    variantId: 
+  - category: 8
+    variantId: Schale
+  statModifiers: []
+  specialEffects:
+  - rid: 6629407958477832262
+  specialEffectDescription: "\uD50C\uB808\uC774\uC5B4\uB97C \uBCF4\uC870\uD558\uB294
+    \uBAA9\uC695 \uBCF4\uC88C\uAD00\uC744 \uC18C\uD658\uD55C\uB2E4\n\n\uBAA9\uC695
+    \uBCF4\uC88C\uAD00\uC740 \uD50C\uB808\uC774\uC5B4\uB97C \uB530\uB77C\uB2E4\uB2C8\uBA70\n\uD50C\uB808\uC774\uC5B4\uAC00
+    \uD53C\uACA9 \uB2F9\uD558\uBA74 \n\uC77C\uC815 \uD655\uB960\uB85C \uBCF4\uD638\uB9C9\uC744
+    \uC0DD\uC131\uD55C\uB2E4"
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6629407958477832262
+      type: {class: ShieldDroneFamiliarEffect, ns: , asm: Assembly-CSharp}
+      data:
+        droneModel: {fileID: 919132149155446097, guid: d3e0318f791132b438d1d6a9b9cd32c5, type: 3}
+        modelScale: 1.5
+        modelRotationOffset: {x: -90, y: 0, z: 0}
+        idleDistance: 0.3
+        movingMaxDistance: 0.4
+        hoverHeight: 0.5
+        followSmoothTime: 0.15
+        maxFollowSpeed: 20
+        snapDistance: 2
+        turnSpeed: 540
+        leanAngle: 10
+        leanFullSpeed: 3
+        bobAmplitude: 0.03
+        bobPeriod: 1.4
+        appearDuration: 0.6
+        shieldChance: 0.25
+        shieldAmount: 1
+        poseLiftHeight: 0.12
+        poseNoseUpAngle: 25
+        poseDuration: 0.8
+        procColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+        procVfxLayers:
+        - enabled: 1
+          prefab: {fileID: 1943286446490004412, guid: e953460ff16e0a6459684f9b77202b5c, type: 3}
+          scale: 0.5
+          worldOffset: {x: 0, y: 0, z: 0}
+          pushBehindDistance: 0.15
+          worldEulerAngles: {x: 0, y: 0, z: 0}
+          recolor: 1
+          keepOriginalAlpha: 1
+          lifetimeMultiplier: 1
+          speedMultiplier: 1
+          emissionRateMultiplier: 1
+          particleSizeMultiplier: 1
+          gravityOverride: 0
+          disabledChildNames: []
+        - enabled: 1
+          prefab: {fileID: 3473529909581181512, guid: bc142210df3ec4545a4e3e1f21e00da7, type: 3}
+          scale: 1
+          worldOffset: {x: 0, y: 0.1, z: 0}
+          pushBehindDistance: 0.15
+          worldEulerAngles: {x: 0, y: 0, z: 0}
+          recolor: 1
+          keepOriginalAlpha: 1
+          lifetimeMultiplier: 1
+          speedMultiplier: 1
+          emissionRateMultiplier: 2
+          particleSizeMultiplier: 0.3
+          gravityOverride: 0
+          disabledChildNames:
+          - Particle System
+        procVfxLifetime: 1.2
+        procVfxFadeOutDuration: 0.5

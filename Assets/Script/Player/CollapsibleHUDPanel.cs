@@ -23,6 +23,10 @@ using UnityEngine.UI;
 // 바꾸고 싶으면 설정의 Button Sprite / Arrow Sprite 칸에 넣으면 됩니다(화살표 스프라이트는 "위쪽"을 가리키는
 // 그림으로 넣어야 회전이 맞습니다).
 //
+// [견본용 - 설정 창 HUD 탭]
+// 설정 창의 견본 스탯 창(SettingsHUDTab)에도 같은 모양의 버튼을 보여주기 위해, interactive = false로 만들면 전체 등록소에
+// 넣지 않고(Tab 전체 접기/클릭 차단 판정에서 빠짐) TickPreview로 "펼친 모습"만 그립니다. 누를 수 없습니다.
+//
 // [클릭 판정 - EventSystem 불필요]
 // 이 프로젝트의 다른 HUD(툴팁 호버 등)와 같은 방식으로, 매 프레임 마우스 화면 좌표와 버튼 사각형을 직접
 // 비교합니다. 그래서 씬에 EventSystem이 없어도 동작합니다. 버튼 위에서 누른 좌클릭이 총 사격/수류탄 투척/
@@ -162,11 +166,25 @@ public class CollapsibleHUDPanel
     public bool IsBuilt => buttonRect != null;
     public bool IsCollapsed => collapsed;
 
-    public CollapsibleHUDPanel(string name, HUDCollapseDirection direction)
+    public CollapsibleHUDPanel(string name, HUDCollapseDirection direction) : this(name, direction, true)
+    {
+    }
+
+    // interactive = false: 견본용(등록소에 넣지 않음 - 파일 상단 [견본용]).
+    public CollapsibleHUDPanel(string name, HUDCollapseDirection direction, bool interactive)
     {
         this.name = name;
         this.direction = direction;
-        registry.Add(this);
+        if (interactive) registry.Add(this);
+    }
+
+    // 견본용: 클릭/애니메이션/패널 이동 없이 펼친 상태의 버튼 모양만 패널에 그립니다.
+    public void TickPreview(CollapsibleHUDSettings s, RectTransform panelRect)
+    {
+        if (s == null || panelRect == null) return;
+        if (buttonRect == null) Build(panelRect);
+        buttonRect.SetAsLastSibling();
+        ApplyButtonVisual(s, false, 0f);
     }
 
     public void SetCollapsed(bool value)

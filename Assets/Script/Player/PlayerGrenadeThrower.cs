@@ -66,6 +66,12 @@ using UnityEngine;
 // Grenade가 터질 때 분열탄 4개를 요청하면 SpawnSplitGrenade가 만듭니다. 수류탄 모델(프리팹/임시 구체)과 57번 외형 색은 일반 수류탄과
 // 같고, 크기만 배율(기본 0.6)로 줄입니다. 분열탄은 "던진" 수류탄이 아니므로 OnGrenadeThrown은 보내지 않고, 터질 때는 일반 수류탄처럼
 // NotifyExploded(폭발 이펙트 + OnGrenadeExploded)를 거칩니다. 착지점의 방 범위 보정은 ClampToRoomBounds(터진 위치 기준)를 씁니다.
+//
+// [108번 폭죽탄]
+// 108번 포대가 SpawnFireworkShell로 폭죽탄(겉모습만 다른 수류탄 - Grenade.PrepareAsFirework)을 만듭니다. 플레이어가 던진 것이 아니므로
+// OnGrenadeThrown은 보내지 않고 수류탄 개수도 쓰지 않습니다. 터질 때는 NotifyFireworkExploded를 거쳐 폭발 이펙트만 폭죽 이펙트로 바뀌고
+// OnGrenadeExploded(66번/57번 토끼/특수방 잠금 해제/폭발음)는 똑같이 보냅니다. 폭발음은 IsExplodingFirework를 보고 폭죽 소리로 바뀝니다.
+// 92번 분열탄은 SpawnSplitGrenade의 firework 인자로 폭죽탄 겉모습을 물려받습니다.
 [RequireComponent(typeof(PlayerStats))]
 public class PlayerGrenadeThrower : MonoBehaviour
 {
@@ -187,6 +193,9 @@ public class PlayerGrenadeThrower : MonoBehaviour
     // 특수방 잠금(SpecialRoomLock)이 폭발 위치가 아닌 "수류탄을 던진 방" 기준으로 판정할 때 읽습니다. 수류탄은 벽을 넘어 옆 방 칸에
     // 떨어질 수도 있어서 위치로는 방을 정할 수 없습니다. null이면(포격 등 방을 넘기지 않는 폭발) 받는 쪽이 예전 기준으로 판정합니다.
     public RoomInstance ExplodingRoom { get; private set; }
+
+    // [108번] 지금 OnGrenadeExploded를 보내고 있는 폭발이 폭죽탄이면 true입니다(이벤트를 받는 동안에만 - 폭발음을 폭죽 소리로 바꾸는 데 씀).
+    public bool IsExplodingFirework { get; private set; }
 
     private bool wasAimingForSound;
 
@@ -418,10 +427,21 @@ public class PlayerGrenadeThrower : MonoBehaviour
                                      float childEnemyDamage, float childSelfDamage, float childRadius,
                                      float childExplosionHeight, string childEnemyTag, float modelScale,
                                      IncendiaryGrenadeOverride.Settings inheritedIncendiary,
-                                     ClaymoreOverride.Settings inheritedClaymore = null, RoomInstance claymoreRoom = null)
+                                     ClaymoreOverride.Settings inheritedClaymore = null, RoomInstance claymoreRoom = null,
+                                     FireworkStyle firework = null)
     {
-        Grenade grenade = SpawnGrenadeObject(origin);
-        grenade.transform.localScale *= Mathf.Max(modelScale, 0.01f);
+        // [108번] 원래 수류탄이 폭죽탄이면 분열탄도 폭죽탄입니다(색은 새로 뽑음, 크기만 modelScale배).
+        Grenade grenade;
+        if (firework != null)
+        {
+            Color color = firework.PickColor();
+            grenade = CreateFireworkGrenade(firework, color, origin, modelScale);
+        }
+        else
+        {
+            grenade = SpawnGrenadeObject(origin);
+            grenade.transform.localScale *= Mathf.Max(modelScale, 0.01f);
+        }
 
         grenade.PrepareAsSplitChild(inheritedIncendiary);
         // [115번] 원래 수류탄이 크레모어면 분열탄도 크레모어(같은 방)입니다. null이면 일반 분열탄.
@@ -430,8 +450,27 @@ public class PlayerGrenadeThrower : MonoBehaviour
                        childEnemyDamage, childSelfDamage, childRadius,
                        childExplosionHeight, childEnemyTag, spinDegreesPerSecond);
 
-        // [수류탄 외형 - 57번 등] 일반 수류탄과 같은 색을 입힙니다.
-        GrenadeVisualOverride.ApplyToGrenade(grenade.gameObject);
+        // [수류탄 외형 - 57번 등] 일반 수류탄과 같은 색을 입힙니다(폭죽탄은 폭죽 색 우선 - 입히지 않음).
+        if (firework == null) GrenadeVisualOverride.ApplyToGrenade(grenade.gameObject);
+        return grenade;
+    }
+
+    // [108번 폭죽탄] 폭죽탄 하나를 origin에서 target으로 날립니다. 수류탄 개수를 쓰지 않고 OnGrenadeThrown도 보내지 않습니다.
+    // 피해/자해/반경은 부르는 쪽(108번 포대)이 정한 값입니다. 나머지(77/81/92/115번, 방 전환)는 일반 수류탄과 같습니다.
+    public Grenade SpawnFireworkShell(FireworkStyle style, Color color, Vector3 origin, Vector3 target, float shellFlightTime,
+                                      float shellArcHeight, float enemyDamage, float selfDamage, float radius)
+    {
+        Grenade grenade = CreateFireworkGrenade(style, color, origin, 1f);
+        grenade.Launch(this, origin, target, shellFlightTime, shellArcHeight,
+                       enemyDamage, selfDamage, radius, explosionHeight, enemyTag, 0f);
+        return grenade;
+    }
+
+    Grenade CreateFireworkGrenade(FireworkStyle style, Color color, Vector3 origin, float scale)
+    {
+        GameObject obj = FireworkShell.CreateShellObject(style, color, origin, scale);
+        Grenade grenade = obj.AddComponent<Grenade>();
+        grenade.PrepareAsFirework(style, color);
         return grenade;
     }
 
@@ -463,7 +502,7 @@ public class PlayerGrenadeThrower : MonoBehaviour
         ExplodingRoom = room;
         try
         {
-            NotifyExplodedCore(position, radius, vfxPosition);
+            NotifyExplodedCore(position, radius, vfxPosition, null, Color.white);
         }
         finally
         {
@@ -471,12 +510,32 @@ public class PlayerGrenadeThrower : MonoBehaviour
         }
     }
 
-    private void NotifyExplodedCore(Vector3 position, float radius, Vector3 vfxPosition)
+    // [108번 폭죽탄] 폭발 이펙트만 폭죽 이펙트로 바꾼 버전입니다. 아이템용 폭발 알림은 일반 수류탄과 똑같이 보냅니다.
+    public void NotifyFireworkExploded(Vector3 position, float radius, Vector3 vfxPosition, RoomInstance room,
+                                       FireworkStyle style, Color color)
+    {
+        RoomInstance previousRoom = ExplodingRoom;
+        bool previousFirework = IsExplodingFirework;
+        ExplodingRoom = room;
+        IsExplodingFirework = true;
+        try
+        {
+            NotifyExplodedCore(position, radius, vfxPosition, style, color);
+        }
+        finally
+        {
+            ExplodingRoom = previousRoom;
+            IsExplodingFirework = previousFirework;
+        }
+    }
+
+    private void NotifyExplodedCore(Vector3 position, float radius, Vector3 vfxPosition, FireworkStyle firework, Color fireworkColor)
     {
         // 폭발 이펙트(연출)에서 오류가 나도 아래 폭발 알림(특수방 잠금 해제 등 게임 처리)은 반드시 보냅니다.
         try
         {
-            SpawnExplosionVfx(radius, vfxPosition);
+            if (firework != null) FireworkShell.SpawnBurst(firework, vfxPosition, fireworkColor, radius);
+            else SpawnExplosionVfx(radius, vfxPosition);
         }
         catch (Exception e)
         {
