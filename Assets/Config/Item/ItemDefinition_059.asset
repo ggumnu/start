@@ -75,7 +75,7 @@ MonoBehaviour:
         bobAmplitude: 0.03
         bobPeriod: 1.4
         appearDuration: 0.6
-        rangeMultiplier: 0.4
+        rangeMultiplier: 1
         rangeOnlyForDetection: 1
         cooldown: 15
         checkInterval: 0.1
