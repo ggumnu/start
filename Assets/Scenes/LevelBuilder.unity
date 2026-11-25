@@ -394,6 +394,26 @@ MonoBehaviour:
     - prefab: {fileID: 4602110161752534432, guid: b5a9795e9837f144ea4926c4860dbe34, type: 3}
       weight: 1
     wallPools: []
+  - category: 1
+    variantId: drone_elite_lv3
+    floorPool:
+    - prefab: {fileID: 8010054021951440682, guid: a7d98db084590644e9acfdc49cdc58ce, type: 3}
+      weight: 1
+    wallPools:
+    - direction: 0
+      closedWalls:
+      - prefab: {fileID: 130023701920810641, guid: 709b4892d440ccd4e9186b430fdbfa88, type: 3}
+        weight: 1
+      openWalls:
+      - prefab: {fileID: 8025136977150041872, guid: 481db4a3b47729642bdd611e80be94c1, type: 3}
+        weight: 1
+    - direction: 1
+      closedWalls:
+      - prefab: {fileID: 7622010155037920758, guid: 5a1d526af98c1754a860860ca5524f73, type: 3}
+        weight: 1
+      openWalls:
+      - prefab: {fileID: 5639039816518782461, guid: 4aaf6fe375410994e92e0fe3cac8d055, type: 3}
+        weight: 1
   neighborFacingWallSets:
   - neighborCategory: 4
     neighborVariantId: 

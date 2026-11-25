@@ -28,10 +28,8 @@ MonoBehaviour:
     countWeights: []
   - category: 2
     minCount: 2
-    maxCount: 3
-    countWeights:
-    - 10
-    - 8
+    maxCount: 2
+    countWeights: []
   - category: 3
     minCount: 1
     maxCount: 1
@@ -42,11 +40,10 @@ MonoBehaviour:
     countWeights: []
   - category: 7
     minCount: 3
-    maxCount: 5
+    maxCount: 4
     countWeights:
-    - 5
-    - 10
-    - 5
+    - 1
+    - 1
   storeVariants:
   - variantId: convenience_store
     category: 3
